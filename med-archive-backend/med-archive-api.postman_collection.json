@@ -1,0 +1,2099 @@
+{
+  "info": {
+    "name": "Med-Archive API",
+    "description": "Collection complète pour tester l'API Med-Archive Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "patient_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "medecin_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "dossier_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "consultation_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "laboratoire_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "analyse_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "document_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "ROUTES PUBLIQUES",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/ping",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ping"
+              ]
+            },
+            "description": "Vérifie si l'API est en ligne"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set(\"token\", jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Authentification utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nom Utilisateur\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"role_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "description": "Enregistrement d'un nouvel utilisateur"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AUTHENTIFICATION (Protégé)",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "me"
+              ]
+            },
+            "description": "Récupère les informations de l'utilisateur connecté"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "refresh"
+              ]
+            },
+            "description": "Rafraîchit le token d'authentification"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            },
+            "description": "Déconnecte l'utilisateur"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "USERS",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Liste tous les utilisateurs"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nom Utilisateur\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"role_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Crée un nouvel utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Récupère les détails d'un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nouveau Nom\",\n  \"email\": \"newemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Met à jour un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Supprime un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Désactiver User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/desactiver",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                "desactiver"
+              ]
+            },
+            "description": "Désactive un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "Activer User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/activer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}",
+                "activer"
+              ]
+            },
+            "description": "Active un utilisateur"
+          },
+          "response": []
+        },
+        {
+          "name": "User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/utilisateurs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "utilisateurs"
+              ]
+            },
+            "description": "Récupère les statistiques des utilisateurs"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "PATIENTS",
+      "item": [
+        {
+          "name": "List All Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients"
+              ]
+            },
+            "description": "Liste tous les patients"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Patient",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Dupont\",\n  \"prenom\": \"Jean\",\n  \"date_naissance\": \"1990-05-15\",\n  \"sexe\": \"M\",\n  \"telephone\": \"0612345678\",\n  \"adresse\": \"123 Rue de Paris\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/patients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients"
+              ]
+            },
+            "description": "Crée un nouveau patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patient",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients/{{patient_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients",
+                "{{patient_id}}"
+              ]
+            },
+            "description": "Récupère les informations d'un patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Patient",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telephone\": \"0699999999\",\n  \"adresse\": \"456 Rue de France\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/patients/{{patient_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients",
+                "{{patient_id}}"
+              ]
+            },
+            "description": "Met à jour les informations d'un patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Patient",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients/{{patient_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients",
+                "{{patient_id}}"
+              ]
+            },
+            "description": "Supprime un patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Patient - Dossier Complet",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients/{{patient_id}}/dossier-complet",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "patients",
+                "{{patient_id}}",
+                "dossier-complet"
+              ]
+            },
+            "description": "Récupère le dossier complet d'un patient"
+          },
+          "response": []
+        },
+        {
+          "name": "Patient Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/patients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "patients"
+              ]
+            },
+            "description": "Récupère les statistiques des patients"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "MÉDECINS",
+      "item": [
+        {
+          "name": "List All Médecins",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medecins",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins"
+              ]
+            },
+            "description": "Liste tous les médecins"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Médecin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Martin\",\n  \"prenom\": \"Pierre\",\n  \"numero_ordre\": \"75001234\",\n  \"specialite_id\": 1,\n  \"telephone\": \"0612345678\",\n  \"email\": \"medecin@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medecins",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins"
+              ]
+            },
+            "description": "Crée un nouveau médecin"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Médecin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medecins/{{medecin_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins",
+                "{{medecin_id}}"
+              ]
+            },
+            "description": "Récupère les informations d'un médecin"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Médecin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telephone\": \"0699999999\",\n  \"email\": \"newemail@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medecins/{{medecin_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins",
+                "{{medecin_id}}"
+              ]
+            },
+            "description": "Met à jour un médecin"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Médecin",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medecins/{{medecin_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins",
+                "{{medecin_id}}"
+              ]
+            },
+            "description": "Supprime un médecin"
+          },
+          "response": []
+        },
+        {
+          "name": "Médecin - Planning",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medecins/{{medecin_id}}/planning",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins",
+                "{{medecin_id}}",
+                "planning"
+              ]
+            },
+            "description": "Récupère le planning d'un médecin"
+          },
+          "response": []
+        },
+        {
+          "name": "Médecin - Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/medecins/{{medecin_id}}/patients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medecins",
+                "{{medecin_id}}",
+                "patients"
+              ]
+            },
+            "description": "Récupère les patients d'un médecin"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DOSSIERS",
+      "item": [
+        {
+          "name": "List All Dossiers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dossiers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers"
+              ]
+            },
+            "description": "Liste tous les dossiers"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Dossier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"numero_dossier\": \"DOS001\",\n  \"description\": \"Dossier médical du patient\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dossiers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers"
+              ]
+            },
+            "description": "Crée un nouveau dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dossier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}"
+              ]
+            },
+            "description": "Récupère les informations d'un dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Dossier",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Dossier mis à jour\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}"
+              ]
+            },
+            "description": "Met à jour un dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Dossier",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}"
+              ]
+            },
+            "description": "Supprime un dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Dossier - Résumé",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}/resume",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}",
+                "resume"
+              ]
+            },
+            "description": "Récupère le résumé d'un dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Dossier - Archiver",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}/archiver",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}",
+                "archiver"
+              ]
+            },
+            "description": "Archive un dossier"
+          },
+          "response": []
+        },
+        {
+          "name": "Dossier - Transférer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"etablissement_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}/transferer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dossiers",
+                "{{dossier_id}}",
+                "transferer"
+              ]
+            },
+            "description": "Transfère un dossier vers un autre établissement"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "CONSULTATIONS",
+      "item": [
+        {
+          "name": "List All Consultations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/consultations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations"
+              ]
+            },
+            "description": "Liste toutes les consultations"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Consultation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patient_id\": 1,\n  \"medecin_id\": 1,\n  \"dossier_id\": 1,\n  \"date_consultation\": \"2026-03-10 14:00:00\",\n  \"motif\": \"Visite de routine\",\n  \"diagnostic\": \"Aucun problème détecté\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/consultations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations"
+              ]
+            },
+            "description": "Crée une nouvelle consultation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Consultation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/consultations/{{consultation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations",
+                "{{consultation_id}}"
+              ]
+            },
+            "description": "Récupère les détails d'une consultation"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Consultation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"diagnostic\": \"Légers problèmes de tension\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/consultations/{{consultation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations",
+                "{{consultation_id}}"
+              ]
+            },
+            "description": "Met à jour une consultation"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Consultation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/consultations/{{consultation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations",
+                "{{consultation_id}}"
+              ]
+            },
+            "description": "Supprime une consultation"
+          },
+          "response": []
+        },
+        {
+          "name": "Consultation - Ajouter Constantes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"temperature\": 36.8,\n  \"tension_systolique\": 120,\n  \"tension_diastolique\": 80,\n  \"pouls\": 72,\n  \"poids\": 75,\n  \"taille\": 175\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/consultations/{{consultation_id}}/constantes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "consultations",
+                "{{consultation_id}}",
+                "constantes"
+              ]
+            },
+            "description": "Ajoute les constantes vitales à une consultation"
+          },
+          "response": []
+        },
+        {
+          "name": "Consultation Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/consultations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "consultations"
+              ]
+            },
+            "description": "Récupère les statistiques des consultations"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ÉTABLISSEMENTS",
+      "item": [
+        {
+          "name": "Mes Données",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/mes-donnees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "mes-donnees"
+              ]
+            },
+            "description": "Récupère les données de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Mes Médecins",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/mes-medecins",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "mes-medecins"
+              ]
+            },
+            "description": "Récupère les médecins de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Mes Patients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/mes-patients",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "mes-patients"
+              ]
+            },
+            "description": "Récupère les patients de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Mes Consultations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/mes-consultations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "mes-consultations"
+              ]
+            },
+            "description": "Récupère les consultations de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/statistiques",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "statistiques"
+              ]
+            },
+            "description": "Récupère les statistiques de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/etablissement/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "dashboard"
+              ]
+            },
+            "description": "Récupère le dashboard de son établissement"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Info",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Hôpital Central\",\n  \"telephone\": \"0123456789\",\n  \"adresse\": \"1 Rue de la Médecine\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/etablissement/info",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "etablissement",
+                "info"
+              ]
+            },
+            "description": "Met à jour les informations de son établissement"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "LABORATOIRES",
+      "item": [
+        {
+          "name": "List All Laboratoires",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/laboratoires",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires"
+              ]
+            },
+            "description": "Liste tous les laboratoires"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Laboratoire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Laboratoire Central\",\n  \"telephone\": \"0123456789\",\n  \"adresse\": \"123 Rue des Sciences\",\n  \"email\": \"labo@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/laboratoires",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires"
+              ]
+            },
+            "description": "Crée un nouveau laboratoire"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Laboratoire",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/laboratoires/{{laboratoire_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires",
+                "{{laboratoire_id}}"
+              ]
+            },
+            "description": "Récupère les informations d'un laboratoire"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Laboratoire",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telephone\": \"0198765432\",\n  \"email\": \"newemail@labo.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/laboratoires/{{laboratoire_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires",
+                "{{laboratoire_id}}"
+              ]
+            },
+            "description": "Met à jour un laboratoire"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Laboratoire",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/laboratoires/{{laboratoire_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires",
+                "{{laboratoire_id}}"
+              ]
+            },
+            "description": "Supprime un laboratoire"
+          },
+          "response": []
+        },
+        {
+          "name": "Analyses en Attente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/laboratoires/{{laboratoire_id}}/analyses-en-attente",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires",
+                "{{laboratoire_id}}",
+                "analyses-en-attente"
+              ]
+            },
+            "description": "Récupère les analyses en attente d'un laboratoire"
+          },
+          "response": []
+        },
+        {
+          "name": "Laboratoire Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/laboratoires/{{laboratoire_id}}/statistiques",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "laboratoires",
+                "{{laboratoire_id}}",
+                "statistiques"
+              ]
+            },
+            "description": "Récupère les statistiques d'un laboratoire"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ANALYSES",
+      "item": [
+        {
+          "name": "List All Analyses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analyses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses"
+              ]
+            },
+            "description": "Liste toutes les analyses"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Analyse",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultation_id\": 1,\n  \"laboratoire_id\": 1,\n  \"type_analyse\": \"Analyse de sang\",\n  \"date_demande\": \"2026-03-05\",\n  \"description\": \"Analyses biologiques completes\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses"
+              ]
+            },
+            "description": "Crée une nouvelle analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Analyse",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses",
+                "{{analyse_id}}"
+              ]
+            },
+            "description": "Récupère les détails d'une analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Analyse",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Analyse mise à jour\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses",
+                "{{analyse_id}}"
+              ]
+            },
+            "description": "Met à jour une analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Analyse",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses",
+                "{{analyse_id}}"
+              ]
+            },
+            "description": "Supprime une analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Statut",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"En cours\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}/statut",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses",
+                "{{analyse_id}}",
+                "statut"
+              ]
+            },
+            "description": "Met à jour le statut d'une analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Ajouter Résultats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultats\": \"Résultats de l'analyse\",\n  \"date_resultat\": \"2026-03-10\",\n  \"observation\": \"Tous les paramètres sont normaux\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}/resultats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analyses",
+                "{{analyse_id}}",
+                "resultats"
+              ]
+            },
+            "description": "Ajoute les résultats à une analyse"
+          },
+          "response": []
+        },
+        {
+          "name": "Analyse Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/analyses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "analyses"
+              ]
+            },
+            "description": "Récupère les statistiques des analyses"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "DOCUMENTS",
+      "item": [
+        {
+          "name": "List All Documents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "description": "Liste tous les documents"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dossier_id\": 1,\n  \"type_document_id\": 1,\n  \"titre\": \"Rapport Médical\",\n  \"description\": \"Rapport de consultation\",\n  \"chemin_fichier\": \"documents/rapport.pdf\",\n  \"date_document\": \"2026-03-05\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents"
+              ]
+            },
+            "description": "Crée un nouveau document"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            },
+            "description": "Récupère les détails d'un document"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Document",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Rapport Médical Mis à Jour\",\n  \"description\": \"Rapport de consultation mis à jour\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            },
+            "description": "Met à jour un document"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}"
+              ]
+            },
+            "description": "Supprime un document"
+          },
+          "response": []
+        },
+        {
+          "name": "Download Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "download"
+              ]
+            },
+            "description": "Télécharge un document"
+          },
+          "response": []
+        },
+        {
+          "name": "View Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/documents/{{document_id}}/view",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "documents",
+                "{{document_id}}",
+                "view"
+              ]
+            },
+            "description": "Affiche un document"
+          },
+          "response": []
+        },
+        {
+          "name": "Document Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/documents",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "documents"
+              ]
+            },
+            "description": "Récupère les statistiques des documents"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "STATISTIQUES GLOBALES",
+      "item": [
+        {
+          "name": "Dashboard Statistiques",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/dashboard",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "dashboard"
+              ]
+            },
+            "description": "Récupère le dashboard global des statistiques"
+          },
+          "response": []
+        },
+        {
+          "name": "Statistiques Avancées",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/statistiques/avancees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "statistiques",
+                "avancees"
+              ]
+            },
+            "description": "Récupère les statistiques avancées"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,573 @@
+{
+  "info": {
+    "name": "Med-Archive API 2",
+    "description": "Collection de tests après l'ajout de nouvelles fonctionnalités (flux de paiement, consultations, analyses, QR code, transfert)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 - Setup & Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('admin_token', jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@medarchive.bj\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Login Médecin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('medecin_token', jsonData.token);",
+                  "pm.environment.set('medecin_id', jsonData.user.medecin.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"medecin1@hopital.bj\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Login Agent Caisse",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('caisse_token', jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"caisse@medarchive.bj\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        },
+        {
+          "name": "Login Patient (optionnel)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('patient_token', jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"jean@test.bj\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 - Création Patient",
+      "item": [
+        {
+          "name": "Créer patient (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('patient_id', jsonData.data.id);",
+                  "pm.environment.set('patient_imu', jsonData.data.imu);",
+                  "pm.environment.set('dossier_id', jsonData.data.dossier.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"npi\": \"NPI-2025-000001\",\n    \"name\": \"Jean Tester\",\n    \"email\": \"jean@test.bj\",\n    \"password\": \"password\",\n    \"password_confirmation\": \"password\",\n    \"telephone\": \"+229 97000001\",\n    \"adresse\": \"Cotonou\",\n    \"ville\": \"Cotonou\",\n    \"date_naissance\": \"1990-01-01\",\n    \"sexe\": \"M\",\n    \"groupe_sanguin\": \"O+\",\n    \"allergies\": \"Aucune\",\n    \"antecedents_medicaux\": \"Aucun\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/patients", "host": ["{{base_url}}"], "path": ["patients"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Consultation & Paiement",
+      "item": [
+        {
+          "name": "Créer consultation (Médecin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('consultation_id', jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dossier_id\": \"{{dossier_id}}\",\n    \"medecin_id\": \"{{medecin_id}}\",\n    \"date_consultation\": \"2026-05-04 10:00:00\",\n    \"motif\": \"Fièvre\",\n    \"diagnostic\": \"Paludisme simple\",\n    \"montant_consultation\": 5000,\n    \"est_urgence\": false,\n    \"constantes\": {\n        \"tension_arterielle\": \"12/8\",\n        \"temperature\": 38.5\n    }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/consultations", "host": ["{{base_url}}"], "path": ["consultations"] }
+          }
+        },
+        {
+          "name": "Vérifier consultation non visible (GET avec médecin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/consultations?patient_id={{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["consultations"],
+              "query": [
+                { "key": "patient_id", "value": "{{patient_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Lister factures (Admin) pour récupérer facture_id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var factures = jsonData.data.data;",
+                  "if (factures && factures.length > 0) {",
+                  "    pm.environment.set('facture_id', factures[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/factures?patient_id={{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["factures"],
+              "query": [
+                { "key": "patient_id", "value": "{{patient_id}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payer facture (Agent Caisse)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success) {",
+                  "    console.log('Consultation payée');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{caisse_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"montant\": 5000,\n    \"methode\": \"especes\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/factures/{{facture_id}}/paiement",
+              "host": ["{{base_url}}"],
+              "path": ["factures", "{{facture_id}}", "paiement"]
+            }
+          }
+        },
+        {
+          "name": "Vérifier consultation visible après paiement (GET médecin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/consultations?patient_id={{patient_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["consultations"],
+              "query": [
+                { "key": "patient_id", "value": "{{patient_id}}" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Analyse & Paiement Examen",
+      "item": [
+        {
+          "name": "Créer analyse (Médecin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.environment.set('analyse_id', jsonData.data.id);",
+                  "// La facture examen aura été créée, on peut la récupérer plus tard"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"consultation_id\": \"{{consultation_id}}\",\n    \"laboratoire_id\": 1,\n    \"type_analyse\": \"NFS\",\n    \"date_prelevement\": \"2026-05-04\",\n    \"prescripteur_id\": \"{{medecin_id}}\",\n    \"montant_analyse\": 3000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/analyses", "host": ["{{base_url}}"], "path": ["analyses"] }
+          }
+        },
+        {
+          "name": "Tenter de passer l'analyse à 'en_cours' (Laborantin) - Doit échouer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"statut\": \"en_cours\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}/statut",
+              "host": ["{{base_url}}"],
+              "path": ["analyses", "{{analyse_id}}", "statut"]
+            }
+          }
+        },
+        {
+          "name": "Lister factures (Admin) pour trouver facture examen",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var factures = jsonData.data.data;",
+                  "if (factures && factures.length > 0) {",
+                  "    pm.environment.set('facture_examen_id', factures[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/factures?patient_id={{patient_id}}&type=examen",
+              "host": ["{{base_url}}"],
+              "path": ["factures"],
+              "query": [
+                { "key": "patient_id", "value": "{{patient_id}}" },
+                { "key": "type", "value": "examen" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payer facture examen (Agent Caisse)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{caisse_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"montant\": 3000,\n    \"methode\": \"especes\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/factures/{{facture_examen_id}}/paiement",
+              "host": ["{{base_url}}"],
+              "path": ["factures", "{{facture_examen_id}}", "paiement"]
+            }
+          }
+        },
+        {
+          "name": "Passer l'analyse à 'en_cours' (maintenant possible)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"statut\": \"en_cours\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/analyses/{{analyse_id}}/statut",
+              "host": ["{{base_url}}"],
+              "path": ["analyses", "{{analyse_id}}", "statut"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Urgence",
+      "item": [
+        {
+          "name": "Créer consultation urgente (Médecin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dossier_id\": \"{{dossier_id}}\",\n    \"medecin_id\": \"{{medecin_id}}\",\n    \"date_consultation\": \"2026-05-04 11:00:00\",\n    \"motif\": \"Urgence\",\n    \"montant_consultation\": 0,\n    \"est_urgence\": true,\n    \"constantes\": {\n        \"tension_arterielle\": \"9/5\"\n    }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/consultations", "host": ["{{base_url}}"], "path": ["consultations"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Recherche Patient & QR Code",
+      "item": [
+        {
+          "name": "Recherche par IMU",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients/imu/{{patient_imu}}",
+              "host": ["{{base_url}}"],
+              "path": ["patients", "imu", "{{patient_imu}}"]
+            }
+          }
+        },
+        {
+          "name": "Générer QR Code (image PNG)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{admin_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/patients/{{patient_id}}/qrcode",
+              "host": ["{{base_url}}"],
+              "path": ["patients", "{{patient_id}}", "qrcode"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 - Transfert Dossier",
+      "item": [
+        {
+          "name": "Transférer dossier (Médecin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"etablissement_destination_id\": 2,\n    \"motif_transfert\": \"Besoin de spécialiste\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/dossiers/{{dossier_id}}/transferer",
+              "host": ["{{base_url}}"],
+              "path": ["dossiers", "{{dossier_id}}", "transferer"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 - Tests de rôles (Accès refusé)",
+      "item": [
+        {
+          "name": "Médecin tente de créer une facture (doit échouer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"patient_id\": \"{{patient_id}}\",\n    \"type\": \"consultation\",\n    \"montant_total\": 5000\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/factures", "host": ["{{base_url}}"], "path": ["factures"] }
+          }
+        },
+        {
+          "name": "Médecin tente de payer une facture (doit échouer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{medecin_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"montant\": 1000,\n    \"methode\": \"especes\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/factures/1/paiement",
+              "host": ["{{base_url}}"],
+              "path": ["factures", "1", "paiement"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api"
+    },
+    {
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "key": "medecin_token",
+      "value": ""
+    },
+    {
+      "key": "caisse_token",
+      "value": ""
+    },
+    {
+      "key": "patient_token",
+      "value": ""
+    },
+    {
+      "key": "patient_id",
+      "value": ""
+    },
+    {
+      "key": "patient_imu",
+      "value": ""
+    },
+    {
+      "key": "dossier_id",
+      "value": ""
+    },
+    {
+      "key": "medecin_id",
+      "value": ""
+    },
+    {
+      "key": "consultation_id",
+      "value": ""
+    },
+    {
+      "key": "facture_id",
+      "value": ""
+    },
+    {
+      "key": "analyse_id",
+      "value": ""
+    },
+    {
+      "key": "facture_examen_id",
+      "value": ""
+    }
+  ]
+}
