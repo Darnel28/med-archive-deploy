@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Hero from "./components/Hero.jsx";
 import About from "./components/About.jsx";
@@ -9,6 +8,8 @@ import APropos from "./components/APropos.jsx";
 import BlogFront from "./components/BlogFront.jsx";
 import BlogDetail from "./components/BlogDetail.jsx";
 import Contact from "./components/Contact.jsx";
+import Connexion from "./components/Connexion.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashPatient from "./components/DashPatient/index.jsx";
 import DashboardHome from "./components/DashPatient/DashboardHome.jsx";
 import DashMedecin from "./components/DashMedecin/index.jsx";
@@ -82,9 +83,10 @@ function AllRoutes() {
             <Route path="/blog" element={<BlogFront />} />
             <Route path="/blog-detail" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/connexion" element={<Connexion />} />
 
             {/* Dashboard with nested routes - DashPatient is the layout parent */}
-            <Route path="/espacepatient" element={<DashPatient />}>
+            <Route path="/espacepatient" element={<ProtectedRoute><DashPatient /></ProtectedRoute>}>
                 <Route index element={<DashboardHome />} />
                 <Route path="consultations" element={<ConsultationsHistory />} />
                 <Route path="resultats-analyses" element={<ResultatsAnalyses />} />
@@ -103,7 +105,7 @@ function AllRoutes() {
             </Route>
 
             {/* Alternative dashboard path */}
-            <Route path="/DasbordPatient" element={<DashPatient />}>
+            <Route path="/DasbordPatient" element={<ProtectedRoute><DashPatient /></ProtectedRoute>}>
                 <Route index element={<DashboardHome />} />
                 <Route path="consultations" element={<ConsultationsHistory />} />
                 <Route path="resultats-analyses" element={<ResultatsAnalyses />} />
@@ -118,7 +120,7 @@ function AllRoutes() {
                 <Route path="preferences-notifications" element={<PreferencesNotifications />} />
                 <Route path="securite-compte" element={<SecuriteCompte />} />
             </Route>
-            <Route path="/espacemedecin" element={<DashMedecin />}>
+            <Route path="/espacemedecin" element={<ProtectedRoute><DashMedecin /></ProtectedRoute>}>
                 <Route index element={<DashboardHomeMedecin />} />
                 {/* Ajoute ici les autres routes propres au médecin */}
                 <Route path="rendez-vous" element={<RendezVousMedecin />} />
@@ -132,21 +134,21 @@ function AllRoutes() {
                 <Route path="preferences-notifications" element={<PreferencesNotificationsMed />} />
                 <Route path="securite-compte" element={<SecuriteCompteMed />} />
             </Route>
-            <Route path="/espaceaccueil" element={<DashAccueil />}>
+            <Route path="/espaceaccueil" element={<ProtectedRoute><DashAccueil /></ProtectedRoute>}>
                 <Route index element={<DashboardHomeAccueil />} />
                 <Route path="patients" element={<PatientService />} />
                 <Route path="medecins" element={<MedecinService />} />
                 <Route path="transfert" element={<TransfertService />} />
                 <Route path="rendez-vous" element={<RendezVousService />} />
             </Route>
-            <Route path="/espaceexamen" element={<DashExamen />} >
+            <Route path="/espaceexamen" element={<ProtectedRoute><DashExamen /></ProtectedRoute>} >
                 <Route index element={<DashboardLabo />} />
                 <Route path="demandes" element={<DemandeExamLabo />} />
                 <Route path="resultats" element={<ResultatExamLabo />} />
                 <Route path="alertes" element={<AlertesExamen />} />
                 {/* Ajoute ici les autres routes propres au laboratoire */}
             </Route>
-            <Route path="/espacehopital" element={<DashHopital />} >
+            <Route path="/espacehopital" element={<ProtectedRoute><DashHopital /></ProtectedRoute>} >
                 <Route index element={<DashHomeHopital />} />
                 <Route path="transfert" element={<TransfertHopital />} />
                 <Route path="rapports" element={<Rapports />} />.
