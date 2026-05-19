@@ -8,7 +8,9 @@ use App\Models\Dossier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Writer\SvgWriter;
 
 class PatientController extends Controller
 {
@@ -263,17 +265,20 @@ class PatientController extends Controller
 
     public function generateQrCode($id)
     {
-        // nécessite 'composer require endroid/qr-code'
         $patient = Patient::findOrFail($id);
 
-        $result = Builder::create()
-            ->writer(new PngWriter())
-            ->data($patient->imu)
-            ->size(300)
-            ->margin(10)
-            ->build();
+        $builder = new Builder(
+            writer: new SvgWriter(),
+            data: $patient->imu,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+        );
+
+        $result = $builder->build();
 
         return response($result->getString(), 200)
-            ->header('Content-Type', 'image/png');
+            ->header('Content-Type', 'image/svg+xml');
     }
 }

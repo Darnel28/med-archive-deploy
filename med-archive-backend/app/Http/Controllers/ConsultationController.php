@@ -99,13 +99,15 @@ class ConsultationController extends Controller
             'est_urgence' => 'nullable|boolean',
         ]);
 
-
         DB::beginTransaction();
 
         try {
+            // Récupérer le dossier dès le début
+            $dossier = Dossier::findOrFail($validated['dossier_id']);
+
             // Créer la consultation
             $consultation = Consultation::create([
-                'dossier_id' => $validated['dossier_id'],
+                'dossier_id' => $dossier->id,
                 'medecin_id' => $validated['medecin_id'],
                 'date_consultation' => $validated['date_consultation'],
                 'motif' => $validated['motif'],
@@ -115,12 +117,12 @@ class ConsultationController extends Controller
 
             $estUrgence = $request->input('est_urgence', false);
             if (!$estUrgence) {
-                $montant = $request->input('montant_consultation', 5000); // valeur par défaut
+                $montant = $request->input('montant_consultation', 5000);
                 $latestId = Facture::max('id') ?? 0;
                 $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
                 Facture::create([
                     'numero' => $numero,
-                    'patient_id' => $dossier->patient_id,
+                    'patient_id' => $dossier->patient_id, // Maintenant $dossier existe
                     'consultation_id' => $consultation->id,
                     'type' => 'consultation',
                     'montant_total' => $montant,
@@ -158,8 +160,7 @@ class ConsultationController extends Controller
                 ]);
             }
 
-            // Mettre à jour les stats du dossier
-            $dossier = Dossier::find($validated['dossier_id']);
+            // Mettre à jour les stats du dossier (on réutilise $dossier)
             $dossier->updateStatistiques();
 
             DB::commit();
