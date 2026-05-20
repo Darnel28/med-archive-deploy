@@ -55,7 +55,7 @@ function App() {
   }
 
   const isDashPatientRoute = currentPath.startsWith("/espacepatient") || currentPath.startsWith("/DasbordPatient") ||
-    currentPath.startsWith("/espacemedecin") || currentPath.startsWith("/espaceaccueil") || currentPath.startsWith("/espaceexamen") || currentPath.startsWith("/espacehopital");;
+    currentPath.startsWith("/espacemedecin") || currentPath.startsWith("/espaceaccueil") || currentPath.startsWith("/espaceexamen") || currentPath.startsWith("/espacehopital") || currentPath.startsWith("/connexion");;
 
 
   if (isDashPatientRoute) {

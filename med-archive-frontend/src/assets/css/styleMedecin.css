@@ -1125,7 +1125,7 @@ body.dark-mode .sheet-result {
 }
 
 .trend-badge-red {
-      background: #cb4f5f;
+    background: #cb4f5f;
 }
 
 .trend-badge-green {
@@ -1311,6 +1311,7 @@ body.dark-mode .chip-pink {
         height: 220px;
     }
 }
+
 /* ========== MES PATIENTS MEDECIN ========== */
 .mes-patients-main {
     display: grid;
@@ -1824,5 +1825,319 @@ body.dark-mode .mes-patients-pager-btn.active {
 
     .mes-patients-list-page {
         font-size: 14px;
+    }
+}
+
+/* ========== MODAL DE PUBLICATION ========== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+body.dark-mode .modal-content {
+    background: #0a2839;
+    border-color: #1a4257;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5fa;
+    color: #6b7f9a;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #e0e8f2;
+    color: #152943;
+}
+
+body.dark-mode .modal-close {
+    background: #123449;
+    color: #c8ddf0;
+}
+
+body.dark-mode .modal-close:hover {
+    background: #194967;
+    color: #e4f1ff;
+}
+
+.modal-header {
+    padding: 28px 28px 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+body.dark-mode .modal-header h2 {
+    color: #e4f1ff;
+}
+
+.modal-body {
+    padding: 0 28px;
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: grid;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+}
+
+body.dark-mode .form-label {
+    color: #c8ddf0;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #f8fafb;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(23, 184, 176, 0.1);
+}
+
+body.dark-mode .form-control {
+    background: #123449;
+    border-color: #1a4f6b;
+    color: #c8ddf0;
+}
+
+body.dark-mode .form-control:focus {
+    border-color: #2dd4c8;
+    box-shadow: 0 0 0 3px rgba(45, 212, 200, 0.15);
+}
+
+.form-control::placeholder {
+    color: #a7b8cc;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #738ba3;
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.image-upload-zone {
+    border: 2px dashed var(--line);
+    border-radius: 14px;
+    padding: 32px;
+    text-align: center;
+    background: #f8fafb;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+body.dark-mode .image-upload-zone {
+    background: #123449;
+    border-color: #1a4f6b;
+}
+
+.image-upload-zone:hover {
+    border-color: var(--teal);
+    background: #f0f7f6;
+}
+
+body.dark-mode .image-upload-zone:hover {
+    background: #194967;
+}
+
+.file-input {
+    display: none;
+}
+
+.upload-label {
+    display: grid;
+    gap: 8px;
+    place-items: center;
+    cursor: pointer;
+}
+
+.upload-label i {
+    font-size: 32px;
+    color: var(--teal);
+}
+
+.upload-label p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+body.dark-mode .upload-label p {
+    color: #c8ddf0;
+}
+
+.upload-label small {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+body.dark-mode .upload-label small {
+    color: #738ba3;
+}
+
+.file-name {
+    margin: 0;
+    padding: 12px;
+    background: #e8f7f4;
+    border-radius: 8px;
+    color: #0a6d67;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+body.dark-mode .file-name {
+    background: rgba(45, 212, 200, 0.1);
+    color: #2dd4c8;
+}
+
+.modal-footer {
+    padding: 20px 28px 28px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-cancel,
+.btn-submit {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-cancel {
+    background: #f1f5fa;
+    color: #6b7f9a;
+    border: 1px solid var(--line);
+}
+
+.btn-cancel:hover {
+    background: #e0e8f2;
+    color: #152943;
+}
+
+body.dark-mode .btn-cancel {
+    background: #123449;
+    border-color: #1a4f6b;
+    color: #c8ddf0;
+}
+
+body.dark-mode .btn-cancel:hover {
+    background: #194967;
+    color: #e4f1ff;
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, var(--teal), #0f9f9b);
+    color: #fff;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(23, 184, 176, 0.3);
+}
+
+body.dark-mode .btn-submit {
+    background: linear-gradient(135deg, #2dd4c8, #1ca59f);
+}
+
+/* Responsive Modal */
+@media (max-width: 600px) {
+    .modal-overlay {
+        padding: 12px;
+    }
+
+    .modal-content {
+        border-radius: 14px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .modal-header {
+        padding-top: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+    }
+
+    .image-upload-zone {
+        padding: 20px;
+    }
+
+    .form-textarea {
+        min-height: 100px;
     }
 }

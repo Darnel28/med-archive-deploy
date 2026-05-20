@@ -46,11 +46,14 @@ import PreferencesNotificationsMed from "./components/DashMedecin/PreferenceNoti
 import SecuriteCompteMed from "./components/DashMedecin/SecuritecompteMed.jsx";
 import DashboardHomeAccueil from "./components/DashAccueil/DashboardHomeAccueil.jsx";
 import DashHomeHopital from "./components/DashHopital/DashHomeHopital.jsx";
+import BesoinAide from "./components/DashMedecin/BesoinAide.jsx";
+import DossierVoirMedecin from "./components/DashMedecin/DossierVoirMedecin.jsx";
 // accueil
 import PatientService from "./components/DashAccueil/PatientService.jsx";
 import MedecinService from "./components/DashAccueil/MedecinService.jsx";
 import TransfertService from "./components/DashAccueil/TransfertService.jsx";
 import RendezVousService from "./components/DashAccueil/RendezVousService.jsx";
+import DossierDuPatient from "./components/DashAccueil/DossierDuPatient.jsx";
 // Examens
 import DashboardLabo from "./components/DashExamen/DashExamHome.jsx";
 import DemandeExamLabo from "./components/DashExamen/DemandeExam.jsx";
@@ -61,6 +64,7 @@ import AlertesExamen from "./components/DashExamen/Alertes.jsx";
 import TransfertHopital from "./components/DashHopital/TransfertHopital.jsx";
 import Rapports from "./components/DashHopital/Rapports.jsx";
 import NotificationsHopital from "./components/DashHopital/NotificationHopital.jsx";
+import LoginPage from "./components/Connexion.jsx";
 
 // Homepage component
 const HomePage = () => (
@@ -131,6 +135,8 @@ function AllRoutes() {
                 <Route path="parametres" element={<ParametresMedecin />} />
                 <Route path="preferences-notifications" element={<PreferencesNotificationsMed />} />
                 <Route path="securite-compte" element={<SecuriteCompteMed />} />
+                <Route path="besoin-aide" element={<BesoinAide />} />
+                <Route path="votre-patient" element={<DossierVoirMedecin />} />
             </Route>
             <Route path="/espaceaccueil" element={<DashAccueil />}>
                 <Route index element={<DashboardHomeAccueil />} />
@@ -138,6 +144,7 @@ function AllRoutes() {
                 <Route path="medecins" element={<MedecinService />} />
                 <Route path="transfert" element={<TransfertService />} />
                 <Route path="rendez-vous" element={<RendezVousService />} />
+                <Route path="dossier-patient" element={<DossierDuPatient />} />
             </Route>
             <Route path="/espaceexamen" element={<DashExamen />} >
                 <Route index element={<DashboardLabo />} />
@@ -149,12 +156,13 @@ function AllRoutes() {
             <Route path="/espacehopital" element={<DashHopital />} >
                 <Route index element={<DashHomeHopital />} />
                 <Route path="transfert" element={<TransfertHopital />} />
-                <Route path="rapports" element={<Rapports />} />.
+                <Route path="rapports" element={<Rapports />} />
                 <Route path="notifications" element={<NotificationsHopital />} />
                 {/* Ajoute ici les autres routes propres à l'hôpital */}
             </Route>
-
+            <Route path="/connexion" element={<LoginPage />} />
         </Routes>
+
     );
 }
 

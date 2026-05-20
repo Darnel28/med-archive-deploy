@@ -66,11 +66,11 @@ const SidebarMedecin = () => {
           </NavLink>
         </div>
 
-        <a className="sidebar-help" href="#">
+        <NavLink to="/espacemedecin/besoin-aide" className={({ isActive }) => `sidebar-help menu-item${isActive ? ' active' : ''}`}>
           <i className="fa-solid fa-headset"></i>
-          <span>Besoin d'aide ? Contacter le support</span>
+          <span>Besoin d'aide ?</span>
           <i className="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
+        </NavLink>
       </div>
     </aside>
   );

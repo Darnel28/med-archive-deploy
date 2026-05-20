@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 
 // Données statiques des patients (à remplacer par une API plus tard)
 const patientsData = [
@@ -101,9 +102,9 @@ const PatientService = () => {
                 </div>
               </div>
               <div className="mes-patients-actions">
-                <a className="mes-patients-action-btn" href="/espacemedecin/patients/dossier">
+                <Link className="mes-patients-action-btn" to="/espaceaccueil/dossier-patient">
                   <i className="fa-solid fa-folder-open"></i>
-                </a>
+                </Link>
                 <a className="mes-patients-action-btn" href={`tel:${patient.phone}`}>
                   <i className="fa-solid fa-phone"></i>
                 </a>
@@ -143,9 +144,9 @@ const PatientService = () => {
                     <td>{patient.lastConsult}</td>
                     <td>
                       <div className="mes-patients-list-actions">
-                        <a className="icon-action" href="/espacemedecin/patients/dossier">
+                        <Link className="icon-action" to="/espaceaccueil/dossier-patient">
                           <i className="fa-solid fa-folder-open"></i>
-                        </a>
+                        </Link>
                         <a className="icon-action" href={`tel:${patient.phone}`}>
                           <i className="fa-solid fa-phone"></i>
                         </a>

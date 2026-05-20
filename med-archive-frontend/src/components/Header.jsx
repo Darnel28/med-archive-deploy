@@ -58,7 +58,7 @@ function Header() {
                     </nav>
                   </div>
                   <div className="header-right-btn f-right d-none d-lg-block ml-30">
-                    <a href="#" className="btn header-btn">Mon Espace Santé</a>
+                    <a href="/connexion" onClick={(event) => navigate(event, "/connexion")} className="btn header-btn">Mon Espace Santé</a>
                   </div>
                 </div>
               </div>
