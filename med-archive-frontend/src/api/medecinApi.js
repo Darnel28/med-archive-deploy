@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 import { createResourceApi } from "./resourceApi";
 
 export const medecinsApi = createResourceApi("/medecins");
@@ -10,9 +10,9 @@ export const updateMedecin = medecinsApi.update;
 export const deleteMedecin = medecinsApi.remove;
 
 export function getMedecinPlanning(id) {
-  return api.get(`/medecins/${id}/planning`);
+  return apiClient.get(`/medecins/${id}/planning`).then((response) => response.data);
 }
 
 export function getMedecinPatients(id) {
-  return api.get(`/medecins/${id}/patients`);
+  return apiClient.get(`/medecins/${id}/patients`).then((response) => response.data);
 }

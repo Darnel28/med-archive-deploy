@@ -1,29 +1,29 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 
 export function getMesDonneesEtablissement() {
-  return api.get("/etablissement/mes-donnees");
+  return apiClient.get("/etablissement/mes-donnees").then((response) => response.data);
 }
 
 export function getMesMedecinsEtablissement() {
-  return api.get("/etablissement/mes-medecins");
+  return apiClient.get("/etablissement/mes-medecins").then((response) => response.data);
 }
 
 export function getMesPatientsEtablissement() {
-  return api.get("/etablissement/mes-patients");
+  return apiClient.get("/etablissement/mes-patients").then((response) => response.data);
 }
 
 export function getMesConsultationsEtablissement() {
-  return api.get("/etablissement/mes-consultations");
+  return apiClient.get("/etablissement/mes-consultations").then((response) => response.data);
 }
 
 export function getEtablissementStatistiques() {
-  return api.get("/etablissement/statistiques");
+  return apiClient.get("/etablissement/statistiques").then((response) => response.data);
 }
 
 export function getEtablissementDashboard() {
-  return api.get("/etablissement/dashboard");
+  return apiClient.get("/etablissement/dashboard").then((response) => response.data);
 }
 
 export function updateEtablissementInfo(payload) {
-  return api.put("/etablissement/info", payload);
+  return apiClient.put("/etablissement/info", payload).then((response) => response.data);
 }

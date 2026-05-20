@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 import { createResourceApi } from "./resourceApi";
 
 export const documentsApi = createResourceApi("/documents");
@@ -9,21 +9,23 @@ export const updateDocument = documentsApi.update;
 export const deleteDocument = documentsApi.remove;
 
 export function createDocument(payload) {
-  return api.post("/documents", payload);
+  return apiClient.post("/documents", payload).then((response) => response.data);
 }
 
 export function uploadDocument(formData) {
-  return api.post("/documents", formData);
+  return apiClient.post("/documents", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  }).then((response) => response.data);
 }
 
 export function downloadDocument(id) {
-  return api.get(`/documents/${id}/download`, { responseType: "blob" });
+  return apiClient.get(`/documents/${id}/download`, { responseType: "blob" }).then((response) => response.data);
 }
 
 export function viewDocument(id) {
-  return api.get(`/documents/${id}/view`, { responseType: "blob" });
+  return apiClient.get(`/documents/${id}/view`, { responseType: "blob" }).then((response) => response.data);
 }
 
 export function getDocumentsStatistiques() {
-  return api.get("/statistiques/documents");
+  return apiClient.get("/statistiques/documents").then((response) => response.data);
 }

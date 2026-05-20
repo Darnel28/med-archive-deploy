@@ -101,7 +101,7 @@ const MesPatientsMedecin = () => {
                 </div>
               </div>
               <div className="mes-patients-actions">
-                <a className="mes-patients-action-btn" href="/espacemedecin/patients/dossier">
+                <a className="mes-patients-action-btn" href="/espacemedecin/votre-patient">
                   <i className="fa-solid fa-folder-open"></i>
                 </a>
                 <a className="mes-patients-action-btn" href={`tel:${patient.phone}`}>

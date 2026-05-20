@@ -1,0 +1,336 @@
+.connexion-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 24px 16px;
+    background: #f3f5f4;
+}
+
+.connexion-card {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(29, 49, 64, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.connexion-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    min-height: 620px;
+}
+
+.connexion-left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 32px;
+    background: #38b8a2;
+    color: #fff;
+}
+
+.connexion-left-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 30%),
+        radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.1), transparent 24%),
+        radial-gradient(circle at 0% 100%, rgba(255, 255, 255, 0.16), transparent 22%);
+}
+
+.connexion-brand,
+.connexion-left-content {
+    position: relative;
+    z-index: 1;
+}
+
+.connexion-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+}
+
+.connexion-brand-mark {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.connexion-brand-text {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.connexion-left-content {
+    max-width: 240px;
+}
+
+.connexion-left-title {
+    margin: 0;
+    font-size: 2.15rem;
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.connexion-left-text {
+    margin: 20px 0 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.connexion-left-button {
+    margin-top: 32px;
+    width: 155px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: transparent;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.connexion-left-button:hover {
+    background: #fff;
+    color: #2ea897;
+}
+
+.connexion-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 64px;
+}
+
+.connexion-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-top: 62px solid #ec5b6b;
+    border-left: 62px solid transparent;
+}
+
+.connexion-form-panel {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.connexion-right-title {
+    margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.1;
+    font-weight: 800;
+    color: #31b2a2;
+    letter-spacing: -0.03em;
+}
+
+.connexion-socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.connexion-social-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+    color: #64748b;
+    font-weight: 700;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+}
+
+.connexion-right-subtitle {
+    margin: 24px 0 0;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.connexion-form {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.connexion-field {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    margin-bottom: 12px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: #f1f4f4;
+    border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.connexion-field-icon {
+    margin-right: 12px;
+    color: #a1a1aa;
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.connexion-options-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 2px 0 8px;
+}
+
+.connexion-remember {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #334155;
+}
+
+.connexion-remember input {
+    width: 16px;
+    height: 16px;
+    accent-color: #31b2a2;
+    cursor: pointer;
+}
+
+.connexion-forgot-link {
+    font-size: 0.88rem;
+    color: #334155;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.connexion-forgot-link:hover {
+    color: #2b9f90;
+}
+
+.connexion-input {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    outline: none;
+    color: #334155;
+    font-size: 0.92rem;
+}
+
+.connexion-input::placeholder {
+    color: #94a3b8;
+}
+
+.connexion-error {
+    margin: 4px 0 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.connexion-submit-wrap {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.connexion-submit {
+    width: 160px;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: #31b2a2;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 24px rgba(49, 178, 162, 0.28);
+    cursor: pointer;
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.connexion-submit:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.connexion-submit:disabled {
+    cursor: progress;
+    opacity: 0.72;
+    transform: none;
+}
+
+@media (max-width: 900px) {
+    .connexion-page {
+        padding: 12px;
+    }
+
+    .connexion-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .connexion-left {
+        min-height: 280px;
+    }
+
+    .connexion-right {
+        padding: 36px 20px 40px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .connexion-left-title,
+    .connexion-right-title {
+        font-size: 1.8rem;
+    }
+
+    .connexion-left {
+        padding: 28px 22px;
+    }
+
+    .connexion-brand {
+        margin-bottom: 28px;
+    }
+
+    .connexion-left-button,
+    .connexion-submit {
+        width: 100%;
+    }
+
+    .connexion-options-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

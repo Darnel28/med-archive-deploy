@@ -2990,11 +2990,12 @@ body.dark-mode .page-title-card {
     justify-content: space-between;
     gap: 12px;
     border: 1px solid #dbe5f2;
-    border-radius: 8px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 12px 14px;
     color: #2b4467;
     font-size: 14px;
     font-weight: 600;
+    background: #ffffff;
 }
 
 .settings-switch-row input {
@@ -3004,8 +3005,301 @@ body.dark-mode .page-title-card {
 
 .settings-action-list {
     display: grid;
+    gap: 10px;
+}
+
+.security-action-btn {
+    width: 100%;
+    min-height: 52px;
+    padding: 0 18px;
+    border: 1.5px solid #17b8b0;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #17b8b0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    box-shadow: 0 8px 18px rgba(18, 39, 73, 0.05);
+}
+
+.security-action-btn i {
+    font-size: 16px;
+}
+
+.security-action-btn:hover {
+    transform: translateY(-1px);
+    background: #f1fbfa;
+    box-shadow: 0 10px 22px rgba(18, 39, 73, 0.08);
+}
+
+body.dark-mode .security-action-btn {
+    background: #082537;
+    color: #2dd4c8;
+    border-color: #2dd4c8;
+}
+
+body.dark-mode .security-action-btn:hover {
+    background: #0d3248;
+}
+
+/* Security modals */
+.security-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 18, 28, 0.58);
+    display: grid;
+    place-items: center;
+    z-index: 1200;
+    padding: 16px;
+}
+
+.security-modal {
+    width: min(560px, 100%);
+    max-height: 90vh;
+    overflow: auto;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 24px 50px rgba(2, 12, 22, 0.35);
+    position: relative;
+}
+
+.security-modal-lg {
+    width: min(680px, 100%);
+}
+
+.security-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.security-modal-kicker {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #17b8b0;
+}
+
+.security-modal-header h2 {
+    margin: 0;
+    color: #1e3a5f;
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+.security-modal-close {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5fa;
+    color: #5c748f;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.security-modal-close:hover {
+    background: #e0e8f2;
+    color: #1e3a5f;
+}
+
+.security-modal-form {
+    display: grid;
+    gap: 14px;
+}
+
+.security-field {
+    display: grid;
     gap: 8px;
 }
+
+.security-field span {
+    color: #1e3a5f;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.security-field input {
+    width: 100%;
+    border: 1px solid #d1dce6;
+    border-radius: 12px;
+    padding: 0.8rem 0.95rem;
+    font-size: 0.95rem;
+    color: #1e3a5f;
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.security-field input:focus {
+    outline: none;
+    border-color: #17b8b0;
+    box-shadow: 0 0 0 3px rgba(23, 184, 176, 0.1);
+}
+
+.security-field input::placeholder {
+    color: #8b9fb7;
+}
+
+.security-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.security-modal-actions-end {
+    margin-top: 18px;
+}
+
+.security-btn {
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.security-btn-ghost {
+    background: #e8f0f7;
+    color: #3b556b;
+}
+
+.security-btn-ghost:hover {
+    background: #d8e5f2;
+}
+
+.security-btn-primary {
+    background: #17b8b0;
+    color: #ffffff;
+}
+
+.security-btn-primary:hover {
+    background: #14a09e;
+}
+
+.security-device-list {
+    display: grid;
+    gap: 12px;
+}
+
+.security-device-card {
+    border: 1px solid #dbe5f2;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #f9fbfe;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.security-device-card strong {
+    display: block;
+    color: #1e3a5f;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.security-device-card p {
+    margin: 0;
+    color: #5d738f;
+    font-size: 13px;
+}
+
+.security-device-status {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #e8f7f4;
+    color: #0f9f9b;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.security-device-status.active {
+    background: rgba(23, 184, 176, 0.14);
+    color: #0f8b82;
+}
+
+.security-device-status.muted {
+    background: #edf3f8;
+    color: #6b7f9a;
+}
+
+body.dark-mode .security-modal {
+    background: #082537;
+}
+
+body.dark-mode .security-modal-header h2,
+body.dark-mode .security-field span,
+body.dark-mode .security-device-card strong {
+    color: #e4f1ff;
+}
+
+body.dark-mode .security-modal-close {
+    background: #123449;
+    color: #c8ddf0;
+}
+
+body.dark-mode .security-modal-close:hover {
+    background: #194967;
+    color: #e4f1ff;
+}
+
+body.dark-mode .security-field input {
+    background: #123449;
+    border-color: #1a4f6b;
+    color: #c8ddf0;
+}
+
+body.dark-mode .security-field input::placeholder {
+    color: #738ba3;
+}
+
+body.dark-mode .security-btn-ghost {
+    background: #123449;
+    color: #c8ddf0;
+}
+
+body.dark-mode .security-btn-ghost:hover {
+    background: #194967;
+}
+
+body.dark-mode .security-device-card {
+    background: #0f2c3f;
+    border-color: #1a4f6b;
+}
+
+body.dark-mode .security-device-card p {
+    color: #98b6cf;
+}
+
+body.dark-mode .security-device-status {
+    background: #123449;
+    color: #2dd4c8;
+}
+
+body.dark-mode .security-device-status.muted {
+    color: #98b6cf;
+}
+
+
 
 .switch-control {
     position: relative;
@@ -3018,6 +3312,35 @@ body.dark-mode .page-title-card {
     opacity: 0;
     width: 0;
     height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #c7d5e6;
+    transition: background-color 0.2s ease;
+}
+
+.switch-slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(18, 39, 73, 0.18);
+    transition: transform 0.2s ease;
+}
+
+.switch-control input:checked + .switch-slider {
+    background: #5c4ee5;
+}
+
+.switch-control input:checked + .switch-slider::before {
+    transform: translateX(20px);
 }
 
 body.dark-mode .settings-extra {

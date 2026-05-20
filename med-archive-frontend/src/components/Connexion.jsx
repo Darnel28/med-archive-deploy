@@ -1,113 +1,138 @@
-import { useMemo, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { getAuthUser, getDashboardPathForUser, login } from "../api";
-import logo from "../assets/img/logo11.png";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaFacebookF, FaGooglePlusG, FaLinkedinIn } from "react-icons/fa";
+import { FiLock, FiMail } from "react-icons/fi";
+import "../assets/css/Connexion.css";
+import { getDashboardPathForUser, login } from "../api";
 
-function Connexion() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+export default function LoginPage() {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-  const redirectPath = useMemo(() => {
-    const from = location.state?.from?.pathname;
+    const handleLogin = async (event) => {
+        event.preventDefault();
+        setErrorMessage("");
+        setIsLoading(true);
 
-    if (from && from !== "/connexion") {
-      return from;
-    }
+        try {
+            const data = await login({ email, password });
+            navigate(getDashboardPathForUser(data.user), { replace: true });
+        } catch (error) {
+            const apiMessage = error.response?.data?.message;
+            const validationMessage = error.response?.data?.errors
+                ? Object.values(error.response.data.errors).flat().join(" ")
+                : null;
 
-    return null;
-  }, [location.state]);
+            setErrorMessage(validationMessage || apiMessage || "Email ou mot de passe incorrect.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((current) => ({ ...current, [name]: value }));
-  };
+    return (
+        <div className="connexion-page">
+            <div className="connexion-card">
+                <div className="connexion-layout">
+                    <aside className="connexion-left">
+                        <div className="connexion-left-overlay" />
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setIsSubmitting(true);
+                        <div className="connexion-brand">
+                            <div className="connexion-brand-mark">
+                                360
+                            </div>
+                            <span className="connexion-brand-text">Med-Archive</span>
+                        </div>
 
-    try {
-      const result = await login(formData);
-      const user = result?.user || getAuthUser();
-      navigate(redirectPath || getDashboardPathForUser(user), { replace: true });
-    } catch (apiError) {
-      const validationMessage = apiError?.data?.errors
-        ? Object.values(apiError.data.errors).flat().join(" ")
-        : null;
+                        <div className="connexion-left-content">
+                            <h2 className="connexion-left-title">
+                                Bon retour !
+                            </h2>
+                            <p className="connexion-left-text">
+                                Pour rester connecte avec nous, veuillez vous connecter avec vos informations personnelles.
+                            </p>
+                        </div>
+                    </aside>
 
-      setError(validationMessage || apiError?.message || "Connexion impossible pour le moment.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+                    <section className="connexion-right">
+                        <div className="connexion-corner" />
 
-  return (
-    <section className="login-page">
-      <div className="login-shell">
-        <div className="login-panel login-brand-panel">
-          <Link to="/" className="login-logo-link" aria-label="Retour a l'accueil">
-            <img src={logo} alt="Med-Archive" />
-          </Link>
-          <div>
-            <p className="login-eyebrow">Espace securise</p>
-            <h1>Connexion a Med-Archive</h1>
-            <p className="login-copy">
-              Accedez a votre espace selon votre role : patient, medecin, laboratoire,
-              accueil ou etablissement.
-            </p>
-          </div>
-        </div>
+                        <div className="connexion-form-panel">
+                            <h1 className="connexion-right-title">
+                                Connexion a votre espace
+                            </h1>
 
-        <div className="login-panel">
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div>
-              <p className="login-eyebrow">Identification</p>
-              <h2>Se connecter</h2>
+                            <div className="connexion-socials">
+                                <button type="button" className="connexion-social-btn">
+                                    <FaFacebookF />
+                                </button>
+                                <button type="button" className="connexion-social-btn">
+                                    <FaGooglePlusG />
+                                </button>
+                                <button type="button" className="connexion-social-btn">
+                                    <FaLinkedinIn />
+                                </button>
+                            </div>
+
+                            <p className="connexion-right-subtitle">
+                                ou utilisez votre E-mail pour vous connecter :
+                            </p>
+
+                            <form onSubmit={handleLogin} className="connexion-form">
+                                <div className="connexion-field">
+                                    <span className="connexion-field-icon"><FiMail /></span>
+                                    <input
+                                        type="email"
+                                        placeholder="Email"
+                                        className="connexion-input"
+                                        value={email}
+                                        onChange={(event) => setEmail(event.target.value)}
+                                        autoComplete="email"
+                                        required
+                                    />
+                                </div>
+
+                                <div className="connexion-field">
+                                    <span className="connexion-field-icon"><FiLock /></span>
+                                    <input
+                                        type="password"
+                                        placeholder="Mot de passe"
+                                        className="connexion-input"
+                                        value={password}
+                                        onChange={(event) => setPassword(event.target.value)}
+                                        autoComplete="current-password"
+                                        required
+                                    />
+                                </div>
+
+                                {errorMessage ? (
+                                    <p className="connexion-error">{errorMessage}</p>
+                                ) : null}
+
+                                <div className="connexion-options-row">
+                                    <label className="connexion-remember">
+                                        <input type="checkbox" />
+                                        <span>Se souvenir de moi</span>
+                                    </label>
+                                    <a href="#" className="connexion-forgot-link">Mot de passe oublie ?</a>
+                                </div>
+
+                                <div className="connexion-submit-wrap">
+                                    <button
+                                        type="submit"
+                                        className="connexion-submit"
+                                        disabled={isLoading}
+                                    >
+                                        {isLoading ? "Connexion..." : "Se connecter"}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
             </div>
-
-            {error ? <div className="login-alert">{error}</div> : null}
-
-            <label className="login-field">
-              <span>Email</span>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="nom@exemple.com"
-                autoComplete="email"
-                required
-              />
-            </label>
-
-            <label className="login-field">
-              <span>Mot de passe</span>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Votre mot de passe"
-                autoComplete="current-password"
-                required
-              />
-            </label>
-
-            <button className="login-submit" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Connexion..." : "Se connecter"}
-            </button>
-          </form>
         </div>
-      </div>
-    </section>
-  );
+    );
 }
-
-export default Connexion;

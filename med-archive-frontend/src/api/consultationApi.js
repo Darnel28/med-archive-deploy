@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 import { createResourceApi } from "./resourceApi";
 
 export const consultationsApi = createResourceApi("/consultations");
@@ -10,9 +10,9 @@ export const updateConsultation = consultationsApi.update;
 export const deleteConsultation = consultationsApi.remove;
 
 export function ajouterConstantesConsultation(id, payload) {
-  return api.post(`/consultations/${id}/constantes`, payload);
+  return apiClient.post(`/consultations/${id}/constantes`, payload).then((response) => response.data);
 }
 
 export function getConsultationsStatistiques() {
-  return api.get("/statistiques/consultations");
+  return apiClient.get("/statistiques/consultations").then((response) => response.data);
 }

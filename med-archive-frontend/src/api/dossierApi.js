@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 import { createResourceApi } from "./resourceApi";
 
 export const dossiersApi = createResourceApi("/dossiers");
@@ -10,17 +10,17 @@ export const updateDossier = dossiersApi.update;
 export const deleteDossier = dossiersApi.remove;
 
 export function getDossierResume(id) {
-  return api.get(`/dossiers/${id}/resume`);
+  return apiClient.get(`/dossiers/${id}/resume`).then((response) => response.data);
 }
 
 export function archiverDossier(id) {
-  return api.post(`/dossiers/${id}/archiver`);
+  return apiClient.post(`/dossiers/${id}/archiver`).then((response) => response.data);
 }
 
 export function transfererDossier(id, payload) {
-  return api.patch(`/dossiers/${id}/transferer`, payload);
+  return apiClient.patch(`/dossiers/${id}/transferer`, payload).then((response) => response.data);
 }
 
 export function transfererDossierPost(id, payload) {
-  return api.post(`/dossiers/${id}/transferer`, payload);
+  return apiClient.post(`/dossiers/${id}/transferer`, payload).then((response) => response.data);
 }

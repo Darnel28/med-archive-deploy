@@ -6,12 +6,8 @@ export const DASHBOARD_ROUTES = {
   hopital: "/espacehopital",
 };
 
-export function getRoleName(user) {
-  return user?.role?.nom || user?.role || "";
-}
-
 export function getDashboardPathForUser(user) {
-  const role = getRoleName(user).toLowerCase();
+  const role = String(user?.role?.nom || user?.role || "").toLowerCase();
 
   if (role.includes("patient")) {
     return DASHBOARD_ROUTES.patient;
@@ -29,11 +25,7 @@ export function getDashboardPathForUser(user) {
     return DASHBOARD_ROUTES.accueil;
   }
 
-  if (role.includes("etablissement")) {
-    return DASHBOARD_ROUTES.hopital;
-  }
-
-  if (role.includes("admin")) {
+  if (role.includes("etablissement") || role.includes("admin")) {
     return DASHBOARD_ROUTES.hopital;
   }
 

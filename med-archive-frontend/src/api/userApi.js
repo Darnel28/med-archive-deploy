@@ -1,4 +1,4 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 import { createResourceApi } from "./resourceApi";
 
 export const usersApi = createResourceApi("/users");
@@ -9,14 +9,14 @@ export const getUser = usersApi.show;
 export const updateUser = usersApi.update;
 export const deleteUser = usersApi.remove;
 
-export function desactiverUser(id) {
-  return api.post(`/users/${id}/desactiver`);
+export function activerUser(id) {
+  return apiClient.post(`/users/${id}/activer`).then((response) => response.data);
 }
 
-export function activerUser(id) {
-  return api.post(`/users/${id}/activer`);
+export function desactiverUser(id) {
+  return apiClient.post(`/users/${id}/desactiver`).then((response) => response.data);
 }
 
 export function getUtilisateursStatistiques() {
-  return api.get("/statistiques/utilisateurs");
+  return apiClient.get("/statistiques/utilisateurs").then((response) => response.data);
 }

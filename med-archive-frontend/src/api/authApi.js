@@ -1,51 +1,49 @@
-import { api, clearAuthSession, setAuthToken, setAuthUser } from "./client";
+import { apiClient, clearAuthSession, setAuthSession } from "./client";
 
 export async function login(credentials) {
-  const result = await api.post("/login", credentials, { auth: false });
+  const response = await apiClient.post("/login", credentials);
+  const data = response.data;
 
-  if (result?.token) {
-    setAuthToken(result.token);
-  }
+  setAuthSession({
+    token: data?.token,
+    user: data?.user,
+  });
 
-  if (result?.user) {
-    setAuthUser(result.user);
-  }
-
-  return result;
+  return data;
 }
 
 export async function register(payload) {
-  const result = await api.post("/register", payload, { auth: false });
+  const response = await apiClient.post("/register", payload);
+  const data = response.data;
 
-  if (result?.token) {
-    setAuthToken(result.token);
-  }
+  setAuthSession({
+    token: data?.token,
+    user: data?.user,
+  });
 
-  if (result?.user) {
-    setAuthUser(result.user);
-  }
-
-  return result;
+  return data;
 }
 
 export async function logout() {
   try {
-    return await api.post("/logout");
+    await apiClient.post("/logout");
   } finally {
     clearAuthSession();
   }
 }
 
-export function getCurrentUser() {
-  return api.get("/me");
+export async function getCurrentUser() {
+  const response = await apiClient.get("/me");
+  return response.data;
 }
 
 export async function refreshToken() {
-  const result = await api.post("/refresh");
+  const response = await apiClient.post("/refresh");
+  const token = response.data?.token;
 
-  if (result?.token) {
-    setAuthToken(result.token);
+  if (token) {
+    setAuthSession({ token });
   }
 
-  return result;
+  return response.data;
 }

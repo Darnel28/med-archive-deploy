@@ -1,21 +1,21 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 
-export function getFactures(query) {
-  return api.get("/factures", { query });
+export function getFactures(params) {
+  return apiClient.get("/factures", { params }).then((response) => response.data);
 }
 
 export function createFacture(payload) {
-  return api.post("/factures", payload);
+  return apiClient.post("/factures", payload).then((response) => response.data);
 }
 
 export function getFacture(id) {
-  return api.get(`/factures/${id}`);
+  return apiClient.get(`/factures/${id}`).then((response) => response.data);
 }
 
 export function payerFacture(id, payload) {
-  return api.post(`/factures/${id}/paiement`, payload);
+  return apiClient.post(`/factures/${id}/paiement`, payload).then((response) => response.data);
 }
 
 export function downloadFacturePdf(id) {
-  return api.get(`/factures/${id}/pdf`, { responseType: "blob" });
+  return apiClient.get(`/factures/${id}/pdf`, { responseType: "blob" }).then((response) => response.data);
 }

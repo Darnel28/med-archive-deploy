@@ -1,9 +1,9 @@
-import { api } from "./client";
+import { apiClient } from "./client";
 
 export function getDashboardStatistiques() {
-  return api.get("/statistiques/dashboard");
+  return apiClient.get("/statistiques/dashboard").then((response) => response.data);
 }
 
 export function getStatistiquesAvancees() {
-  return api.get("/statistiques/avancees");
+  return apiClient.get("/statistiques/avancees").then((response) => response.data);
 }

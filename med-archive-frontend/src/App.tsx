@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import AllRoutes from "./AllRoutes.jsx";
 import Footer from "./components/Footer.jsx";
 import Load from "./components/load.jsx";
 
 function App() {
-  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   // Loader on initial page load
   useEffect(() => {
@@ -25,11 +24,18 @@ function App() {
 
   // Loader on route changes
   useEffect(() => {
-    setIsLoading(true);
-    const timer = window.setTimeout(() => setIsLoading(false), 500);
+    const handlePopState = () => {
+      const newPath = window.location.pathname;
+      if (newPath !== currentPath) {
+        setCurrentPath(newPath);
+        setIsLoading(true);
+        setTimeout(() => setIsLoading(false), 500);
+      }
+    };
 
-    return () => window.clearTimeout(timer);
-  }, [location.pathname]);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentPath]);
 
   if (isLoading) {
     return (
@@ -48,12 +54,11 @@ function App() {
     );
   }
 
-  const currentPath = location.pathname;
-  const isDashboardRoute = currentPath.startsWith("/espacepatient") || currentPath.startsWith("/DasbordPatient") ||
-    currentPath.startsWith("/espacemedecin") || currentPath.startsWith("/espaceaccueil") || currentPath.startsWith("/espaceexamen") || currentPath.startsWith("/espacehopital");
+  const isDashPatientRoute = currentPath.startsWith("/espacepatient") || currentPath.startsWith("/DasbordPatient") ||
+    currentPath.startsWith("/espacemedecin") || currentPath.startsWith("/espaceaccueil") || currentPath.startsWith("/espaceexamen") || currentPath.startsWith("/espacehopital") || currentPath.startsWith("/connexion");;
 
 
-  if (isDashboardRoute) {
+  if (isDashPatientRoute) {
     return <AllRoutes />;
   }
 
