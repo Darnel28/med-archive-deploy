@@ -1,8 +1,8 @@
 import React from 'react';
 import DynamicPatientsDirectory from '../shared/DynamicPatientsDirectory.jsx';
 
-const PatientService = () => (
+const PatientHopital = () => (
   <DynamicPatientsDirectory title="Patients" source="etablissement" detailPath="/espaceaccueil/dossier-patient" />
 );
 
-export default PatientService;
+export default PatientHopital;

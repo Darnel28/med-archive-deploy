@@ -1,36 +1,79 @@
-import React, { useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto';  
+import React, { useEffect, useMemo, useState } from 'react';
+import { getDashboardStatistiques } from '../../api/statistiqueApi';
+import { apiErrorMessage } from '../DashAdmin/AdminCrudPage.jsx';
+
+function getPayload(response) {
+  return response?.data ?? response ?? {};
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatTime(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
 
 const DashboardHomeMedecin = () => {
-  const chartRef = useRef(null);
-  let chartInstance = null;
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (chartRef.current) {
-      if (chartInstance) chartInstance.destroy();
-      chartInstance = new Chart(chartRef.current, {
-        type: 'line',
-        data: {
-          labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
-          datasets: [{
-            label: 'Consultations',
-            data: [5, 8, 6, 9, 7, 4],
-            borderColor: '#2c7be5',
-            backgroundColor: 'rgba(44,123,229,0.1)',
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } }
-        }
-      });
+    let mounted = true;
+
+    async function loadDashboard() {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await getDashboardStatistiques();
+        if (mounted) setDashboard(getPayload(response));
+      } catch (err) {
+        if (mounted) setError(apiErrorMessage(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
     }
+
+    loadDashboard();
     return () => {
-      if (chartInstance) chartInstance.destroy();
+      mounted = false;
     };
   }, []);
+
+  const prochainesConsultations = useMemo(() => {
+    const list = dashboard?.consultations?.prochaines;
+    return Array.isArray(list) ? list.slice(0, 5) : [];
+  }, [dashboard]);
+
+  const stats = [
+    {
+      label: 'Patients suivis',
+      value: dashboard?.patients?.total ?? 0,
+      icon: 'fa-user-group',
+      meta: `${dashboard?.patients?.vus_mois ?? 0} patient(s) vu(s) ce mois`,
+    },
+    {
+      label: "Rendez-vous aujourd'hui",
+      value: dashboard?.consultations?.aujourdhui ?? 0,
+      icon: 'fa-calendar-check',
+      meta: `${dashboard?.consultations?.mois ?? 0} consultation(s) ce mois`,
+    },
+    {
+      label: 'Analyses prescrites',
+      value: dashboard?.analyses?.prescrites ?? 0,
+      icon: 'fa-flask',
+      meta: 'Total des demandes laboratoire',
+    },
+    {
+      label: 'Examens en attente',
+      value: dashboard?.analyses?.en_attente ?? 0,
+      icon: 'fa-bell',
+      meta: 'Prescrits, preleves ou en cours',
+    },
+  ];
 
   return (
     <div className="doctor-main">
@@ -38,94 +81,69 @@ const DashboardHomeMedecin = () => {
         <div className="dashboard-header">
           <div className="dashboard-copy">
             <p className="dashboard-kicker">Vue d'ensemble</p>
-            <p>Suivi synthétique de l'activité médicale du jour.</p>
+            <p>Suivi synthetique de l'activite medicale du jour.</p>
           </div>
           <div className="dashboard-date">
-            <i className="fa-regular fa-calendar"></i> 12 mars 2026
+            <i className="fa-regular fa-calendar"></i> {new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' })}
           </div>
         </div>
+
+        {error && <div className="alert alert-danger">{error}</div>}
+
         <div className="quick-stats">
-          <article className="quick-stat">
-            <div className="quick-stat-top">
-              <p className="quick-stat-label">Patients suivis</p>
-              <span className="quick-stat-icon"><i className="fa-solid fa-user-group"></i></span>
-            </div>
-            <strong>120</strong>
-            <p className="quick-stat-meta">Dossiers actifs sous votre suivi</p>
-          </article>
-          <article className="quick-stat">
-            <div className="quick-stat-top">
-              <p className="quick-stat-label">Rendez-vous aujourd'hui</p>
-              <span className="quick-stat-icon"><i className="fa-regular fa-calendar-check"></i></span>
-            </div>
-            <strong>8</strong>
-            <p className="quick-stat-meta">Consultations programmées pour la journée</p>
-          </article>
-          <article className="quick-stat">
-            <div className="quick-stat-top">
-              <p className="quick-stat-label">Examens en attente</p>
-              <span className="quick-stat-icon"><i className="fa-solid fa-flask"></i></span>
-            </div>
-            <strong>3</strong>
-            <p className="quick-stat-meta">Demandes en cours de traitement laboratoire</p>
-          </article>
-          <article className="quick-stat">
-            <div className="quick-stat-top">
-              <p className="quick-stat-label">Alertes résultats disponibles</p>
-              <span className="quick-stat-icon"><i className="fa-regular fa-bell"></i></span>
-            </div>
-            <strong>2</strong>
-            <p className="quick-stat-meta">Résultats à consulter dans la file d'attente</p>
-          </article>
+          {stats.map((stat) => (
+            <article className="quick-stat" key={stat.label}>
+              <div className="quick-stat-top">
+                <p className="quick-stat-label">{stat.label}</p>
+                <span className="quick-stat-icon"><i className={`fa-solid ${stat.icon}`}></i></span>
+              </div>
+              <strong>{loading ? '...' : stat.value}</strong>
+              <p className="quick-stat-meta">{stat.meta}</p>
+            </article>
+          ))}
         </div>
       </section>
 
       <section className="widgets-grid">
         <div className="widget">
           <h3><i className="fa-regular fa-calendar"></i> Prochains rendez-vous</h3>
-          <div className="appointment">
-            <div><strong>Jean Dupont</strong><br />Consultation générale</div>
-            <div className="appointment-time">09:30</div>
-          </div>
-          <div className="appointment">
-            <div><strong>Amina Bello</strong><br />Suivi hypertension</div>
-            <div className="appointment-time">11:00</div>
-          </div>
-          <div className="appointment">
-            <div><strong>Paul Koffi</strong><br />Résultats examens</div>
-            <div className="appointment-time">14:00</div>
-          </div>
+          {loading && <p className="table-meta">Chargement...</p>}
+          {!loading && prochainesConsultations.length === 0 && <p className="table-meta">Aucun rendez-vous a venir.</p>}
+          {prochainesConsultations.map((consultation) => (
+            <div className="appointment" key={consultation.id}>
+              <div>
+                <strong>{consultation?.dossier?.patient?.user?.name || 'Patient'}</strong><br />
+                {consultation.motif || consultation.type_consultation || 'Consultation'} - {formatDate(consultation.date_consultation)}
+              </div>
+              <div className="appointment-time">{formatTime(consultation.date_consultation)}</div>
+            </div>
+          ))}
         </div>
 
         <div className="widget">
-          <h3><i className="fa-solid fa-bell"></i> Alertes médicales</h3>
+          <h3><i className="fa-solid fa-bell"></i> Alertes medicales</h3>
           <div className="alert-box">
-            Résultat laboratoire disponible pour <strong>Jean Dupont</strong>
+            Analyses en attente : <strong>{dashboard?.analyses?.en_attente ?? 0}</strong>
           </div>
           <div className="alert-box">
-            Patient <strong>Amina Bello</strong> - tension élevée
+            Consultations aujourd'hui : <strong>{dashboard?.consultations?.aujourdhui ?? 0}</strong>
           </div>
         </div>
 
         <div className="widget">
-          <h3><i className="fa-solid fa-user"></i> Patients récents</h3>
+          <h3><i className="fa-solid fa-user"></i> Activite patients</h3>
           <div className="patient-mini">
-            <img src="https://i.pravatar.cc/40?img=15" alt="patient" />
-            <span>Jean Dupont</span>
+            <span>Patients suivis</span>
+            <strong>{dashboard?.patients?.total ?? 0}</strong>
           </div>
           <div className="patient-mini">
-            <img src="https://i.pravatar.cc/40?img=21" alt="patient" />
-            <span>Amina Bello</span>
+            <span>Vus ce mois</span>
+            <strong>{dashboard?.patients?.vus_mois ?? 0}</strong>
           </div>
           <div className="patient-mini">
-            <img src="https://i.pravatar.cc/40?img=33" alt="patient" />
-            <span>Paul Koffi</span>
+            <span>Consultations totales</span>
+            <strong>{dashboard?.consultations?.total ?? 0}</strong>
           </div>
-        </div>
-
-        <div className="widget">
-          <h3><i className="fa-solid fa-chart-line"></i> Activité de la semaine</h3>
-          <canvas ref={chartRef} className="chart-box"></canvas>
         </div>
       </section>
     </div>

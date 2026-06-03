@@ -127,6 +127,7 @@ function AllRoutes() {
                 <Route path="securite-compte" element={<SecuriteCompte />} />
                 <Route path="rendez-vous" element={<RendezVousPatient />} />
                 <Route path="besoin-aide" element={<BesoinAidePatient />} />
+              
 
             </Route>
 
@@ -146,6 +147,8 @@ function AllRoutes() {
                 <Route path="dossier-medical" element={<DossierMedicalDetails />} />
                 <Route path="preferences-notifications" element={<PreferencesNotifications />} />
                 <Route path="securite-compte" element={<SecuriteCompte />} />
+            
+                
             </Route>
             <Route path="/espacemedecin" element={<DashMedecin />}>
                 <Route index element={<DashboardHomeMedecin />} />

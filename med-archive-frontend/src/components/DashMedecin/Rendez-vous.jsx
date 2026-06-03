@@ -453,6 +453,19 @@ const RendezVousMedecin = () => {
                   </select>
                   {loadingPatients && <small>Chargement des patients...</small>}
                 </div>
+                
+            {!loading && !error && filteredData.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-state-search">
+                  <i className="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <h2>Aucune demande de transfert trouvée</h2>
+                <p>Aucune demande de transfert n’a été trouvée pour les critères sélectionnés.</p>
+                <NavLink to="nouvelle-demande" className="empty-state-btn">
+                  <i className="fa-solid fa-plus"></i> Ajouter une demande
+                </NavLink>
+              </div>
+            )}
                 <div className="form-row">
                   <div className="form-group">
                     <label>Date *</label>

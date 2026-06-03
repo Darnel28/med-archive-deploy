@@ -8,12 +8,12 @@ export function getMesMedecinsEtablissement() {
   return apiClient.get("/etablissement/mes-medecins").then((response) => response.data);
 }
 
-export function getMesPatientsEtablissement() {
-  return apiClient.get("/etablissement/mes-patients").then((response) => response.data);
+export function getMesPatientsEtablissement(params = {}) {
+  return apiClient.get("/etablissement/mes-patients", { params }).then((response) => response.data);
 }
 
-export function getMesConsultationsEtablissement() {
-  return apiClient.get("/etablissement/mes-consultations").then((response) => response.data);
+export function getMesConsultationsEtablissement(params = {}) {
+  return apiClient.get("/etablissement/mes-consultations", { params }).then((response) => response.data);
 }
 
 export function getEtablissementStatistiques() {

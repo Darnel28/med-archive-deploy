@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { deleteTransfertDossier, getTransfertDossiers } from "../../api";
+import { NavLink } from "react-router-dom";
 
 const statusTabs = ["Tous", "En cours", "Validé", "Refusé"];
 const statusLabels = {
@@ -141,9 +142,9 @@ const TransfertHopital = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </label>
-        <button className="btn transfer-add-btn" type="button">
-          <i className="fa-solid fa-plus"></i> Ajouter une demande
-        </button>
+        <NavLink className="btn transfer-add-btn" to="nouvelle-demande">
+          <i></i> Ajouter une demande
+        </NavLink>
       </section>
 
       <section className="transfer-section">

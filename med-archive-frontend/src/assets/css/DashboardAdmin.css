@@ -8,6 +8,126 @@
   margin: 0 auto;
 }
 
+.admin-modal-overlay {
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4rem 1rem 2rem;
+  background: rgba(11, 22, 35, 0.58);
+  backdrop-filter: blur(2px);
+}
+
+.admin-modal-container {
+  position: relative;
+  width: min(720px, 100%);
+  max-height: calc(100vh - 6rem);
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dce7f3;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(14, 30, 48, 0.28);
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-modal-container .modal-header {
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid #e7eef7;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-modal-container .modal-header h3 {
+  margin: 0;
+  color: #14324d;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.admin-modal-container .modal-close {
+  position: static;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #eef4fb;
+  color: #50657b;
+  font-size: 1.4rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-modal-container .modal-close:hover {
+  background: #dfeaf6;
+  color: #102c45;
+  transform: translateY(-1px);
+}
+
+.admin-modal-container .modal-body {
+  padding: 1.4rem;
+  overflow-y: auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-modal-container form {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-modal-container .form-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.admin-modal-container .form-group label {
+  color: #1d4770;
+  font-weight: 600;
+  margin: 0;
+}
+
+.admin-modal-container input,
+.admin-modal-container select,
+.admin-modal-container textarea {
+  width: 100%;
+  border: 1px solid #d7e3ef;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #15283b;
+  padding: 0.78rem 0.9rem;
+  min-height: 46px;
+  outline: none;
+  box-shadow: none;
+}
+
+.admin-modal-container textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.admin-modal-container input:focus,
+.admin-modal-container select:focus,
+.admin-modal-container textarea:focus {
+  border-color: #17b8b0;
+  box-shadow: 0 0 0 3px rgba(23, 184, 176, 0.14);
+}
+
+.admin-modal-container .modal-footer {
+  padding: 1rem 1.4rem 1.25rem;
+  border-top: 1px solid #e7eef7;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
 /* En-tête */
 .dashadmin-header {
   display: flex;

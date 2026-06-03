@@ -1,84 +1,86 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { getAuthUser } from '../../api/client';
+import { getCurrentUser } from '../../api/authApi';
+import AvatarInitials from '../AvatarInitials.jsx';
+
+function normalizeUser(value) {
+  return value?.data?.data?.user || value?.data?.user || value?.user || value?.data || value || {};
+}
+
+const menuItems = [
+  { to: '/espacehopital', label: 'Dashboard', icon: 'fa-house', end: true },
+  { to: '/espacehopital/tout-les-medecins', label: 'Medecins', icon: 'fa-user-doctor' },
+  { to: '/espacehopital/patients', label: 'Patients', icon: 'fa-user-injured' },
+  { to: '/espacehopital/transfert', label: 'Transfert', icon: 'fa-exchange-alt' },
+  { to: '/espacehopital/rapports', label: 'Rapports', icon: 'fa-file-medical' },
+];
 
 const SidebarHopital = () => {
   const [userPanelOpen, setUserPanelOpen] = useState(false);
+  const [user, setUser] = useState(() => normalizeUser(getAuthUser()));
 
-  const toggleUserPanel = () => setUserPanelOpen(prev => !prev);
+  useEffect(() => {
+    let mounted = true;
+    getCurrentUser()
+      .then((response) => {
+        if (mounted) setUser(normalizeUser(response));
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const profile = useMemo(() => {
+    const info = user.information_etablissement || user.informationEtablissement || {};
+    return {
+      name: user.name || 'Hopital',
+      service: info.type_etablissement || user.role?.nom || 'Etablissement',
+      id: info.code_etablissement || user.matricule || user.id || '-',
+      avatar: user.avatar || null,
+    };
+  }, [user]);
 
   return (
     <aside className="sidebar">
       <div className="sidebar-title-row">
         <h3>Navigation</h3>
-        <button
-          className="sidebar-user-toggle"
-          onClick={toggleUserPanel}
-          aria-expanded={userPanelOpen}
-        >
+        <button className="sidebar-user-toggle" type="button" onClick={() => setUserPanelOpen((prev) => !prev)} aria-expanded={userPanelOpen}>
           <i className="fa-regular fa-user"></i>
         </button>
       </div>
 
       <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
-        <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice" />
-        <strong>BAH Konie</strong>
-        <span>Service: Medecine generale</span>
+        {profile.avatar ? <img src={profile.avatar} alt={profile.name} /> : <AvatarInitials name={profile.name} size={56} bgColor="#13c3b8" />}
+        <strong>{profile.name}</strong>
+        <span>Type: {profile.service}</span>
       </div>
 
       <div className="menu-block">
-        <NavLink end to="/espacehopital" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-house"></i><span>Dashboard</span>
-        </NavLink>
-
-        <NavLink to="/espacehopital/tout-les-medecins" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-user-doctor"></i><span>Medecins</span>
-        </NavLink>
-
-        <NavLink to="/espacehopital/patients" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-user-injured"></i><span>Patients</span>
-        </NavLink>
-
-        <NavLink to="/espacehopital/transfert" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-exchange-alt"></i><span>Transfert</span>
-        </NavLink>
-
-        <NavLink to="/espacehopital/rapports" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-file-medical"></i><span>Rapports</span>
-        </NavLink>
+        {menuItems.map((item) => (
+          <NavLink key={item.to} end={item.end} to={item.to} className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+            <i className={`fa-solid ${item.icon}`}></i><span>{item.label}</span>
+          </NavLink>
+        ))}
 
         <h4>Gestion du compte</h4>
         <div className="menu-block">
-          {/* <a className="menu-item" href="/espacemedecin/publications">
-            <i className="fa-regular fa-newspaper"></i><span>Publications</span>
-          </a> */}
           <NavLink to="/espacehopital/notifications" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-            <i className="fa-regular fa-bell "></i><span>Alertes</span>
+            <i className="fa-regular fa-bell"></i><span>Alertes</span>
           </NavLink>
-
-          <a className="menu-item" href="/espacemedecin/profil">
-            <i className="fa-regular fa-user"></i><span>Profil</span>
-          </a>
         </div>
 
         <div className="sidebar-profile">
-          <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice" />
+          {profile.avatar ? <img src={profile.avatar} alt={profile.name} /> : <AvatarInitials name={profile.name} size={45} bgColor="#13c3b8" />}
           <div>
-            <strong>BAH Konie</strong>
-            <span>ID: MED-24-007</span>
+            <strong>{profile.name}</strong>
+            <span>ID: {profile.id}</span>
           </div>
-          <a className="settings-link" href="/espacemedecin/parametres">
-            <i className="fa-solid fa-gear"></i>
-          </a>
-          <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">
+          <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se deconnecter">
             <i className="fa-solid fa-right-from-bracket"></i>
-          </a>
+          </NavLink>
         </div>
-
-        <a className="sidebar-help" href="#">
-          <i className="fa-solid fa-headset"></i>
-          <span>Besoin d'aide ? Contacter le support</span>
-          <i className="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
       </div>
     </aside>
   );

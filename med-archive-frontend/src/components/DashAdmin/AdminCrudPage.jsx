@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import "../../assets/css/DashboardAdmin.css";
 
 export function unwrapList(response) {
   const payload = response?.data ?? response;
@@ -255,16 +256,21 @@ export default function AdminCrudPage({
           </div>
           <div className="table-footer">
             <span className="table-meta">{filteredRows.length} affiché(s) sur {total || rows.length}</span>
-            <button className="table-page active" type="button" onClick={loadRows}>
+            {/* <button className="table-page active" type="button" onClick={loadRows}>
               Actualiser
-            </button>
+            </button> */}
+              <div className="table-pagination">
+                            <span className="table-page">Précédent</span>
+                            <span className="table-page active">1</span>
+                            <span className="table-page">Suivant</span>
+                        </div>
           </div>
         </article>
       </section>
 
       {modalMode && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-overlay admin-modal-overlay" onClick={closeModal}>
+          <div className="modal-container admin-modal-container" onClick={(event) => event.stopPropagation()}>
             <div className="modal-header">
               <h3>
                 {modalMode === "details" ? "Détails" : modalMode === "edit" ? "Modifier" : addLabel}

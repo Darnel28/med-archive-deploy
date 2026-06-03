@@ -110,11 +110,11 @@ const Sidebar = () => {
         </NavLink>
       </div>
 
-      <a href="#" className="sidebar-help">
+      <NavLink to="/espacepatient/besoin-aide" className="sidebar-help">
         <i className="fa-solid fa-headset"></i>
         <span>Besoin d'aide ? Contacter le support</span>
         <i className="fa-solid fa-arrow-up-right-from-square"></i>
-      </a>
+      </NavLink>
     </aside>
   );
 };

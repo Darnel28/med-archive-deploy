@@ -1,55 +1,165 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import '../../assets/css/Hopital.css'; 
+import {
+  getDashboardStatistiques,
+  getEtablissementDashboard,
+  getEtablissementStatistiques,
+  getMesConsultationsEtablissement,
+  getTransfertDossiers,
+} from '../../api';
+import { apiErrorMessage, unwrapList, valueAt } from '../DashAdmin/AdminCrudPage.jsx';
+import '../../assets/css/Hopital.css';
+
+async function safeLoad(loader, fallback) {
+  try {
+    return await loader();
+  } catch {
+    return fallback;
+  }
+}
+
+function payload(response) {
+  return response?.data ?? response ?? {};
+}
+
+function formatDate(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatHour(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function isToday(value) {
+  if (!value) return false;
+  return new Date(value).toDateString() === new Date().toDateString();
+}
 
 const DashHomeHopital = () => {
-  // Données statiques pour les graphiques et tableaux
-  const patientsActifsData = [
-    { mois: 'Jan', actifs: 320 },
-    { mois: 'Fév', actifs: 345 },
-    { mois: 'Mar', actifs: 378 },
-    { mois: 'Avr', actifs: 410 },
-    { mois: 'Mai', actifs: 456 },
-    { mois: 'Juin', actifs: 490 },
-  ];
+  const [dashboard, setDashboard] = useState({});
+  const [statsDetaillees, setStatsDetaillees] = useState({});
+  const [consultations, setConsultations] = useState([]);
+  const [transferts, setTransferts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const activiteServices = [
-    { service: 'Hématologie', examens: 124 },
-    { service: 'Biochimie', examens: 98 },
-    { service: 'Microbiologie', examens: 76 },
-    { service: 'Immunologie', examens: 52 },
-    { service: 'Anatomopatho', examens: 38 },
-  ];
+  useEffect(() => {
+    let mounted = true;
 
-  const examensJour = [
-    { patient: 'Mme A. Kouassi', examen: 'NFS', priorite: 'Haute', statut: 'En attente', heure: '09:30' },
-    { patient: 'M. B. N\'dri', examen: 'Bilan rénal', priorite: 'Moyenne', statut: 'Réalisé', heure: '11:00' },
-    { patient: 'Mme C. Zongo', examen: 'Hémoculture', priorite: 'Basse', statut: 'Programmé', heure: '08:15' },
-    { patient: 'M. D. Koffi', examen: 'Glycémie', priorite: 'Haute', statut: 'En cours', heure: '14:00' },
-    { patient: 'Mme E. Traoré', examen: 'Bilan lipidique', priorite: 'Moyenne', statut: 'En attente', heure: '15:30' },
-  ];
+    async function loadDashboard() {
+      setLoading(true);
+      setError('');
+      try {
+        const [statsResponse, etablissementDashboardResponse, statsDetailleesResponse, consultationsResponse, transfertsResponse] = await Promise.all([
+          safeLoad(getDashboardStatistiques, {}),
+          safeLoad(getEtablissementDashboard, {}),
+          safeLoad(getEtablissementStatistiques, {}),
+          safeLoad(() => getMesConsultationsEtablissement({ per_page: 100 }), []),
+          safeLoad(() => getTransfertDossiers({ per_page: 20 }), []),
+        ]);
 
-  const transfertsRecents = [
-    { patient: 'M. F. Diop', de: 'Urgences', vers: 'Laboratoire', date: '2026-05-09', statut: 'En traitement' },
-    { patient: 'Mme G. Koné', de: 'Cardiologie', vers: 'Biochimie', date: '2026-05-09', statut: 'Terminé' },
-    { patient: 'M. H. Ouattara', de: 'Pédiatrie', vers: 'Hématologie', date: '2026-05-08', statut: 'Terminé' },
-  ];
+        if (!mounted) return;
+        setDashboard({ ...payload(statsResponse), ...payload(etablissementDashboardResponse) });
+        setStatsDetaillees(payload(statsDetailleesResponse));
+        setConsultations(unwrapList(consultationsResponse).rows);
+        setTransferts(unwrapList(transfertsResponse).rows);
+      } catch (err) {
+        if (mounted) setError(apiErrorMessage(err));
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    }
 
-  const pieData = [
-    { name: 'En attente', value: 24, color: '#f4a261' },
-    { name: 'Réalisés', value: 42, color: '#17b8b0' },
-    { name: 'Programmés', value: 18, color: '#2a9d8f' },
+    loadDashboard();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const consultationsToday = useMemo(() => consultations.filter((item) => isToday(item.date_consultation)), [consultations]);
+
+  const patientsActifsData = useMemo(() => {
+    const parJour = statsDetaillees?.consultations?.par_jour;
+    if (Array.isArray(parJour) && parJour.length > 0) {
+      return parJour.map((item) => ({
+        mois: formatDate(item.date),
+        actifs: item.total,
+      }));
+    }
+
+    const buckets = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map((jour) => ({ mois: jour, actifs: 0 }));
+    consultations.forEach((item) => {
+      if (!item.date_consultation) return;
+      const index = (new Date(item.date_consultation).getDay() + 6) % 7;
+      buckets[index].actifs += 1;
+    });
+    return buckets;
+  }, [consultations, statsDetaillees]);
+
+  const activiteServices = useMemo(() => {
+    const parMotif = statsDetaillees?.consultations?.par_motif || dashboard?.consultations?.par_motif;
+    if (Array.isArray(parMotif) && parMotif.length > 0) {
+      return parMotif.map((item) => ({ service: item.motif || 'Consultation', examens: item.total }));
+    }
+
+    const counts = consultations.reduce((acc, item) => {
+      const service = item.service?.nom || item.medecin?.specialite?.nom || item.motif || 'Consultation';
+      acc[service] = (acc[service] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).slice(0, 6).map(([service, examens]) => ({ service, examens }));
+  }, [consultations, dashboard, statsDetaillees]);
+
+  const examensJour = useMemo(() => (
+    consultationsToday.slice(0, 8).map((item) => ({
+      id: item.id,
+      patient: valueAt(item, 'dossier.patient.user.name', 'Patient'),
+      examen: item.motif || item.type_consultation || 'Consultation',
+      priorite: item.priorite || 'Normale',
+      statut: item.statut || 'Planifie',
+      heure: formatHour(item.date_consultation),
+    }))
+  ), [consultationsToday]);
+
+  const transfertsRecents = useMemo(() => transferts.slice(0, 5), [transferts]);
+
+  const kpis = [
+    {
+      label: 'Patients actifs',
+      value: dashboard?.patients_actifs ?? dashboard?.patients?.total ?? 0,
+      icon: 'fa-users',
+      trend: `${dashboard?.patients?.nouveaux_mois ?? 0} nouveau(x) ce mois`,
+    },
+    {
+      label: 'Nouveaux patients',
+      value: dashboard?.patients?.nouveaux_mois ?? statsDetaillees?.patients?.nouveaux ?? 0,
+      icon: 'fa-user-plus',
+      trend: 'Ce mois',
+    },
+    {
+      label: 'Transferts recents',
+      value: transferts.length,
+      icon: 'fa-arrow-right-arrow-left',
+      trend: 'Total charge',
+    },
+    {
+      label: 'Examens du jour',
+      value: dashboard?.consultations_aujourdhui ?? dashboard?.consultations?.aujourdhui ?? consultationsToday.length,
+      icon: 'fa-microscope',
+      trend: `${dashboard?.analyses_en_cours ?? dashboard?.analyses?.en_attente ?? 0} en cours`,
+    },
   ];
 
   return (
     <div className="dashboard-accueil">
-      {/* En-tête */}
       <div className="dashboard-header">
         <div>
           <h1>Tableau de bord</h1>
-          <p className="subtitle">Vue d'ensemble du laboratoire</p>
+          <p className="subtitle">Vue d'ensemble de l'hopital</p>
         </div>
         <div className="header-date">
           <i className="fa-regular fa-calendar-alt"></i>
@@ -57,71 +167,43 @@ const DashHomeHopital = () => {
         </div>
       </div>
 
-      {/* Cartes KPI */}
+      {error && <div className="alert alert-danger">{error}</div>}
+
       <div className="kpi-grid">
-        <div className="kpi-card">
-          <div className="kpi-icon" style={{ backgroundColor: '#e0f7f5' }}>
-            <i className="fa-solid fa-users" style={{ color: '#17b8b0' }}></i>
+        {kpis.map((kpi) => (
+          <div className="kpi-card" key={kpi.label}>
+            <div className="kpi-icon" style={{ backgroundColor: '#e0f7f5' }}>
+              <i className={`fa-solid ${kpi.icon}`} style={{ color: '#17b8b0' }}></i>
+            </div>
+            <div className="kpi-content">
+              <span className="kpi-value">{loading ? '...' : kpi.value}</span>
+              <span className="kpi-label">{kpi.label}</span>
+              <span className="kpi-trend up">{kpi.trend}</span>
+            </div>
           </div>
-          <div className="kpi-content">
-            <span className="kpi-value">490</span>
-            <span className="kpi-label">Patients actifs</span>
-            <span className="kpi-trend up">+12%</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-icon" style={{ backgroundColor: '#e0f7f5' }}>
-            <i className="fa-solid fa-user-plus" style={{ color: '#17b8b0' }}></i>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">86</span>
-            <span className="kpi-label">Nouveaux patients</span>
-            <span className="kpi-trend up">+8%</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-icon" style={{ backgroundColor: '#e0f7f5' }}>
-            <i className="fa-solid fa-arrow-right-arrow-left" style={{ color: '#17b8b0' }}></i>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">12</span>
-            <span className="kpi-label">Transferts récents</span>
-            <span className="kpi-trend neutral">→ 0%</span>
-          </div>
-        </div>
-        <div className="kpi-card">
-          <div className="kpi-icon" style={{ backgroundColor: '#e0f7f5' }}>
-            <i className="fa-solid fa-microscope" style={{ color: '#17b8b0' }}></i>
-          </div>
-          <div className="kpi-content">
-            <span className="kpi-value">47</span>
-            <span className="kpi-label">Examens du jour</span>
-            <span className="kpi-trend up">+5%</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Graphiques ligne + barres */}
       <div className="charts-row">
         <div className="chart-card">
-          <h3><i className="fa-solid fa-chart-line"></i> Évolution patients actifs</h3>
+          <h3><i className="fa-solid fa-chart-line"></i> Evolution patients actifs</h3>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={patientsActifsData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef2fa" />
               <XAxis dataKey="mois" stroke="#5f7f9e" />
-              <YAxis stroke="#5f7f9e" />
+              <YAxis stroke="#5f7f9e" allowDecimals={false} />
               <Tooltip />
               <Line type="monotone" dataKey="actifs" stroke="#17b8b0" strokeWidth={2} dot={{ fill: '#17b8b0' }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
         <div className="chart-card">
-          <h3><i className="fa-solid fa-chart-simple"></i> Activité par service</h3>
+          <h3><i className="fa-solid fa-chart-simple"></i> Activite par service</h3>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={activiteServices} layout="vertical" margin={{ left: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#eef2fa" />
-              <XAxis type="number" stroke="#5f7f9e" />
-              <YAxis type="category" dataKey="service" stroke="#5f7f9e" width={100} />
+              <XAxis type="number" stroke="#5f7f9e" allowDecimals={false} />
+              <YAxis type="category" dataKey="service" stroke="#5f7f9e" width={120} />
               <Tooltip />
               <Bar dataKey="examens" fill="#17b8b0" radius={[0, 8, 8, 0]} />
             </BarChart>
@@ -129,9 +211,7 @@ const DashHomeHopital = () => {
         </div>
       </div>
 
-      {/* Section basse : tableau examens + pie + transferts */}
       <div className="bottom-section">
-        {/* Tableau examens du jour */}
         <div className="exam-card">
           <h3><i className="fa-regular fa-clock"></i> Examens du jour</h3>
           <div className="table-wrapper">
@@ -140,19 +220,25 @@ const DashHomeHopital = () => {
                 <tr>
                   <th>Patient</th>
                   <th>Examen</th>
-                  <th>Priorité</th>
+                  <th>Priorite</th>
                   <th>Heure</th>
                   <th>Statut</th>
                 </tr>
               </thead>
               <tbody>
-                {examensJour.map((ex, idx) => (
-                  <tr key={idx}>
+                {loading && (
+                  <tr><td colSpan="5">Chargement...</td></tr>
+                )}
+                {!loading && examensJour.length === 0 && (
+                  <tr><td colSpan="5">Aucun examen aujourd'hui.</td></tr>
+                )}
+                {examensJour.map((ex) => (
+                  <tr key={ex.id}>
                     <td>{ex.patient}</td>
                     <td>{ex.examen}</td>
-                    <td><span className={`priority-badge ${ex.priorite === 'Haute' ? 'high' : ex.priorite === 'Moyenne' ? 'medium' : 'low'}`}>{ex.priorite}</span></td>
+                    <td><span className={`priority-badge ${String(ex.priorite).toLowerCase()}`}>{ex.priorite}</span></td>
                     <td>{ex.heure}</td>
-                    <td><span className={`status-badge ${ex.statut.replace(' ', '-').toLowerCase()}`}>{ex.statut}</span></td>
+                    <td><span className={`status-badge ${String(ex.statut).replace(' ', '-').toLowerCase()}`}>{ex.statut}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -160,33 +246,19 @@ const DashHomeHopital = () => {
           </div>
         </div>
 
-        {/* Bloc droit : camembert + transferts récents */}
         <div className="right-col">
-          <div className="chart-card pie-card">
-            <h3><i className="fa-solid fa-chart-pie"></i> Répartition statuts examens</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label>
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
           <div className="transfer-card">
-            <h3><i className="fa-solid fa-truck-medical"></i> Transferts récents</h3>
+            <h3><i className="fa-solid fa-truck-medical"></i> Transferts recents</h3>
             <ul className="transfer-list">
-              {transfertsRecents.map((t, idx) => (
-                <li key={idx}>
+              {!loading && transfertsRecents.length === 0 && <li>Aucun transfert recent.</li>}
+              {transfertsRecents.map((t) => (
+                <li key={t.id}>
                   <div className="transfer-info">
-                    <strong>{t.patient}</strong>
-                    <span>{t.de} → {t.vers}</span>
-                    <small>{t.date}</small>
+                    <strong>{valueAt(t, 'dossier.patient.user.name', 'Patient')}</strong>
+                    <span>{valueAt(t, 'serviceSource.nom', '-')} vers {valueAt(t, 'serviceDestination.nom', '-')}</span>
+                    <small>{formatDate(t.created_at || t.date_transfert || t.date)}</small>
                   </div>
-                  <span className={`transfer-status ${t.statut === 'Terminé' ? 'done' : 'pending'}`}>{t.statut}</span>
+                  <span className={`transfer-status ${String(t.statut).toLowerCase().includes('termin') ? 'done' : 'pending'}`}>{t.statut || 'En attente'}</span>
                 </li>
               ))}
             </ul>
