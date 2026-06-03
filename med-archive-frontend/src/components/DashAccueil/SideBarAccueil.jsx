@@ -68,6 +68,9 @@ const SidebarAccueil = () => {
           <a className="settings-link" href="/espacemedecin/parametres">
             <i className="fa-solid fa-gear"></i>
           </a>
+          <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">
+            <i className="fa-solid fa-right-from-bracket"></i>
+          </a>
         </div>
 
         <a className="sidebar-help" href="#">

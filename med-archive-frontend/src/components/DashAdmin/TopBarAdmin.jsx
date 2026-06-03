@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getAuthUser } from '../../api/client';
-import AvatarInitials from '../AvatarInitials.jsx';
 import Chart from '../Chart.jsx';
 
-const TopbarMedecin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
+const TopbarAdmin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showChart, setShowChart] = useState(false);
 
@@ -48,26 +46,13 @@ const TopbarMedecin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
           <i className="fa-regular fa-bell"></i>
           <span className="badge">4</span>
         </button>
-        {(() => {
-          const auth = getAuthUser() || {};
-          const name = auth?.name || auth?.user?.name || '—';
-          const imu = auth?.imu || auth?.numero_professionnel || auth?.medecin_code || auth?.id || '';
-          const avatar = auth?.avatar || auth?.user?.avatar || null;
-
-          return (
-            <div className="profile">
-              {avatar ? (
-                <img src={avatar} alt="Profil" />
-              ) : (
-                <AvatarInitials name={name} size={45} bgColor="#13c3b8" />
-              )}
-              <div>
-                <strong>{name}</strong>
-                <span>{imu ? `IMU: ${imu}` : ''}</span>
-              </div>
-            </div>
-          );
-        })()}
+        <div className="profile">
+          <img src="https://i.pravatar.cc/80?img=12" alt="Profil" />
+          <div>
+            <strong>Dr.Alice</strong>
+            <span>IMU: 24P-001</span>
+          </div>
+        </div>
       </div>
       {showChart && (
         <div className="chart-modal-backdrop" onClick={() => setShowChart(false)}>
@@ -81,4 +66,4 @@ const TopbarMedecin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
   );
 };
 
-export default TopbarMedecin;
+export default TopbarAdmin;

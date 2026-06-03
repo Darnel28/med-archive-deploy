@@ -65,7 +65,7 @@ const categories = [
   }
 ];
 
-const BesoinAide = () => {
+const BesoinAidePatient = () => {
   const [activeCategoryId, setActiveCategoryId] = useState(categories[0].id);
   const [openIndex, setOpenIndex] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(false);
@@ -321,4 +321,4 @@ const BesoinAide = () => {
   );
 };
 
-export default BesoinAide;
+export default BesoinAidePatient;

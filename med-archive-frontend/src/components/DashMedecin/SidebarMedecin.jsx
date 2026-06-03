@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { getAuthUser } from '../../api/client';
+import AvatarInitials from '../AvatarInitials.jsx';
 import { NavLink } from 'react-router-dom';
 
 const SidebarMedecin = () => {
@@ -19,11 +21,24 @@ const SidebarMedecin = () => {
         </button>
       </div>
 
-      <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
-        <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice" />
-        <strong>Dr. Alice</strong>
-        <span>Service: Medecine generale</span>
-      </div>
+      {(() => {
+        const auth = getAuthUser() || {};
+        const name = auth?.name || auth?.user?.name || '—';
+        const service = auth?.service || auth?.user?.service || '—';
+        const avatar = auth?.avatar || auth?.user?.avatar || null;
+
+        return (
+          <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
+            {avatar ? (
+              <img src={avatar} alt={name} />
+            ) : (
+              <AvatarInitials name={name} size={56} bgColor="#13c3b8" />
+            )}
+            <strong>{name}</strong>
+            <span>Service: {service}</span>
+          </div>
+        );
+      })()}
 
       <div className="menu-block">
         <NavLink end to="/espacemedecin" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
@@ -55,16 +70,33 @@ const SidebarMedecin = () => {
           </NavLink>
         </div>
 
-        <div className="sidebar-profile">
-          <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice" />
-          <div>
-            <strong>Dr. Alice</strong>
-            <span>ID: MED-24-007</span>
-          </div>
-          <NavLink className="settings-link" to="/espacemedecin/parametres">
-            <i className="fa-solid fa-gear"></i>
-          </NavLink>
-        </div>
+        {(() => {
+          const auth = getAuthUser() || {};
+          const name = auth?.name || auth?.user?.name || '—';
+          const avatar = auth?.avatar || auth?.user?.avatar || null;
+          // Try multiple possible id fields
+          const idDisplay = auth?.numero_professionnel || auth?.medecin_id || auth?.id || auth?.user?.id || '—';
+
+          return (
+            <div className="sidebar-profile">
+              {avatar ? (
+                <img src={avatar} alt={name} />
+              ) : (
+                <AvatarInitials name={name} size={45} bgColor="#13c3b8" />
+              )}
+              <div>
+                <strong>{name}</strong>
+                <span>IMU: {idDisplay}</span>
+              </div>
+              <NavLink className="settings-link" to="/espacemedecin/parametres">
+                <i className="fa-solid fa-gear"></i>
+              </NavLink>
+              <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se déconnecter">
+                <i className="fa-solid fa-right-from-bracket"></i>
+              </NavLink>
+            </div>
+          );
+        })()}
 
         <NavLink to="/espacemedecin/besoin-aide" className={({ isActive }) => `sidebar-help menu-item${isActive ? ' active' : ''}`}>
           <i className="fa-solid fa-headset"></i>

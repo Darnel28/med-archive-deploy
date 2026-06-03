@@ -81,7 +81,7 @@ const RendezVousPatient = () => {
                   <th>Médecin</th>
                   <th>Service</th>
                   <th>Statut</th>
-                  <th>Rappel</th>
+                  {/* <th>Rappel</th> */}
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -93,7 +93,7 @@ const RendezVousPatient = () => {
                     <td>{rdv.medecin}</td>
                     <td>{rdv.service}</td>
                     <td><span className={getStatutClass(rdv.statut)}>{rdv.statut}</span></td>
-                    <td><i className={rdv.rappelIcon}></i> {rdv.rappel}</td>
+                    {/* <td><i className={rdv.rappelIcon}></i> {rdv.rappel}</td> */}
                     <td className="rdv-actions">
                       <button className="icon-action" title="Voir" onClick={() => handleAction('Voir', rdv)}>
                         <i className="fa-regular fa-eye"></i>

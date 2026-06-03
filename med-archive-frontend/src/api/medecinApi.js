@@ -1,18 +1,70 @@
 import { apiClient } from "./client";
-import { createResourceApi } from "./resourceApi";
 
-export const medecinsApi = createResourceApi("/medecins");
+const DEFAULT_API_URL = "http://localhost:8000/api";
+const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 
-export const getMedecins = medecinsApi.list;
-export const createMedecin = medecinsApi.create;
-export const getMedecin = medecinsApi.show;
-export const updateMedecin = medecinsApi.update;
-export const deleteMedecin = medecinsApi.remove;
-
-export function getMedecinPlanning(id) {
-  return apiClient.get(`/medecins/${id}/planning`).then((response) => response.data);
+export async function listMedecins(params = {}) {
+  const res = await apiClient.get(`/medecins`, { params });
+  return res.data;
 }
 
-export function getMedecinPatients(id) {
-  return apiClient.get(`/medecins/${id}/patients`).then((response) => response.data);
+export async function getMedecin(id) {
+  const res = await apiClient.get(`/medecins/${id}`);
+  return res.data;
 }
+
+export async function getMedecinById(medecinId, token) {
+  const response = await fetch(`${API_URL}/medecins/${medecinId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    throw new Error(json?.message || "Erreur lors de la récupération du médecin");
+  }
+
+  return json.data;
+}
+
+export async function updateMedecin(id, payload, token) {
+  const response = await fetch(`${API_URL}/medecins/${id}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    throw new Error(json?.message || "Erreur lors de la mise à jour du médecin");
+  }
+
+  return json.data;
+}
+
+export async function getPlanning(id) {
+  const res = await apiClient.get(`/medecins/${id}/planning`);
+  return res.data;
+}
+
+export async function getPatients(id) {
+  const res = await apiClient.get(`/medecins/${id}/patients`);
+  return res.data;
+}
+
+export default {
+  listMedecins,
+  getMedecin,
+  getMedecinById,
+  updateMedecin,
+  getPlanning,
+  getPatients,
+};

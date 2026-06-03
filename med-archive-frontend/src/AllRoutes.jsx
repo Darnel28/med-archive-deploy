@@ -31,6 +31,7 @@ import Parametres from "./components/DashPatient/parametre.jsx";
 import DossierMedical from "./components/DashPatient/DossierMedical.jsx";
 import DossierMedicalDetails from "./components/DashPatient/DossierPatientComplet.jsx";
 import RendezVousPatient from "./components/DashPatient/RendezVousPatient.jsx";
+import BesoinAidePatient from "./components/DashPatient/BesoinAidePatient.jsx";
 // DashboardMedecin 
 
 import DashboardHomeMedecin from "./components/DashMedecin/DashboardHomeMedecin.jsx";
@@ -64,7 +65,10 @@ import AlertesExamen from "./components/DashExamen/Alertes.jsx";
 import TransfertHopital from "./components/DashHopital/TransfertHopital.jsx";
 import Rapports from "./components/DashHopital/Rapports.jsx";
 import NotificationsHopital from "./components/DashHopital/NotificationHopital.jsx";
+import NouvelleDemandeTransfert from "./components/DashHopital/NouvelleDemandeTransfert.jsx";
 import LoginPage from "./components/Connexion.jsx";
+import LogoutPage from "./components/Deconnexion.jsx";
+import MedecinHopital from "./components/DashHopital/MedecinHopital.jsx";
 
 // Homepage component
 const HomePage = () => (
@@ -103,6 +107,7 @@ function AllRoutes() {
                 <Route path="preferences-notifications" element={<PreferencesNotifications />} />
                 <Route path="securite-compte" element={<SecuriteCompte />} />
                 <Route path="rendez-vous" element={<RendezVousPatient />} />
+                <Route path="besoin-aide" element={<BesoinAidePatient />} />
 
             </Route>
 
@@ -158,9 +163,13 @@ function AllRoutes() {
                 <Route path="transfert" element={<TransfertHopital />} />
                 <Route path="rapports" element={<Rapports />} />
                 <Route path="notifications" element={<NotificationsHopital />} />
+                <Route path="transfert/nouvelle-demande" element={<NouvelleDemandeTransfert />} />
+                <Route path="tout-les-medecins" element={<MedecinHopital />} />
+
                 {/* Ajoute ici les autres routes propres à l'hôpital */}
             </Route>
             <Route path="/connexion" element={<LoginPage />} />
+            <Route path="/deconnexion" element={<LogoutPage />} />
         </Routes>
 
     );

@@ -1,0 +1,168 @@
+.app-modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 18px !important;
+    background: rgba(8, 27, 46, 0.6) !important;
+    backdrop-filter: blur(4px);
+}
+
+.app-modal-panel {
+    width: min(760px, 100%) !important;
+    max-height: 92vh !important;
+    overflow: auto !important;
+    border-radius: 24px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(150, 171, 195, 0.28) !important;
+    box-shadow: 0 30px 70px rgba(2, 12, 22, 0.35) !important;
+    padding: 24px !important;
+}
+
+.app-modal-header {
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    margin-bottom: 18px !important;
+}
+
+.app-modal-kicker {
+    margin: 0 0 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #4264d0 !important;
+}
+
+.app-modal-header h2 {
+    margin: 0 !important;
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+    color: #16324f !important;
+}
+
+.app-modal-close {
+    width: 40px !important;
+    height: 40px !important;
+    border: none !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f1f5fa !important;
+    color: #5c748f !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}
+
+.app-modal-close:hover {
+    background: #e0e8f2 !important;
+    color: #16324f !important;
+}
+
+.app-modal-body {
+    display: grid !important;
+    gap: 16px !important;
+}
+
+.app-modal-summary {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+}
+
+.app-modal-summary>div,
+.app-modal-card {
+    border: 1px solid #e3eaf3 !important;
+    border-radius: 18px !important;
+    background: #f9fbfe !important;
+    padding: 14px 16px !important;
+}
+
+.app-modal-summary span {
+    display: block !important;
+    margin-bottom: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    color: #6e8097 !important;
+}
+
+.app-modal-summary strong {
+    color: #16324f !important;
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+}
+
+.app-modal-card h3 {
+    margin: 0 0 10px !important;
+    color: #16324f !important;
+    font-size: 18px !important;
+}
+
+.app-modal-card p {
+    margin: 0 !important;
+    color: #45607c !important;
+    line-height: 1.65 !important;
+}
+
+.app-modal-card ul {
+    margin: 14px 0 0 !important;
+    padding-left: 18px !important;
+    color: #45607c !important;
+    display: grid !important;
+    gap: 8px !important;
+}
+
+body.dark-mode .app-modal-panel {
+    background: #0f2232 !important;
+    border-color: rgba(61, 92, 116, 0.4) !important;
+}
+
+body.dark-mode .app-modal-header h2,
+body.dark-mode .app-modal-summary strong,
+body.dark-mode .app-modal-card h3 {
+    color: #f3f7fb !important;
+}
+
+body.dark-mode .app-modal-summary>div,
+body.dark-mode .app-modal-card {
+    background: #14293b !important;
+    border-color: #274259 !important;
+}
+
+body.dark-mode .app-modal-summary span,
+body.dark-mode .app-modal-card p,
+body.dark-mode .app-modal-card ul {
+    color: #b9c8d8 !important;
+}
+
+body.dark-mode .app-modal-close {
+    background: #1b3144 !important;
+    color: #c8d5e3 !important;
+}
+
+body.dark-mode .app-modal-close:hover {
+    background: #274259 !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+    .app-modal-panel {
+        padding: 20px !important;
+        border-radius: 20px !important;
+    }
+
+    .app-modal-summary {
+        grid-template-columns: 1fr !important;
+    }
+
+    .app-modal-header {
+        flex-direction: column !important;
+    }
+}

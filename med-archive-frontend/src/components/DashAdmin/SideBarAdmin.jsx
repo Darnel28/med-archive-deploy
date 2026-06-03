@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-const SidebarExamen = () => {
+const SidebarAdmin = () => {
     const [userPanelOpen, setUserPanelOpen] = useState(false);
 
     const toggleUserPanel = () => setUserPanelOpen(prev => !prev);
@@ -83,4 +83,4 @@ const SidebarExamen = () => {
     );
 };
 
-export default SidebarExamen;
+export default SidebarAdmin;

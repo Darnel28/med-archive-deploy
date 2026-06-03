@@ -105,6 +105,9 @@ const Sidebar = () => {
         <NavLink to="/espacepatient/parametres" className="settings-link">
           <i className="fa-solid fa-gear"></i>
         </NavLink>
+        <NavLink to="/deconnexion" className="settings-link logout-link" aria-label="Se déconnecter">
+          <i className="fa-solid fa-right-from-bracket"></i>
+        </NavLink>
       </div>
 
       <a href="#" className="sidebar-help">

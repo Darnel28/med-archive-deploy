@@ -22,6 +22,7 @@ import './assets/css/Examen.css'
 import App from './App.tsx'
 import './assets/css/load.css'
 import './assets/css/chart.css'
+import './assets/css/global-modals.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import "tailwindcss";
 

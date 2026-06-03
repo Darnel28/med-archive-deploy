@@ -30,7 +30,7 @@ const SidebarHopital = () => {
           <i className="fa-solid fa-house"></i><span>Dashboard</span>
         </NavLink>
 
-        <NavLink to="/espacehopital/medecins" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+        <NavLink to="/espacehopital/tout-les-medecins" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
           <i className="fa-solid fa-user-doctor"></i><span>Medecins</span>
         </NavLink>
 
@@ -52,8 +52,8 @@ const SidebarHopital = () => {
             <i className="fa-regular fa-newspaper"></i><span>Publications</span>
           </a> */}
           <NavLink to="/espacehopital/notifications" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                                 <i className="fa-regular fa-bell "></i><span>Alertes</span>
-                             </NavLink>
+            <i className="fa-regular fa-bell "></i><span>Alertes</span>
+          </NavLink>
 
           <a className="menu-item" href="/espacemedecin/profil">
             <i className="fa-regular fa-user"></i><span>Profil</span>
@@ -68,6 +68,9 @@ const SidebarHopital = () => {
           </div>
           <a className="settings-link" href="/espacemedecin/parametres">
             <i className="fa-solid fa-gear"></i>
+          </a>
+          <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">
+            <i className="fa-solid fa-right-from-bracket"></i>
           </a>
         </div>
 

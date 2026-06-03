@@ -1,5 +1,6 @@
 
 import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const statusTabs = ['Tous', 'En cours', 'Validé', 'Refusé'];
 
@@ -115,9 +116,9 @@ const TransfertHopital = () => {
                         }}
                     />
                 </label>
-                <button className="btn transfer-add-btn" type="button">
+                <Link className="btn transfer-add-btn" to="/espacehopital/transfert/nouvelle-demande">
                     <i className="fa-solid fa-plus"></i> Ajouter une demande
-                </button>
+                </Link>
             </section>
 
             <section className="transfer-section">
