@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             SpecialiteSeeder::class,
+            MedecinSeeder::class,
             TypeDocumentSeeder::class,
             DossierMedicalSeeder::class, // Notre seeder principal
         ]);

@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\MedecinController;
+use App\Http\Controllers\SpecialiteController;
 use App\Http\Controllers\DossierController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\EtablissementController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\StatistiqueController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\PaiementController;
+use App\Http\Controllers\PatientMedecinController;
 
 Route::get('/ping', function() {
     return response()->json(['message' => 'pong']);
@@ -22,6 +24,8 @@ Route::get('/ping', function() {
 // Routes publiques
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::get('/specialites', [SpecialiteController::class, 'index']);
+Route::get('/patients-medecins', [PatientMedecinController::class, 'index']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
@@ -57,6 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('consultations', ConsultationController::class);
     Route::post('/consultations/{id}/constantes', [ConsultationController::class, 'ajouterConstantes']);
     Route::get('/statistiques/consultations', [ConsultationController::class, 'statistiques']);
+    
 
     // Établissements
     Route::prefix('etablissement')->group(function () {

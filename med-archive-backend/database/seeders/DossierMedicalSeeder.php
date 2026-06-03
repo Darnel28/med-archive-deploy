@@ -67,7 +67,7 @@ class DossierMedicalSeeder extends Seeder
                 'statut' => 'actif'
             ]
         );
-
+        
         // 3. CRÉER LES ÉTABLISSEMENTS
         $this->command->info('Création des établissements...');
         $etablissements = $this->createEtablissements($roleEtablissement);
@@ -316,94 +316,130 @@ class DossierMedicalSeeder extends Seeder
         return $patients;
     }
 
-    private function createDossiersEtConsultations($patients, $medecins, $laboratoires)
-    {
-        if (empty($medecins)) {
-            $this->command->error('❌ Aucun médecin disponible!');
-            return;
-        }
+   private function createDossiersEtConsultations($patients, $medecins, $laboratoires)
+{
+    if (empty($medecins)) {
+        $this->command->error('❌ Aucun médecin disponible!');
+        return;
+    }
 
-        $motifs = [
-            'Fièvre persistante',
-            'Toux sèche',
-            'Douleur thoracique',
-            'Maux de tête intenses',
-            'Douleur abdominale',
-            'Fatigue chronique',
-            'Suivi hypertension',
-            'Consultation de routine',
-            'Problème cutané',
-            'Difficultés respiratoires'
-        ];
+    $motifs = [
+        'Fièvre persistante',
+        'Toux sèche',
+        'Douleur thoracique',
+        'Maux de tête intenses',
+        'Douleur abdominale',
+        'Fatigue chronique',
+        'Suivi hypertension',
+        'Consultation de routine',
+        'Problème cutané',
+        'Difficultés respiratoires'
+    ];
 
-        foreach ($patients as $patient) {
-            // Créer le dossier s'il n'existe pas
-            $dossier = Dossier::firstOrCreate(
-                ['patient_id' => $patient->id],
-                [
-                    'numero_dossier' => 'DOS-' . date('Y') . '-' . str_pad($patient->id, 6, '0', STR_PAD_LEFT),
-                    'imu' => $patient->imu,
-                    'statut' => 'actif',
-                    'date_ouverture' => now()->subMonths(rand(1, 24)),
-                    'medecin_traitant' => 'Dr. ' . fake()->lastName()
-                ]
-            );
+    // 1. D'abord, créer les dossiers et consultations pour tous les patients (comme avant)
+    foreach ($patients as $patient) {
+        $dossier = Dossier::firstOrCreate(
+            ['patient_id' => $patient->id],
+            [
+                'numero_dossier' => 'DOS-' . date('Y') . '-' . str_pad($patient->id, 6, '0', STR_PAD_LEFT),
+                'imu' => $patient->imu,
+                'statut' => 'actif',
+                'date_ouverture' => now()->subMonths(rand(1, 24)),
+                'medecin_traitant' => 'Dr. ' . fake()->lastName()
+            ]
+        );
 
-            // Créer 2-5 consultations
-            $nbConsultations = rand(2, 5);
+        $nbConsultations = rand(2, 5);
+        for ($j = 0; $j < $nbConsultations; $j++) {
+            $medecin = $medecins[array_rand($medecins)];
+            $consultation = Consultation::create([
+                'dossier_id' => $dossier->id,
+                'medecin_id' => $medecin->id,
+                'date_consultation' => now()->subDays(rand(1, 365)),
+                'motif' => $motifs[array_rand($motifs)],
+                'diagnostic' => rand(0, 1) ? 'Diagnostic ' . fake()->word() : null,
+                'observations' => rand(0, 1) ? 'Patient à revoir dans 1 mois' : null
+            ]);
 
-            for ($j = 0; $j < $nbConsultations; $j++) {
-                $medecin = $medecins[array_rand($medecins)];
+            Constante::create([
+                'consultation_id' => $consultation->id,
+                'tension_arterielle' => rand(0, 1) ? '12/8' : '13/8',
+                'temperature' => rand(36, 38) . '.' . rand(0, 9),
+                'poids' => rand(60, 90) . '.' . rand(0, 9),
+                'taille' => rand(160, 185),
+                'frequence_cardiaque' => rand(65, 85),
+            ]);
 
-                $consultation = Consultation::create([
-                    'dossier_id' => $dossier->id,
-                    'medecin_id' => $medecin->id,
-                    'date_consultation' => now()->subDays(rand(1, 365)),
-                    'motif' => $motifs[array_rand($motifs)],
-                    'diagnostic' => rand(0, 1) ? 'Diagnostic ' . fake()->word() : null,
-                    'observations' => rand(0, 1) ? 'Patient à revoir dans 1 mois' : null
-                ]);
-
-                // Constantes
-                Constante::create([
+            if (rand(0, 1)) {
+                Ordonnance::create([
                     'consultation_id' => $consultation->id,
-                    'tension_arterielle' => rand(0, 1) ? '12/8' : '13/8',
-                    'temperature' => rand(36, 38) . '.' . rand(0, 9),
-                    'poids' => rand(60, 90) . '.' . rand(0, 9),
-                    'taille' => rand(160, 185),
-                    'frequence_cardiaque' => rand(65, 85),
+                    'medicaments' => ['Paracétamol 500mg', 'Vitamine C'],
+                    'posologie' => '1 comprimé matin et soir',
+                    'instructions' => 'Pendant 5 jours'
                 ]);
-
-                // Ordonnance (50% de chance)
-                if (rand(0, 1)) {
-                    Ordonnance::create([
-                        'consultation_id' => $consultation->id,
-                        'medicaments' => ['Paracétamol 500mg', 'Vitamine C'],
-                        'posologie' => '1 comprimé matin et soir',
-                        'instructions' => 'Pendant 5 jours'
-                    ]);
-                }
-
-                // Analyse (30% de chance) - seulement si des laboratoires existent
-                if (!empty($laboratoires) && rand(0, 2) === 0) {
-                    AnalyseLaboratoire::create([
-                        'consultation_id' => $consultation->id,
-                        'laboratoire_id' => $laboratoires[array_rand($laboratoires)]->id,
-                        'prescripteur_id' => $medecin->id,
-                        'type_analyse' => 'NFS',
-                        'date_prelevement' => $consultation->date_consultation,
-                        'statut' => 'termine'
-                    ]);
-                }
             }
 
-            // Mettre à jour les stats du dossier
-            $dossier->update([
-                'total_consultations' => $dossier->consultations()->count(),
-                'derniere_consultation' => $dossier->consultations()->max('date_consultation')
-            ]);
+            if (!empty($laboratoires) && rand(0, 2) === 0) {
+                AnalyseLaboratoire::create([
+                    'consultation_id' => $consultation->id,
+                    'laboratoire_id' => $laboratoires[array_rand($laboratoires)]->id,
+                    'prescripteur_id' => $medecin->id,
+                    'type_analyse' => 'NFS',
+                    'date_prelevement' => $consultation->date_consultation,
+                    'statut' => 'termine'
+                ]);
+            }
         }
+
+        $dossier->update([
+            'total_consultations' => $dossier->consultations()->count(),
+            'derniere_consultation' => $dossier->consultations()->max('date_consultation')
+        ]);
     }
+
+    // 2. Ensuite, s'assurer que le médecin par défaut (medecin.default@example.com) a au moins 3 patients
+    $defaultMedecin = Medecin::whereHas('user', function($q) {
+        $q->where('email', 'medecin.default@example.com');
+    })->first();
+
+    if ($defaultMedecin) {
+        // Vérifier combien de patients il a déjà
+        $existingPatientsCount = $defaultMedecin->patients()->count();
+        if ($existingPatientsCount < 3) {
+            // Prendre des patients au hasard qui n'ont pas encore de consultation avec ce médecin
+            $patientsWithoutDefault = Patient::whereDoesntHave('consultations', function($q) use ($defaultMedecin) {
+                $q->where('medecin_id', $defaultMedecin->id);
+            })->limit(3 - $existingPatientsCount)->get();
+
+            foreach ($patientsWithoutDefault as $patient) {
+                $dossier = Dossier::where('patient_id', $patient->id)->first();
+                if (!$dossier) {
+                    $dossier = Dossier::create([
+                        'patient_id' => $patient->id,
+                        'numero_dossier' => 'DOS-' . date('Y') . '-' . str_pad($patient->id, 6, '0', STR_PAD_LEFT),
+                        'imu' => $patient->imu,
+                        'statut' => 'actif',
+                        'date_ouverture' => now(),
+                    ]);
+                }
+
+                Consultation::create([
+                    'dossier_id' => $dossier->id,
+                    'medecin_id' => $defaultMedecin->id,
+                    'date_consultation' => now()->subDays(rand(1, 30)),
+                    'motif' => $motifs[array_rand($motifs)],
+                    'diagnostic' => 'Consultation de routine',
+                ]);
+            }
+
+            $this->command->info("✅ {$defaultMedecin->user->name} a maintenant au moins 3 patients.");
+        } else {
+            $this->command->info("ℹ️ Le médecin par défaut a déjà {$existingPatientsCount} patients.");
+        }
+    } else {
+        $this->command->warn("⚠️ Médecin par défaut (medecin.default@example.com) non trouvé.");
+    }
+}
 
     private function afficherResume()
     {
@@ -417,4 +453,5 @@ class DossierMedicalSeeder extends Seeder
         $this->command->info("Consultations : " . Consultation::count());
         $this->command->info("==================================\n");
     }
+    
 }

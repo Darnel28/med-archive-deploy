@@ -71,12 +71,12 @@ class ConsultationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'dossier_id' => 'required|exists:dossiers,id',
-            'medecin_id' => 'required|exists:medecins,id',
-            'date_consultation' => 'required|date',
-            'motif' => 'required|string|max:255',
-            'diagnostic' => 'nullable|string',
-            'observations' => 'nullable|string',
+            'patient_id' => 'required|exists:patients,id',
+    'medecin_id' => 'required|exists:medecins,id',
+    'date_consultation' => 'required|date',
+    'motif' => 'required|string|max:255',
+    'diagnostic' => 'nullable|string',
+    'observations' => 'nullable|string',
 
             // Constantes (optionnelles)
             'constantes' => 'nullable|array',
@@ -103,7 +103,11 @@ class ConsultationController extends Controller
 
         try {
             // Récupérer le dossier dès le début
-            $dossier = Dossier::findOrFail($validated['dossier_id']);
+            // $dossier = Dossier::findOrFail($validated['dossier_id']);
+            $dossier = Dossier::where(
+    'patient_id',
+    $validated['patient_id']
+)->firstOrFail();
 
             // Créer la consultation
             $consultation = Consultation::create([
