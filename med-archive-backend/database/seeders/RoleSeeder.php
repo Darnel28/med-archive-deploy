@@ -38,10 +38,6 @@ class RoleSeeder extends Seeder
                 'nom' => 'Responsable Etablissement',
                 'description' => 'Responsable d\'établissement de santé',
             ],
-            [
-                'nom' => 'Agent d\'accueil / caisse',
-                'description' => 'Agent d\'accueil ou de caisse dans un établissement de santé',
-            ],
         ];
 
         foreach ($roles as $role) {

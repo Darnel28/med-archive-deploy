@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { getAuthUser } from '../../api/client';
+import AvatarInitials from '../AvatarInitials.jsx';
 import Chart from '../Chart.jsx';
 
 const TopbarAdmin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
@@ -46,13 +48,27 @@ const TopbarAdmin = ({ isDarkMode, onToggleDarkMode, onToggleSidebar }) => {
           <i className="fa-regular fa-bell"></i>
           <span className="badge">4</span>
         </button>
-        <div className="profile">
-          <img src="https://i.pravatar.cc/80?img=12" alt="Profil" />
-          <div>
-            <strong>Dr.Alice</strong>
-            <span>IMU: 24P-001</span>
-          </div>
-        </div>
+        {(() => {
+          const auth = getAuthUser() || {};
+          const user = auth.user || auth;
+          const name = user.name || 'Administrateur';
+          const role = user.role?.nom || auth.role?.nom || 'Administrateur';
+          const avatar = user.avatar || auth.avatar || null;
+
+          return (
+            <div className="profile">
+              {avatar ? (
+                <img src={avatar} alt="Profil administrateur" />
+              ) : (
+                <AvatarInitials name={name} size={45} bgColor="#13c3b8" />
+              )}
+              <div>
+                <strong>{name}</strong>
+                <span>{role}</span>
+              </div>
+            </div>
+          );
+        })()}
       </div>
       {showChart && (
         <div className="chart-modal-backdrop" onClick={() => setShowChart(false)}>

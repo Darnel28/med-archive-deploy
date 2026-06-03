@@ -1,0 +1,302 @@
+
+.dashadmin-container {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f6faff;
+  padding: 1.8rem 2rem;
+  border-radius: 32px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* En-tête */
+.dashadmin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.dashadmin-header h1 {
+  font-size: 1.9rem;
+  font-weight: 600;
+  margin: 0;
+  background: linear-gradient(135deg, #1a5f7a, #17b8b0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.dashadmin-subtitle {
+  color: #5a6e8a;
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+}
+.dashadmin-datetime {
+  background: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 60px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: #2c3e66;
+  border: 1px solid #eef2f8;
+}
+.dashadmin-datetime i {
+  color: #17b8b0;
+}
+
+/* Grille stats */
+.dashadmin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.dashadmin-stat-card {
+  background: white;
+  border-radius: 28px;
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+  border: 1px solid #edf2f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.dashadmin-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 30px -12px rgba(23,184,176,0.12);
+  border-color: #d4e6f0;
+}
+.dashadmin-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+.dashadmin-stat-content {
+  flex: 1;
+}
+.dashadmin-stat-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #1e2a47;
+  line-height: 1.2;
+  display: block;
+}
+.dashadmin-stat-label {
+  font-size: 0.8rem;
+  color: #6f8faa;
+}
+.dashadmin-stat-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+/* Graphiques */
+.dashadmin-charts-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.8rem;
+  margin-bottom: 2rem;
+}
+.dashadmin-chart-card {
+  background: white;
+  border-radius: 28px;
+  padding: 1.2rem 1rem 0.8rem 1rem;
+  border: 1px solid #eef3fc;
+  transition: all 0.2s;
+}
+.dashadmin-chart-card.half {
+  flex: 1;
+  min-width: 280px;
+}
+.dashadmin-chart-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+  color: #1f3a5f;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-left: 0.3rem;
+}
+.dashadmin-chart-card h3 i {
+  color: #17b8b0;
+}
+
+/* Section basse */
+.dashadmin-bottom-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.8rem;
+}
+.dashadmin-activities {
+  flex: 2;
+  min-width: 260px;
+  background: white;
+  border-radius: 28px;
+  padding: 1.2rem;
+  border: 1px solid #eef3fc;
+}
+.dashadmin-activities h3,
+.dashadmin-info-card h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 1rem 0;
+  color: #1f3a5f;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.dashadmin-activities h3 i {
+  color: #17b8b0;
+}
+.dashadmin-activity-list {
+  display: flex;
+  flex-direction: column;
+}
+.dashadmin-activity-item {
+  display: flex;
+  align-items: center;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #eff4fa;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.dashadmin-activity-item:last-child {
+  border-bottom: none;
+}
+.dashadmin-activity-time {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #17b8b0;
+  background: #eefaf9;
+  padding: 0.2rem 0.6rem;
+  border-radius: 30px;
+  min-width: 60px;
+  text-align: center;
+}
+.dashadmin-activity-details {
+  flex: 3;
+  font-size: 0.9rem;
+  color: #2c4258;
+}
+.dashadmin-activity-details strong {
+  font-weight: 600;
+  color: #1a2c42;
+}
+.dashadmin-activity-status {
+  flex: 1;
+  text-align: right;
+}
+.dashadmin-status-badge {
+  padding: 0.25rem 0.8rem;
+  border-radius: 40px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: #f0f2f5;
+  color: #4a627a;
+}
+.dashadmin-status-badge.approuvé,
+.dashadmin-status-badge.terminé,
+.dashadmin-status-badge.validé {
+  background: #e0f7f3;
+  color: #138070;
+}
+.dashadmin-status-badge.en-attente {
+  background: #ffe8e6;
+  color: #c23d2c;
+}
+.dashadmin-status-badge.en-cours {
+  background: #fff2df;
+  color: #c97e00;
+}
+.dashadmin-activity-item.urgent {
+  background: #fffaf5;
+  border-radius: 20px;
+  margin: 0 -0.5rem;
+  padding: 0.7rem 0.5rem;
+}
+.urgent-icon {
+  color: #e76f51;
+  font-size: 1rem;
+}
+
+/* Cartes latérales */
+.dashadmin-sidecards {
+  flex: 1.2;
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.dashadmin-info-card {
+  background: white;
+  border-radius: 28px;
+  padding: 1.2rem 1.3rem;
+  border: 1px solid #eef3fc;
+}
+.dashadmin-info-card h3 i {
+  color: #17b8b0;
+}
+.dashadmin-metric-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.7rem 0;
+  border-bottom: 1px dashed #eef2f8;
+}
+.dashadmin-metric-item:last-child {
+  border-bottom: none;
+}
+.dashadmin-metric-item span {
+  font-size: 0.85rem;
+  color: #5f7d9c;
+}
+.dashadmin-metric-item strong {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a3a5c;
+}
+.dashadmin-alert-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dashadmin-alert-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.85rem;
+  padding: 0.6rem 0;
+  color: #3a5c7c;
+  border-bottom: 1px solid #f0f4fa;
+}
+.dashadmin-alert-list li:last-child {
+  border-bottom: none;
+}
+.dashadmin-alert-list li i {
+  width: 1.5rem;
+  color: #e76f51;
+}
+
+/* Responsive */
+@media (max-width: 800px) {
+  .dashadmin-container {
+    padding: 1rem;
+  }
+  .dashadmin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dashadmin-stats-grid {
+    gap: 1rem;
+  }
+}

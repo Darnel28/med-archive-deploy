@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { getAuthUser } from '../../api/client';
+import AvatarInitials from '../AvatarInitials.jsx';
 
 const SidebarAdmin = () => {
     const [userPanelOpen, setUserPanelOpen] = useState(false);
+    const auth = getAuthUser() || {};
+    const user = auth.user || auth;
+    const name = user.name || 'Administrateur';
+    const role = user.role?.nom || auth.role?.nom || 'Administrateur';
+    const avatar = user.avatar || auth.avatar || null;
 
     const toggleUserPanel = () => setUserPanelOpen(prev => !prev);
 
     return (
         <aside className="sidebar">
             <div className="sidebar-title-row">
-                <h3>Navigation</h3>
+                <h3>Administration</h3>
                 <button
                     className="sidebar-user-toggle"
                     onClick={toggleUserPanel}
@@ -20,64 +27,65 @@ const SidebarAdmin = () => {
             </div>
 
             <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
-                <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice" />
-                <strong>BAH Konie</strong>
-                <span>Service: Medecine generale</span>
+                {avatar ? <img src={avatar} alt="Administrateur" /> : <AvatarInitials name={name} size={54} bgColor="#13c3b8" />}
+                <strong>{name}</strong>
+                <span>{role}</span>
             </div>
 
             <div className="menu-block">
-                <NavLink end to="/espaceexamen" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                <NavLink end to="/espaceadmin" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
                     <i className="fa-solid fa-house"></i><span>Dashboard</span>
                 </NavLink>
 
-                <NavLink to="/espaceexamen/demandes" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                    <i className="fa-solid fa-regular fa-envelope"></i><span>Demandes</span>
+                <NavLink to="/espaceadmin/utilisateurs" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-users"></i><span>Utilisateurs</span>
                 </NavLink>
 
-                <NavLink to="/espaceexamen/resultats" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                    <i className="fa-solid fa-vial"></i><span>Résultats</span>
+                <NavLink to="/espaceadmin/hopitaux" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-hospital"></i><span>Hopitaux</span>
                 </NavLink>
 
-                {/* <NavLink to="/espaceexamen/transfert" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                    <i className="fa-solid fa-history"></i><span>Historique</span>
+                <NavLink to="/espaceadmin/services" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-clipboard-list"></i><span>Services</span>
+                </NavLink>
+
+                <NavLink to="/espaceadmin/laboratoires" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-vial"></i><span>Laboratoires</span>
+                </NavLink>
+
+                <h4>Pilotage</h4>
+
+                <NavLink to="/espaceadmin/rapports-admin" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-chart-line"></i><span>Rapports</span>
+                </NavLink>
+
+                <NavLink to="/espaceadmin/notifications-admin" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-bell"></i><span>Notifications</span>
+                </NavLink>
+
+                {/* <NavLink to="/espaceadmin/parametres" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    <i className="fa-solid fa-gear"></i><span>Parametres</span>
                 </NavLink> */}
 
-                {/* <NavLink to="/espaceaccueil/rendez-vous" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-          <i className="fa-solid fa-calendar"></i><span>Rendez-vous</span>
-        </NavLink> */}
-
-                <h4>Gestion du compte</h4>
-                <div className="menu-block">
-                    {/* <a className="menu-item" href="/espacemedecin/publications">
-            <i className="fa-regular fa-newspaper"></i><span>Publications</span>
-          </a> */}
-                    <NavLink to="/espaceexamen/alertes" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                        <i className="fa-regular fa-bell "></i><span>Alertes</span>
-                    </NavLink>
-                    <NavLink to="/espaceexamen/profil" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
-                        <i className="fa-regular fa-user"></i><span>Profil</span>
-                    </NavLink>
-                </div>
-
                 <div className="sidebar-profile">
-                    <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice" />
+                    {avatar ? <img src={avatar} alt="Administrateur" /> : <AvatarInitials name={name} size={42} bgColor="#13c3b8" />}
                     <div>
-                        <strong>BAH Konie</strong>
-                        <span>ID: MED-24-007</span>
+                        <strong>{name}</strong>
+                        <span>{role}</span>
                     </div>
-                    <a className="settings-link" href="/espacemedecin/parametres">
+                    <a className="settings-link" href="/espaceadmin/parametres-admin">
                         <i className="fa-solid fa-gear"></i>
                     </a>
-                    <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">
+                    <a className="settings-link logout-link" href="/deconnexion" aria-label="Se deconnecter">
                         <i className="fa-solid fa-right-from-bracket"></i>
                     </a>
                 </div>
 
-                <a className="sidebar-help" href="#">
+                {/* <a className="sidebar-help" href="/espaceadmin/rapports">
                     <i className="fa-solid fa-headset"></i>
-                    <span>Besoin d'aide ? Contacter le support</span>
+                    <span>Supervision et support</span>
                     <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
+                </a> */}
             </div>
         </aside>
     );

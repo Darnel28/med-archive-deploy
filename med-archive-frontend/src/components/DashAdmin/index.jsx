@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import SidebarAdmin from './SideBarExamen.jsx';
-import TopbarAdmin from './TopBarExamen.jsx';
+import SidebarAdmin from './SideBarAdmin.jsx';
+import TopbarAdmin from './TopBarAdmin.jsx';
 
 import '../../assets/css/styles.css';
 import '../../assets/css/styleMedecin.css';
@@ -30,13 +30,13 @@ const DashAdmin = () => {
 
     return (
         <div className="app">
-            <TopbarExamen
+            <TopbarAdmin
                 isDarkMode={isDarkMode}
                 onToggleDarkMode={toggleDarkMode}
                 onToggleSidebar={toggleSidebar}
             />
             <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-                <SidebarExamen />
+                <SidebarAdmin />
                 <main className="content doctor-main">
                     <Outlet />
                 </main>

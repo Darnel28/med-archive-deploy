@@ -15,6 +15,7 @@ import DashMedecin from "./components/DashMedecin/index.jsx";
 import DashAccueil from "./components/DashAccueil/index.jsx";
 import DashExamen from "./components/DashExamen/index.jsx";
 import DashHopital from "./components/DashHopital/index.jsx";
+import DashAdmin from "./components/DashAdmin/index.jsx";
 
 // Dashboard sub-pages
 import ConsultationsHistory from "./components/DashPatient/Historiqueconsultation.jsx";
@@ -32,6 +33,7 @@ import DossierMedical from "./components/DashPatient/DossierMedical.jsx";
 import DossierMedicalDetails from "./components/DashPatient/DossierPatientComplet.jsx";
 import RendezVousPatient from "./components/DashPatient/RendezVousPatient.jsx";
 import BesoinAidePatient from "./components/DashPatient/BesoinAidePatient.jsx";
+
 // DashboardMedecin 
 
 import DashboardHomeMedecin from "./components/DashMedecin/DashboardHomeMedecin.jsx";
@@ -69,7 +71,15 @@ import NouvelleDemandeTransfert from "./components/DashHopital/NouvelleDemandeTr
 import LoginPage from "./components/Connexion.jsx";
 import LogoutPage from "./components/Deconnexion.jsx";
 import MedecinHopital from "./components/DashHopital/MedecinHopital.jsx";
-
+import DashboardAdmin from "./components/DashAdmin/DashAdminHome.jsx";
+//  Admin
+import RapportAdmin from "./components/DashAdmin/RapportAdmin.jsx";
+import Utilisateurs from "./components/DashAdmin/Utilisateurs.jsx";
+import Hopitaux from "./components/DashAdmin/Hopitaux.jsx";
+import ServicesAdmin from "./components/DashAdmin/Services.jsx";
+import LaboratoiresAdmin from "./components/DashAdmin/LaboratoireAdmin.jsx";
+import NotificationsAdmin from "./components/DashAdmin/NotificationsAdmin.jsx";
+import ParametresAdmin from "./components/DashAdmin/ParametresAdmin.jsx";
 // Homepage component
 const HomePage = () => (
     <>
@@ -79,6 +89,15 @@ const HomePage = () => (
         <Testimonial />
         <Blog />
     </>
+);
+
+const AdminSection = ({ title, description }) => (
+    <section className="dashboard-section">
+        <div className="section-header">
+            <h1>{title}</h1>
+            <p>{description}</p>
+        </div>
+    </section>
 );
 
 function AllRoutes() {
@@ -121,6 +140,7 @@ function AllRoutes() {
                 <Route path="traitements" element={<Traitements />} />
                 <Route path="acces-donnees" element={<AccesDonnees />} />
                 <Route path="notifications" element={<Notifications />} />
+               
                 <Route path="profil" element={<Profil />} />
                 <Route path="parametres" element={<Parametres />} />
                 <Route path="dossier-medical" element={<DossierMedicalDetails />} />
@@ -165,8 +185,19 @@ function AllRoutes() {
                 <Route path="notifications" element={<NotificationsHopital />} />
                 <Route path="transfert/nouvelle-demande" element={<NouvelleDemandeTransfert />} />
                 <Route path="tout-les-medecins" element={<MedecinHopital />} />
+                <Route path="notifications" element={<NotificationsAdmin />} />
 
                 {/* Ajoute ici les autres routes propres à l'hôpital */}
+            </Route>
+            <Route path="/espaceadmin" element={<DashAdmin />} >
+                <Route index element={<DashboardAdmin />} />
+                <Route path="utilisateurs" element={<Utilisateurs />} />
+                <Route path="hopitaux" element={<Hopitaux/>} />
+                <Route path="services" element={<ServicesAdmin />} />
+                <Route path="laboratoires" element={<LaboratoiresAdmin />} />
+                <Route path="rapports-admin" element={<RapportAdmin />} />
+                <Route path="parametres-admin" element={<ParametresAdmin />} />
+                <Route path="notifications-admin" element={<NotificationsAdmin />} />
             </Route>
             <Route path="/connexion" element={<LoginPage />} />
             <Route path="/deconnexion" element={<LogoutPage />} />

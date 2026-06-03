@@ -28,7 +28,7 @@ class Role extends Model
      */
     public function isAdmin(): bool
     {
-        return $this->nom === 'Super Admin' || $this->nom === 'Admin Regional';
+        return in_array($this->nom, ['Super Admin', 'Admin Regional', 'Administrateur'], true);
     }
 
     /**

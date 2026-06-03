@@ -18,7 +18,10 @@ class CheckRole
     {
         $user = $request->user();
 
-        if (!$user || !$user->role || !in_array($user->role->nom, $roles)) {
+        $hasRole = $user && $user->role && in_array($user->role->nom, $roles, true);
+        $acceptsAdminAlias = $user && in_array('Administrateur', $roles, true) && $user->isAdmin();
+
+        if (!$hasRole && !$acceptsAdminAlias) {
             abort(403, 'Accès refusé.');
         }
 

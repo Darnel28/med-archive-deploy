@@ -95,8 +95,9 @@ const RendezVousPatient = () => {
                     <td><span className={getStatutClass(rdv.statut)}>{rdv.statut}</span></td>
                     {/* <td><i className={rdv.rappelIcon}></i> {rdv.rappel}</td> */}
                     <td className="rdv-actions">
-                      <button className="icon-action" title="Voir" onClick={() => handleAction('Voir', rdv)}>
-                        <i className="fa-regular fa-eye"></i>
+                      {/* Bouton Payer remplace l'ancien bouton Voir */}
+                      <button className="icon-action" title="Payer" onClick={() => handleAction('Payer', rdv)}>
+                        <i className="fa-solid fa-credit-card"></i>
                       </button>
                       <button className="icon-action" title="Modifier" onClick={() => handleAction('Modifier', rdv)}>
                         <i className="fa-regular fa-pen-to-square"></i>

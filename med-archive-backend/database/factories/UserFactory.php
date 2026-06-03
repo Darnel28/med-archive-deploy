@@ -39,7 +39,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role_id' => Role::factory()->create(['nom' => 'Super Admin'])->id,
+            'role_id' => $attributes['role_id'] ?? Role::firstOrCreate(['nom' => 'Super Admin'], ['description' => 'Administrateur système'])->id,
             'name' => 'Admin Système',
             'email' => 'admin@medarchive.bj'
         ]);
@@ -51,8 +51,8 @@ class UserFactory extends Factory
     public function medecin(?User $etablissement = null): static
     {
         return $this->state(fn (array $attributes) => [
-            'role_id' => Role::factory()->medecin()->create()->id,
-            'etablissement_id' => $etablissement?->id ?? User::factory()->etablissement()->create()->id,
+            'role_id' => $attributes['role_id'] ?? Role::firstOrCreate(['nom' => 'Medecin'], ['description' => 'Médecin traitant'])->id,
+            'etablissement_id' => $attributes['etablissement_id'] ?? $etablissement?->id ?? User::factory()->create(['role_id' => Role::firstOrCreate(['nom' => 'Responsable Etablissement'], ['description' => 'Responsable d\'établissement de santé'])->id])->id,
             'name' => 'Dr. ' . $this->faker->lastName()
         ]);
     }
@@ -63,8 +63,8 @@ class UserFactory extends Factory
     public function patient(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role_id' => Role::factory()->patient()->create()->id,
-            'etablissement_id' => null
+            'role_id' => $attributes['role_id'] ?? Role::firstOrCreate(['nom' => 'Patient'], ['description' => 'Patient'])->id,
+            'etablissement_id' => $attributes['etablissement_id'] ?? null
         ]);
     }
 
@@ -74,10 +74,10 @@ class UserFactory extends Factory
     public function etablissement(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role_id' => Role::factory()->etablissement()->create()->id,
-            'etablissement_id' => null,
-            'name' => $this->faker->company() . ' ' . $this->faker->randomElement(['Hospital', 'Clinic', 'Center']),
-            'email' => 'contact@' . $this->faker->domainName()
+            'role_id' => $attributes['role_id'] ?? Role::firstOrCreate(['nom' => 'Responsable Etablissement'], ['description' => 'Responsable d\'établissement de santé'])->id,
+            'etablissement_id' => $attributes['etablissement_id'] ?? null,
+            'name' => $attributes['name'] ?? $this->faker->company() . ' ' . $this->faker->randomElement(['Hospital', 'Clinic', 'Center']),
+            'email' => $attributes['email'] ?? 'contact@' . $this->faker->domainName()
         ]);
     }
 
@@ -87,9 +87,9 @@ class UserFactory extends Factory
     public function laborantin(?User $etablissement = null): static
     {
         return $this->state(fn (array $attributes) => [
-            'role_id' => Role::factory()->laborantin()->create()->id,
-            'etablissement_id' => $etablissement?->id ?? User::factory()->etablissement()->create()->id,
-            'name' => $this->faker->name()
+            'role_id' => $attributes['role_id'] ?? Role::firstOrCreate(['nom' => 'Laborantin'], ['description' => 'Personnel de laboratoire'])->id,
+            'etablissement_id' => $attributes['etablissement_id'] ?? $etablissement?->id ?? User::factory()->create(['role_id' => Role::firstOrCreate(['nom' => 'Responsable Etablissement'], ['description' => 'Responsable d\'établissement de santé'])->id])->id,
+            'name' => $attributes['name'] ?? $this->faker->name()
         ]);
     }
 

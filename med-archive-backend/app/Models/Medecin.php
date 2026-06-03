@@ -14,6 +14,7 @@ class Medecin extends Model
     protected $fillable = [
         'user_id',
         'etablissement_id',
+        'service_id',
         'specialite_id',
         'numero_professionnel',
         'diplome',
@@ -40,6 +41,11 @@ class Medecin extends Model
     public function specialite(): BelongsTo
     {
         return $this->belongsTo(Specialite::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function consultations(): HasMany

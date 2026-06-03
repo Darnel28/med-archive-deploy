@@ -1,4 +1,5 @@
 export const DASHBOARD_ROUTES = {
+  admin: "/espaceadmin",
   patient: "/espacepatient",
   medecin: "/espacemedecin",
   accueil: "/espaceaccueil",
@@ -8,6 +9,10 @@ export const DASHBOARD_ROUTES = {
 
 export function getDashboardPathForUser(user) {
   const role = String(user?.role?.nom || user?.role || "").toLowerCase();
+
+  if (role.includes("super admin") || role.includes("admin regional") || role === "administrateur") {
+    return DASHBOARD_ROUTES.admin;
+  }
 
   if (role.includes("patient")) {
     return DASHBOARD_ROUTES.patient;
@@ -21,11 +26,11 @@ export function getDashboardPathForUser(user) {
     return DASHBOARD_ROUTES.examen;
   }
 
-  if (role.includes("accueil") || role.includes("caisse")) {
+  if (role.includes("service") || role.includes("accueil") || role.includes("caisse")) {
     return DASHBOARD_ROUTES.accueil;
   }
 
-  if (role.includes("etablissement") || role.includes("admin")) {
+  if (role.includes("etablissement") || role.includes("hopital") || role.includes("hôpital")) {
     return DASHBOARD_ROUTES.hopital;
   }
 

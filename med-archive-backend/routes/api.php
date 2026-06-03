@@ -15,7 +15,9 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\StatistiqueController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\PaiementController;
-use App\Http\Controllers\PatientMedecinController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ParametreController;
+use App\Http\Controllers\TransfertDossierController;
 
 Route::get('/ping', function() {
     return response()->json(['message' => 'pong']);
@@ -79,6 +81,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/laboratoires/{id}/analyses-en-attente', [LaboratoireController::class, 'analysesEnAttente']);
     Route::get('/laboratoires/{id}/statistiques', [LaboratoireController::class, 'statistiques']);
 
+    // Services
+    Route::apiResource('services', ServiceController::class);
+
+    // Paramètres
+    Route::apiResource('parametres', ParametreController::class);
+
+    // Transferts de dossiers
+    Route::apiResource('transferts-dossiers', TransfertDossierController::class);
+
     // Analyses
     Route::apiResource('analyses', AnalyseController::class);
     Route::patch('/analyses/{id}/statut', [AnalyseController::class, 'updateStatut']);
@@ -99,11 +110,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Factures
     Route::prefix('factures')->group(function () {
-        Route::get('/', [FactureController::class, 'index'])->middleware('role:Administrateur,AgentAccueil');
-        Route::post('/', [FactureController::class, 'store'])->middleware('role:AgentAccueil,Administrateur');
-        Route::get('/{id}', [FactureController::class, 'show'])->middleware('role:Administrateur,AgentAccueil,Patient');
-        Route::post('/{id}/paiement', [FactureController::class, 'payer'])->middleware('role:AgentAccueil,Administrateur');
-        Route::get('/{id}/pdf', [FactureController::class, 'pdf'])->middleware('role:Administrateur,AgentAccueil');
+        Route::get('/', [FactureController::class, 'index'])->middleware('role:Administrateur');
+        Route::post('/', [FactureController::class, 'store'])->middleware('role:Administrateur');
+        Route::get('/{id}', [FactureController::class, 'show'])->middleware('role:Administrateur,Patient');
+        Route::post('/{id}/paiement', [FactureController::class, 'payer'])->middleware('role:Administrateur,Patient');
+        Route::get('/{id}/pdf', [FactureController::class, 'pdf'])->middleware('role:Administrateur,Patient');
     });
 
     // Paiements

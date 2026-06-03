@@ -59,31 +59,7 @@
             "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
           }
         },
-        {
-          "name": "Login Agent Caisse",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.environment.set('caisse_token', jsonData.token);"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"email\": \"caisse@medarchive.bj\",\n    \"password\": \"password\"\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
-          }
-        },
+
         {
           "name": "Login Patient (optionnel)",
           "event": [
