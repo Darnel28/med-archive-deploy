@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dossier;
-use App\Models\Patient;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class DossierController extends Controller
 {
@@ -190,13 +191,32 @@ class DossierController extends Controller
      */
     public function transferer(Request $request, $id)
     {
-        $dossier = Dossier::findOrFail($id);
-        $request->validate([
-            'etablissement_destination_id' => 'required|exists:etablissements,id',
+        $dossier = Dossier::find($id);
+        if (!$dossier) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'Dossier non trouvé',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $validated = $request->validate([
+            'etablissement_destination_id' => 'required|exists:users,id',
             'motif_transfert' => 'required|string'
         ]);
+        $etablissementDestination = User::with('informationEtablissement')
+            ->find($validated['etablissement_destination_id']);
+
+        if (!$etablissementDestination?->isEtablissement() || !$etablissementDestination->informationEtablissement) {
+            return response()->json([
+                'success' => false,
+                'data' => null,
+                'message' => 'L’établissement destinataire est invalide',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         $dossier->update([
-            'etablissement_destination_id' => $request->etablissement_destination_id,
+            'etablissement_destination_id' => $etablissementDestination->informationEtablissement->id,
             'statut_transfert' => 'demande',
             'notes_importantes' => ($dossier->notes_importantes ?? '') . " [Transfert demandé le " . now()->format('d/m/Y') . " : {$request->motif_transfert}]"
         ]);

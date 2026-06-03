@@ -169,11 +169,11 @@ GET    /statistiques/documents             - Stats documents
 
 #### Factures
 ```
-GET    /factures                           - Lister factures (Admin/AgentAccueil)
-POST   /factures                           - Créer facture (AgentAccueil/Admin)
-GET    /factures/{id}                      - Voir facture (Admin/AgentAccueil/Patient)
-POST   /factures/{id}/paiement             - Payer facture (AgentAccueil/Admin)
-GET    /factures/{id}/pdf                  - Télécharger PDF facture (Admin/AgentAccueil)
+GET    /factures                           - Lister factures (Admin)
+POST   /factures                           - Créer facture (Admin)
+GET    /factures/{id}                      - Voir facture (Admin/Patient)
+POST   /factures/{id}/paiement             - Payer facture (Admin/Patient)
+GET    /factures/{id}/pdf                  - Télécharger PDF facture (Admin/Patient)
 ```
 
 #### Paiements

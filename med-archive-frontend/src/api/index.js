@@ -14,3 +14,6 @@ export * from "./documentApi";
 export * from "./statistiqueApi";
 export * from "./factureApi";
 export * from "./paiementApi";
+export * from "./serviceApi";
+export * from "./parametreApi";
+export * from "./transfertDossierApi";

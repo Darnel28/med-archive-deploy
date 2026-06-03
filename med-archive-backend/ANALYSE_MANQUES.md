@@ -19,7 +19,7 @@ Après une analyse exhaustive du code, des migrations, des modèles et des contr
 - Méthode de paiement (Mobile Money, espèces)
 - Clé étrangère patient_id
 - Clé étrangère consultation_id (nullable, pour les examens)
-- Clé étrangère user_id (pour l'agent caisse)
+- Clé étrangère user_id (pour l'agent de caisse) - NOTE: role "Agent d'accueil / caisse" supprimé
 
 #### 1.2 Migration: `create_paiements_table`
 **Contexte** : Gestion des transactions
@@ -28,7 +28,7 @@ Après une analyse exhaustive du code, des migrations, des modèles et des contr
 - Référence transaction
 - Statut (en_attente, confirmé, échoué)
 - Clé étrangère facture_id
-- Clé étrangère user_id (agent caisse)
+- Clé étrangère user_id (agent de caisse) - NOTE: role supprimé
 - Timestamp du paiement
 
 #### 1.3 Migration: `create_qr_codes_table`

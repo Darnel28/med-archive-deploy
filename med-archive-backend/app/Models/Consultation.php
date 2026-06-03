@@ -15,6 +15,7 @@ class Consultation extends Model
     protected $fillable = [
         'dossier_id',
         'medecin_id',
+        'service_id',
         'date_consultation',
         'motif',
         'diagnostic',
@@ -39,6 +40,11 @@ class Consultation extends Model
     public function medecin(): BelongsTo
     {
         return $this->belongsTo(Medecin::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function constantes(): HasOne

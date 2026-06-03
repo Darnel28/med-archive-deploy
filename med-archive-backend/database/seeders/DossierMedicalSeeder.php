@@ -33,9 +33,8 @@ class DossierMedicalSeeder extends Seeder
         $rolePatient = Role::where('nom', 'Patient')->first();
         $roleEtablissement = Role::where('nom', 'Responsable Etablissement')->first();
         $roleLaborantin = Role::where('nom', 'Laborantin')->first();
-        $roleAgentCaisse = Role::where('nom', 'Agent d\'accueil / caisse')->first();
 
-        if (!$roleSuperAdmin || !$roleMedecin || !$rolePatient || !$roleEtablissement || !$roleLaborantin || !$roleAgentCaisse) {
+        if (!$roleSuperAdmin || !$roleMedecin || !$rolePatient || !$roleEtablissement || !$roleLaborantin) {
             $this->command->error('❌ Rôles manquants ! Exécutez d\'abord RoleSeeder.');
             return;
         }
@@ -55,18 +54,7 @@ class DossierMedicalSeeder extends Seeder
             ]
         );
 
-        User::firstOrCreate(
-            ['email' => 'caisse@medarchive.bj'],
-            [
-                'name' => 'Agent Caisse Principal',
-                'password' => Hash::make('password'),
-                'telephone' => '+229 97 00 00 03',
-                'adresse' => 'Cotonou, Bénin',
-                'ville' => 'Cotonou',
-                'role_id' => $roleAgentCaisse->id,
-                'statut' => 'actif'
-            ]
-        );
+        // Agent caisse removed — not used in current schema
 
         // 3. CRÉER LES ÉTABLISSEMENTS
         $this->command->info('Création des établissements...');
