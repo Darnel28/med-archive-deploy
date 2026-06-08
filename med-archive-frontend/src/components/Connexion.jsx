@@ -57,7 +57,7 @@ export default function LoginPage() {
                     </aside>
 
                     <section className="connexion-right">
-                        <div className="connexion-corner" />
+                        <div  />
 
                         <div className="connexion-form-panel">
                             <h1 className="connexion-right-title">

@@ -43,7 +43,7 @@ export default function DeconnexionPage() {
                     </aside>
 
                     <section className="connexion-right deconnexion-right">
-                        <div className="connexion-corner" />
+                        <div  />
 
                         <div className="connexion-form-panel deconnexion-form-panel">
                             <h1 className="connexion-right-title">Déconnexion de Med-Archive</h1>

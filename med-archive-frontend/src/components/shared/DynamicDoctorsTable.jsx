@@ -23,6 +23,15 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+const [isModalOpen, setIsModalOpen] = useState(false);
+
+const [newDoctor, setNewDoctor] = useState({
+  nom: '',
+  email: '',
+  telephone: '',
+  specialite: '',
+  experience: '',
+});
   useEffect(() => {
     let mounted = true;
 
@@ -76,6 +85,15 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
             onChange={(event) => setSearch(event.target.value)}
           />
         </label>
+        <button
+  className="btn transfer-add-btn"
+  type="button"
+  onClick={() => setIsModalOpen(true)}
+>
+  <i></i>
+  Ajouter un médecin
+</button>
+        
       </section>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -118,6 +136,220 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
           </div>
         </article>
       </section>
+      {isModalOpen && (
+  <div
+    className="doctor-modal-overlay"
+    onClick={() => setIsModalOpen(false)}
+  >
+    <div
+      className="doctor-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="doctor-modal-header">
+        <h3>Ajouter un médecin</h3>
+
+        <button
+          className="doctor-modal-close"
+          type="button"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div className="doctor-modal-body">
+
+        <div className="doctor-form-group">
+          <label>Nom complet</label>
+          <input
+            type="text"
+            value={newDoctor.nom}
+            onChange={(e) =>
+              setNewDoctor({
+                ...newDoctor,
+                nom: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="doctor-form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={newDoctor.email}
+            onChange={(e) =>
+              setNewDoctor({
+                ...newDoctor,
+                email: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="doctor-form-group">
+          <label>Téléphone</label>
+          <input
+            type="text"
+            value={newDoctor.telephone}
+            onChange={(e) =>
+              setNewDoctor({
+                ...newDoctor,
+                telephone: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="doctor-form-group">
+          <label>Spécialité</label>
+          <input
+            type="text"
+            value={newDoctor.specialite}
+            onChange={(e) =>
+              setNewDoctor({
+                ...newDoctor,
+                specialite: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="doctor-form-group">
+          <label>Années d'expérience</label>
+          <input
+            type="number"
+            value={newDoctor.experience}
+            onChange={(e) =>
+              setNewDoctor({
+                ...newDoctor,
+                experience: e.target.value,
+              })
+            }
+          />
+        </div>
+
+      </div>
+
+      <div className="doctor-modal-footer">
+        <button
+          type="button"
+          className="doctor-btn-cancel"
+          onClick={() => setIsModalOpen(false)}
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          className="doctor-btn-save"
+        >
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+<style>
+  {`
+    .doctor-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .doctor-modal {
+      width: 100%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,.12);
+    }
+    .doctor-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid #eef2f6;
+    }
+    .doctor-modal-header h3 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+    .doctor-modal-close {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;      /* ← couleur visible (gris bleuté) */
+  transition: all 0.2s;
+}
+.doctor-modal-close:hover {
+  background: #f1f5f9; /* fond gris clair au survol */
+  color: #0f172a;      /* devient plus foncé */
+}
+    .doctor-modal-body {
+      padding: 20px 22px;
+    }
+    .doctor-form-group {
+      margin-bottom: 12px;
+    }
+    .doctor-form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+    .doctor-form-group input,
+    .doctor-form-group select {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid #dbe2ea;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .doctor-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 22px;
+      border-top: 1px solid #eef2f6;
+    }
+    .doctor-btn-cancel,
+    .doctor-btn-save {
+      height: 40px;
+      padding: 0 16px;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+    }
+    .doctor-btn-cancel {
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+    .doctor-btn-save {
+      background: #0f9f9b;
+      color: white;
+    }
+  `}
+</style>
     </main>
   );
 }

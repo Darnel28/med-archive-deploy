@@ -1,233 +1,106 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { getAnalyses } from '../../api/analyseApi';
+import { getCurrentUser } from '../../api/authApi';
+import { getAuthUser } from '../../api/client';
+import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from '../shared/Pagination.jsx';
 
-const ExamensMedecin = () => {
-  // État des demandes d'examens
-  const [demandes, setDemandes] = useState([
-    { id: 1, patient: "Jean A.", demande: "Analyse de sang", laboratoire: "CNHU Labo", statut: "pending" }
-  ]);
+function unwrapUser(value) {
+  return value?.data?.data?.user || value?.data?.user || value?.user || value?.data || value || {};
+}
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    patient: '',
-    demande: 'Analyse de sang',
-    laboratoire: 'CNHU Labo'
-  });
+function medecinId(value) {
+  const user = unwrapUser(value);
+  return user?.medecin?.id || user?.medecin_id || null;
+}
 
-  // Filtrer les demandes selon la recherche
-  const filteredDemandes = demandes.filter(d =>
-    d.patient.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+function unwrapRows(value) {
+  if (Array.isArray(value?.data?.data?.data)) return value.data.data.data;
+  if (Array.isArray(value?.data?.data)) return value.data.data;
+  if (Array.isArray(value?.data)) return value.data;
+  return Array.isArray(value) ? value : [];
+}
 
-  // Ouvrir le modal
-  const handleAddDemande = () => {
-    setShowModal(true);
+function patientName(item) {
+  return item?.consultation?.dossier?.patient?.user?.name || 'Patient';
+}
+
+function statusInfo(status) {
+  const values = {
+    prescrit: ['Prescrit', 'rdv-status pending'],
+    preleve: ['Prélevé', 'rdv-status upcoming'],
+    en_cours: ['En cours', 'rdv-status upcoming'],
+    termine: ['Terminé', 'rdv-status done'],
   };
+  return values[status] || [status || 'Inconnu', 'rdv-status'];
+}
 
-  // Fermer le modal
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setFormData({
-      patient: '',
-      demande: 'Analyse de sang',
-      laboratoire: 'CNHU Labo'
-    });
-  };
+export default function ExamensMedecin() {
+  const [analyses, setAnalyses] = useState([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
 
-  // Mettre à jour les champs du formulaire
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Soumettre le formulaire et ajouter une nouvelle demande
-  const handleSubmitDemande = (e) => {
-    e.preventDefault();
-
-    if (!formData.patient.trim()) {
-      alert("Veuillez saisir le nom du patient");
-      return;
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        let id = medecinId(getAuthUser());
+        if (!id) id = medecinId(await getCurrentUser());
+        const response = await getAnalyses({ prescripteur_id: id, per_page: 100 });
+        if (active) setAnalyses(unwrapRows(response));
+      } catch (requestError) {
+        if (active) setError(requestError?.response?.data?.message || requestError.message || 'Impossible de charger les demandes.');
+      } finally {
+        if (active) setLoading(false);
+      }
     }
+    load();
+    return () => { active = false; };
+  }, []);
 
-    const newDemande = {
-      id: Date.now(),
-      patient: formData.patient.trim(),
-      demande: formData.demande,
-      laboratoire: formData.laboratoire,
-      statut: "pending"
-    };
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return analyses.filter((item) => !query || `${patientName(item)} ${item.type_analyse || ''} ${item.laboratoire?.user?.name || ''}`.toLowerCase().includes(query));
+  }, [analyses, search]);
+  const pagination = useMemo(() => paginateRows(filtered, page, DEFAULT_PAGE_SIZE), [filtered, page]);
 
-    setDemandes(prev => [newDemande, ...prev]);
-    handleCloseModal();
-  };
-
-  // Obtenir la classe CSS du statut
-  const getStatusClass = (statut) => {
-    switch (statut) {
-      case 'pending': return 'rdv-status pending';
-      case 'ongoing': return 'rdv-status upcoming';
-      case 'done': return 'rdv-status done';
-      default: return 'rdv-status';
-    }
-  };
-
-  const getStatusText = (statut) => {
-    switch (statut) {
-      case 'pending': return 'En attente';
-      case 'ongoing': return 'En cours';
-      case 'done': return 'Terminé';
-      default: return statut;
-    }
-  };
+  useEffect(() => setPage(1), [search]);
 
   return (
     <main className="content page-tight">
-      <section className="page-title-card">
-        <h1>Examens</h1>
-      </section>
-
+      <section className="page-title-card"><h1>Mes demandes d'examens</h1></section>
       <section className="table-toolbar">
         <label className="table-search" aria-label="Recherche patient">
           <i className="fa-solid fa-magnifying-glass"></i>
-          <input
-            type="text"
-            placeholder="Rechercher ou saisir le nom du patient..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher un patient ou un examen..." />
         </label>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button className="btn transfer-add-btn btn-add-exam" type="button" onClick={handleAddDemande}>
-            <i className="fa-solid fa-plus"></i> Ajouter une demande
-          </button>
-        </div>
       </section>
-
-      <section className="rdv-section">
-        <article className="rdv-card">
-          <div className="rdv-table-wrap">
-            <table className="rdv-table" aria-label="Demandes d'examens">
-              <thead>
-                <tr>
-                  <th>Patient</th>
-                  <th>Demande</th>
-                  <th>Laboratoire</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDemandes.map((demande) => (
-                  <tr key={demande.id}>
-                    <td>{demande.patient}</td>
-                    <td>{demande.demande}</td>
-                    <td>{demande.laboratoire}</td>
-                    <td><span className={getStatusClass(demande.statut)}>{getStatusText(demande.statut)}</span></td>
-                    <td className="rdv-actions">
-                      <button className="icon-action" title="Voir">
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredDemandes.length === 0 && (
-                  <tr>
-                    <td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>
-                      Aucune demande d'examen trouvée.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="table-footer">
-            <span className="table-meta">
-              {filteredDemandes.length} demande{filteredDemandes.length > 1 ? 's' : ''}
-            </span>
-            <div className="table-pagination">
-              <span className="table-page">Précédent</span>
-              <span className="table-page active">1</span>
-              <span className="table-page">Suivant</span>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      {/* Modal pour ajouter une demande */}
-      {showModal && (
-        <div className="exam-modal-backdrop" onClick={handleCloseModal}>
-          <div className="exam-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Ajouter une demande d'examen</h2>
-              <button className="modal-close" onClick={handleCloseModal} aria-label="Fermer">
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleSubmitDemande}>
-              <div className="form-group">
-                <label htmlFor="patient">Nom du patient *</label>
-                <input
-                  id="patient"
-                  type="text"
-                  name="patient"
-                  value={formData.patient}
-                  onChange={handleFormChange}
-                  placeholder="Saisir le nom du patient"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="demande">Type d'examen *</label>
-                <select
-                  id="demande"
-                  name="demande"
-                  value={formData.demande}
-                  onChange={handleFormChange}
-                >
-                  <option value="Analyse de sang">Analyse de sang</option>
-                  <option value="Radiographie">Radiographie</option>
-                  <option value="Échographie">Échographie</option>
-                  <option value="Scanner">Tomodensitométrie (Scanner)</option>
-                  <option value="IRM">Imagerie par résonance magnétique (IRM)</option>
-                  <option value="ECG">ECG</option>
-                  <option value="Autre">Autre</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="laboratoire">Laboratoire *</label>
-                <select
-                  id="laboratoire"
-                  name="laboratoire"
-                  value={formData.laboratoire}
-                  onChange={handleFormChange}
-                >
-                  <option value="CNHU Labo">CNHU Labo</option>
-                  <option value="Labo Central">Labo Central</option>
-                  <option value="Bio Analysis">Bio Analysis</option>
-                  <option value="Autre">Autre</option>
-                </select>
-              </div>
-
-              <div className="modal-actions">
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
-                  Annuler
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Ajouter la demande
-                </button>
-              </div>
-            </form>
-          </div>
+      {error && <div className="alert alert-danger">{error}</div>}
+      <section className="rdv-section"><article className="rdv-card">
+        <div className="rdv-table-wrap"><table className="rdv-table" aria-label="Demandes d'examens">
+          <thead><tr><th>Patient</th><th>Examen demandé</th><th>Laboratoire</th><th>Date de prélèvement</th><th>Statut</th><th>Résultat</th></tr></thead>
+          <tbody>
+            {loading && <tr><td colSpan="6">Chargement...</td></tr>}
+            {!loading && pagination.rows.map((item) => {
+              const [label, className] = statusInfo(item.statut);
+              return <tr key={item.id}>
+                <td>{patientName(item)}</td>
+                <td>{item.type_analyse}</td>
+                <td>{item.laboratoire?.user?.name || 'Non assigné'}</td>
+                <td>{item.date_prelevement ? new Date(item.date_prelevement).toLocaleString('fr-FR') : 'À planifier'}</td>
+                <td><span className={className}>{label}</span></td>
+                <td>{item.statut === 'termine' ? (item.resultats?.commentaire || 'Disponible') : 'En attente'}</td>
+              </tr>;
+            })}
+            {!loading && filtered.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 24 }}>Aucune demande d'examen prescrite.</td></tr>}
+          </tbody>
+        </table></div>
+        <div className="table-footer">
+          <span className="table-meta">{filtered.length} demande{filtered.length > 1 ? 's' : ''}</span>
+          <Pagination page={pagination.page} totalItems={filtered.length} onPageChange={setPage} />
         </div>
-      )}
+      </article></section>
     </main>
   );
-};
-
-
-export default ExamensMedecin;
+}

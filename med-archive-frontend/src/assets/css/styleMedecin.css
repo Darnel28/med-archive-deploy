@@ -1829,6 +1829,184 @@ body.dark-mode .mes-patients-pager-btn.active {
 }
 
 /* ========== MODAL DE PUBLICATION ========== */
+.appointment-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(8, 26, 38, 0.62);
+    backdrop-filter: blur(4px);
+}
+
+.appointment-modal {
+    width: min(620px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: 0 24px 70px rgba(8, 26, 38, 0.3);
+}
+
+.appointment-modal-header,
+.appointment-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+}
+
+.appointment-modal-header {
+    border-bottom: 1px solid var(--line);
+}
+
+.appointment-modal-header h3 {
+    margin: 0;
+    color: var(--text);
+    font-size: 22px;
+}
+
+.appointment-modal-body {
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+}
+
+.appointment-modal-body .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.appointment-modal-body label {
+    margin: 0;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.appointment-modal-body input,
+.appointment-modal-body select,
+.appointment-modal-body textarea,
+.consultation-editor select,
+.consultation-field textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.appointment-modal-footer {
+    justify-content: flex-end;
+    border-top: 1px solid var(--line);
+}
+
+.appointment-modal-footer button {
+    padding: 11px 18px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.appointment-modal-footer .btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.consultation-workspace {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) 1fr;
+    gap: 20px;
+}
+
+.consultation-list-panel,
+.consultation-editor {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+}
+
+.consultation-list-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.consultation-list-item {
+    display: grid;
+    gap: 4px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.consultation-list-item.active {
+    border-color: var(--primary);
+    background: rgba(13, 148, 136, 0.1);
+}
+
+.consultation-list-item span,
+.consultation-list-item small,
+.consultation-editor-head span,
+.consultation-editor-head p {
+    color: var(--muted);
+}
+
+.consultation-editor,
+.consultation-field {
+    display: grid;
+    gap: 16px;
+}
+
+.consultation-editor-head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.consultation-editor-head h2,
+.consultation-editor-head p {
+    margin: 3px 0 0;
+}
+
+.consultation-editor-head select {
+    width: auto;
+    min-width: 150px;
+}
+
+.consultation-field {
+    gap: 8px;
+    color: var(--text);
+    font-weight: 700;
+}
+
+.consultation-message {
+    margin: 0;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .consultation-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .appointment-modal-body .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 .modal-overlay {
     position: fixed;
     inset: 0;

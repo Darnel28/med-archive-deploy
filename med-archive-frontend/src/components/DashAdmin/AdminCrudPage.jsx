@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "../../assets/css/DashboardAdmin.css";
+import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from "../shared/Pagination.jsx";
 
 export function unwrapList(response) {
   const payload = response?.data ?? response;
@@ -59,6 +60,7 @@ export default function AdminCrudPage({
   const [total, setTotal] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [error, setError] = useState("");
   const [modalMode, setModalMode] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -71,11 +73,12 @@ export default function AdminCrudPage({
     setLoading(true);
     setError("");
     try {
-      const response = await api.list({ per_page: 100, ...(JSON.parse(listParamsKey) || {}) });
+      const response = await api.list({ per_page: 1000, ...(JSON.parse(listParamsKey) || {}) });
       const { rows: nextRows, total: nextTotal } = unwrapList(response);
       const mapped = mapRows ? nextRows.map(mapRows) : nextRows;
       setRows(mapped);
       setTotal(nextTotal || mapped.length);
+      setPage(1);
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -97,6 +100,12 @@ export default function AdminCrudPage({
       return String(text).toLowerCase().includes(term);
     });
   }, [columns, rows, searchTerm, searchableText]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
+
+  const paginatedRows = useMemo(() => paginateRows(filteredRows, page, DEFAULT_PAGE_SIZE), [filteredRows, page]);
 
   const openCreate = () => {
     setSelectedRow(null);
@@ -195,7 +204,7 @@ export default function AdminCrudPage({
           />
         </label>
         <button className="btn transfer-add-btn" type="button" onClick={openCreate}>
-          <i className="fa-solid fa-plus"></i> {addLabel}
+          <i ></i> {addLabel}
         </button>
       </div>
 
@@ -221,7 +230,7 @@ export default function AdminCrudPage({
                     </td>
                   </tr>
                 )}
-                {!loading && filteredRows.map((row) => (
+                {!loading && paginatedRows.rows.map((row) => (
                   <tr key={getRowId(row)}>
                     {columns.map((column) => (
                       <td key={column.key || column.label} className={column.className}>
@@ -255,15 +264,10 @@ export default function AdminCrudPage({
             </table>
           </div>
           <div className="table-footer">
-            <span className="table-meta">{filteredRows.length} affiché(s) sur {total || rows.length}</span>
-            {/* <button className="table-page active" type="button" onClick={loadRows}>
-              Actualiser
-            </button> */}
-              <div className="table-pagination">
-                            <span className="table-page">Précédent</span>
-                            <span className="table-page active">1</span>
-                            <span className="table-page">Suivant</span>
-                        </div>
+            <span className="table-meta">
+              {filteredRows.length === 0 ? 0 : paginatedRows.start + 1}-{paginatedRows.end} affiché(s) sur {filteredRows.length} ({total || rows.length} au total)
+            </span>
+            <Pagination page={paginatedRows.page} totalItems={filteredRows.length} onPageChange={setPage} />
           </div>
         </article>
       </section>

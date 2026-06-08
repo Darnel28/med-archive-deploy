@@ -57,6 +57,7 @@ import MedecinService from "./components/DashAccueil/MedecinService.jsx";
 import TransfertService from "./components/DashAccueil/TransfertService.jsx";
 import RendezVousService from "./components/DashAccueil/RendezVousService.jsx";
 import DossierDuPatient from "./components/DashAccueil/DossierDuPatient.jsx";
+import TransfertPatientServiceForm from "./components/DashAccueil/Patienttransfert.jsx";
 // Examens
 import DashboardLabo from "./components/DashExamen/DashExamHome.jsx";
 import DemandeExamLabo from "./components/DashExamen/DemandeExam.jsx";
@@ -68,6 +69,7 @@ import TransfertHopital from "./components/DashHopital/TransfertHopital.jsx";
 import Rapports from "./components/DashHopital/Rapports.jsx";
 import NotificationsHopital from "./components/DashHopital/NotificationHopital.jsx";
 import NouvelleDemandeTransfert from "./components/DashHopital/NouvelleDemandeTransfert.jsx";
+import PatientsHopital from "./components/DashHopital/PatientsHopital.jsx";
 import LoginPage from "./components/Connexion.jsx";
 import LogoutPage from "./components/Deconnexion.jsx";
 import MedecinHopital from "./components/DashHopital/MedecinHopital.jsx";
@@ -80,6 +82,9 @@ import ServicesAdmin from "./components/DashAdmin/Services.jsx";
 import LaboratoiresAdmin from "./components/DashAdmin/LaboratoireAdmin.jsx";
 import NotificationsAdmin from "./components/DashAdmin/NotificationsAdmin.jsx";
 import ParametresAdmin from "./components/DashAdmin/ParametresAdmin.jsx";
+import ProtectedDashboard from "./components/shared/ProtectedDashboard.jsx";
+
+const protect = (element, roles) => <ProtectedDashboard allowedRoles={roles}>{element}</ProtectedDashboard>;
 // Homepage component
 const HomePage = () => (
     <>
@@ -111,7 +116,7 @@ function AllRoutes() {
             <Route path="/contact" element={<Contact />} />
 
             {/* Dashboard with nested routes - DashPatient is the layout parent */}
-            <Route path="/espacepatient" element={<DashPatient />}>
+            <Route path="/espacepatient" element={protect(<DashPatient />, ["patient"])}>
                 <Route index element={<DashboardHome />} />
                 <Route path="consultations" element={<ConsultationsHistory />} />
                 <Route path="resultats-analyses" element={<ResultatsAnalyses />} />
@@ -132,7 +137,7 @@ function AllRoutes() {
             </Route>
 
             {/* Alternative dashboard path */}
-            <Route path="/DasbordPatient" element={<DashPatient />}>
+            <Route path="/DasbordPatient" element={protect(<DashPatient />, ["patient"])}>
                 <Route index element={<DashboardHome />} />
                 <Route path="consultations" element={<ConsultationsHistory />} />
                 <Route path="resultats-analyses" element={<ResultatsAnalyses />} />
@@ -150,7 +155,7 @@ function AllRoutes() {
             
                 
             </Route>
-            <Route path="/espacemedecin" element={<DashMedecin />}>
+            <Route path="/espacemedecin" element={protect(<DashMedecin />, ["medecin"])}>
                 <Route index element={<DashboardHomeMedecin />} />
                 {/* Ajoute ici les autres routes propres au médecin */}
                 <Route path="rendez-vous" element={<RendezVousMedecin />} />
@@ -166,33 +171,35 @@ function AllRoutes() {
                 <Route path="besoin-aide" element={<BesoinAide />} />
                 <Route path="votre-patient" element={<DossierVoirMedecin />} />
             </Route>
-            <Route path="/espaceaccueil" element={<DashAccueil />}>
+            <Route path="/espaceaccueil" element={protect(<DashAccueil />, ["service", "accueil", "caisse"])}>
                 <Route index element={<DashboardHomeAccueil />} />
                 <Route path="patients" element={<PatientService />} />
                 <Route path="medecins" element={<MedecinService />} />
                 <Route path="transfert" element={<TransfertService />} />
                 <Route path="rendez-vous" element={<RendezVousService />} />
                 <Route path="dossier-patient" element={<DossierDuPatient />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="transfert-patient-service" element={<TransfertPatientServiceForm />} />
             </Route>
-            <Route path="/espaceexamen" element={<DashExamen />} >
+            <Route path="/espaceexamen" element={protect(<DashExamen />, ["laborantin", "laboratoire"])} >
                 <Route index element={<DashboardLabo />} />
                 <Route path="demandes" element={<DemandeExamLabo />} />
                 <Route path="resultats" element={<ResultatExamLabo />} />
                 <Route path="alertes" element={<AlertesExamen />} />
+                <Route path="notifications" element={<AlertesExamen />} />
                 {/* Ajoute ici les autres routes propres au laboratoire */}
             </Route>
-            <Route path="/espacehopital" element={<DashHopital />} >
+            <Route path="/espacehopital" element={protect(<DashHopital />, ["etablissement", "hopital", "hôpital"])} >
                 <Route index element={<DashHomeHopital />} />
                 <Route path="transfert" element={<TransfertHopital />} />
                 <Route path="rapports" element={<Rapports />} />
                 <Route path="notifications" element={<NotificationsHopital />} />
+                <Route path="patients" element={<PatientsHopital />} />
                 <Route path="transfert/nouvelle-demande" element={<NouvelleDemandeTransfert />} />
                 <Route path="tout-les-medecins" element={<MedecinHopital />} />
-                <Route path="notifications" element={<NotificationsAdmin />} />
-
                 {/* Ajoute ici les autres routes propres à l'hôpital */}
             </Route>
-            <Route path="/espaceadmin" element={<DashAdmin />} >
+            <Route path="/espaceadmin" element={protect(<DashAdmin />, ["super admin", "admin regional", "administrateur"])} >
                 <Route index element={<DashboardAdmin />} />
                 <Route path="utilisateurs" element={<Utilisateurs />} />
                 <Route path="hopitaux" element={<Hopitaux/>} />

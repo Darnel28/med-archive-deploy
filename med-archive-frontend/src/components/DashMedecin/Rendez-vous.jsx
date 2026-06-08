@@ -1,122 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAuthToken, getAuthUser } from '../../api/client';
 import { getCurrentUser } from '../../api/authApi';
 import { getPatients } from '../../api/medecinApi';
+import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from '../shared/Pagination.jsx';
 
 const DEFAULT_API_URL = 'http://localhost:8000/api';
 const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/$/, '');
 
+function normalizeAuthPayload(value) {
+  return value?.data?.data?.user || value?.data?.user || value?.user || value?.data || value || null;
+}
+
+function extractMedecinId(auth) {
+  return auth?.medecin?.id || auth?.user?.medecin?.id || auth?.data?.user?.medecin?.id || auth?.medecin_id || auth?.user?.medecin_id || null;
+}
+
+function unwrapPatients(responseData) {
+  if (Array.isArray(responseData?.data?.data)) return responseData.data.data;
+  if (Array.isArray(responseData?.data)) return responseData.data;
+  if (Array.isArray(responseData)) return responseData;
+  return [];
+}
+
+function patientLabel(row) {
+  return row?.name || row?.user?.name || row?.patient?.user?.name || row?.patient?.name || 'Patient';
+}
+
 const RendezVousMedecin = () => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(1);
   const [medecinId, setMedecinId] = useState(null);
-
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [patients, setPatients] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
-  const [formData, setFormData] = useState({
-    patient_id: '',
-    date_consultation: date,
-    heure: '09:00',
-    motif: '',
-  });
+const getCurrentTime = () => {
+  const now = new Date();
+  return now.toTimeString().slice(0, 5);
+};
+
+const [formData, setFormData] = useState({
+  patient_id: '',
+  date_consultation: date,
+  heure: getCurrentTime(),
+  motif: ''
+});
+const today = new Date().toISOString().split('T')[0];
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
-
-  // ========== FONCTIONS D'EXTRACTION (identiques à ProfilMedecin) ==========
-  const normalizeAuthPayload = (value) => {
-    return (
-      value?.data?.data?.user ||
-      value?.data?.user ||
-      value?.user ||
-      value?.data ||
-      value ||
-      null
-    );
-  };
-
-  const extractMedecinId = (auth) => {
-    return (
-      auth?.medecin?.id ||
-      auth?.user?.medecin?.id ||
-      auth?.data?.user?.medecin?.id ||
-      auth?.medecin_id ||
-      auth?.user?.medecin_id ||
-      null
-    );
-  };
 
   const loadMedecinId = async () => {
     let auth = normalizeAuthPayload(getAuthUser());
     let id = extractMedecinId(auth);
-    if (!id) {
-      const token = getAuthToken();
-      if (token) {
-        try {
-          const current = await getCurrentUser();
-          auth = normalizeAuthPayload(current);
-          id = extractMedecinId(auth);
-        } catch (err) {
-          console.error('Erreur getCurrentUser', err);
-        }
-      }
+    if (!id && getAuthToken()) {
+      auth = normalizeAuthPayload(await getCurrentUser());
+      id = extractMedecinId(auth);
     }
-    if (!id) {
-      setError('Impossible d’identifier le médecin connecté');
-      return null;
-    }
+    if (!id) throw new Error("Impossible d'identifier le medecin connecte");
     setMedecinId(id);
     return id;
   };
 
-  // ========== CHARGEMENT DES PATIENTS (avec extraction paginée) ==========
-  const loadPatients = async () => {
-    if (!medecinId) return;
+  const loadPatients = async (id = medecinId) => {
+    if (!id) return;
     setLoadingPatients(true);
     try {
-      const token = getAuthToken();
-      const responseData = await getPatients(medecinId, token);
-      // La réponse est : { success: true, data: { current_page: 1, data: [...] } }
-      let patientsList = [];
-      if (responseData?.data?.data && Array.isArray(responseData.data.data)) {
-        patientsList = responseData.data.data;
-      } else if (Array.isArray(responseData?.data)) {
-        patientsList = responseData.data;
-      } else if (Array.isArray(responseData)) {
-        patientsList = responseData;
-      }
-      setPatients(patientsList);
-    } catch (err) {
-      console.error('Erreur chargement patients', err);
+      const responseData = await getPatients(id, getAuthToken());
+      setPatients(unwrapPatients(responseData));
+    } catch {
       setPatients([]);
     } finally {
       setLoadingPatients(false);
     }
   };
 
-  // ========== CHARGEMENT DU PLANNING ==========
-  const loadPlanning = async () => {
+  const loadPlanning = async (id = medecinId) => {
     setLoading(true);
     setError(null);
     try {
-      let id = medecinId;
-      if (!id) {
-        id = await loadMedecinId();
-        if (!id) throw new Error('ID du médecin introuvable');
-      }
-      const token = getAuthToken();
-      const res = await fetch(`${API_URL}/medecins/${id}/planning?date=${date}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      const currentId = id || await loadMedecinId();
+      const res = await fetch(`${API_URL}/medecins/${currentId}/planning?date=${date}`, {
+        headers: { Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.message || 'Erreur récupération planning');
-      setAppointments(Array.isArray(json?.data?.consultations) ? json.data.consultations : []);
+      if (!res.ok) throw new Error(json?.message || 'Erreur recuperation planning');
+     const consultations = Array.isArray(json?.data?.consultations)
+  ? json.data.consultations
+  : [];
+
+setAppointments(
+  consultations.filter(
+    (c) => c.statut !== 'termine'
+  )
+);
     } catch (err) {
-      console.error(err);
       setError(err.message || 'Erreur');
       setAppointments([]);
     } finally {
@@ -125,59 +107,67 @@ const RendezVousMedecin = () => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      await loadMedecinId();
-      await loadPlanning();
-    };
+    let mounted = true;
+    async function init() {
+      try {
+        const id = await loadMedecinId();
+        if (mounted) await loadPlanning(id);
+      } catch (err) {
+        if (mounted) {
+          setError(err.message);
+          setLoading(false);
+        }
+      }
+    }
     init();
+    return () => {
+      mounted = false;
+    };
   }, [date]);
 
-  // ========== MODAL ==========
+  const filteredAppointments = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return appointments;
+    return appointments.filter((app) => `${app.patient || ''} ${app.motif || ''}`.toLowerCase().includes(query));
+  }, [appointments, searchTerm]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, appointments.length]);
+
+  const paginatedAppointments = useMemo(() => paginateRows(filteredAppointments, page, DEFAULT_PAGE_SIZE), [filteredAppointments, page]);
+
   const openModal = () => {
-    setFormData({
-      patient_id: '',
-      date_consultation: date,
-      heure: '09:00',
-      motif: '',
-    });
+    setFormData({ patient_id: '', date_consultation: date, heure: getCurrentTime(), motif: '' });
     setFormError('');
     setIsModalOpen(true);
-    if (patients.length === 0 && medecinId) loadPatients();
+    if (patients.length === 0) loadPatients();
   };
 
   const closeModal = () => setIsModalOpen(false);
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  const handleInputChange = (event) => setFormData((prev) => ({ ...prev, [event.target.name]: event.target.value }));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setSubmitting(true);
     setFormError('');
     try {
-      const id = medecinId;
-      if (!id) throw new Error('Médecin non identifié');
-      const token = getAuthToken();
+      if (!medecinId) throw new Error('Medecin non identifie');
       const response = await fetch(`${API_URL}/consultations`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
         body: JSON.stringify({
-          medecin_id: id,
+          medecin_id: medecinId,
           patient_id: formData.patient_id,
-          date_consultation: formData.date_consultation,
-          heure: formData.heure,
+          date_consultation: `${formData.date_consultation}T${formData.heure}`,
           motif: formData.motif,
+          statut: 'en_attente',
         }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data?.message || 'Erreur création');
+      if (!response.ok) throw new Error(data?.message || 'Erreur creation');
       closeModal();
-      loadPlanning();
+      await loadPlanning(medecinId);
     } catch (err) {
       setFormError(err.message);
     } finally {
@@ -185,176 +175,54 @@ const RendezVousMedecin = () => {
     }
   };
 
-  // ========== FILTRES & AFFICHAGE ==========
-  const handleConsultation = (id) => {
-    setAppointments(prev =>
-      prev.map(app => app.id === id ? { ...app, statut: app.statut === 'programme' ? 'termine' : app.statut } : app)
-    );
-  };
-
-  const filteredAppointments = appointments.filter(app =>
-    app.patient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.motif.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getStatusInfo = (statut) => {
-    switch (statut) {
-      case 'pending': return { text: 'En attente', className: 'rdv-status pending' };
-      case 'ongoing': return { text: 'En consultation', className: 'rdv-status upcoming' };
-      case 'done': return { text: 'Terminé', className: 'rdv-status done' };
-      case 'absent': return { text: 'Absent', className: 'rdv-status done' };
-      default: return { text: statut, className: 'rdv-status' };
+  const startConsultation = async (appointment) => {
+    try {
+      const response = await fetch(`${API_URL}/consultations/${appointment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
+        body: JSON.stringify({ statut: 'en_cours' }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Impossible de commencer la consultation');
+      sessionStorage.setItem('active_consultation', JSON.stringify({ ...appointment, statut: 'en_cours' }));
+      navigate('/espacemedecin/consultations');
+    } catch (err) {
+      setError(err.message);
     }
   };
 
-  const getButtonText = (statut) => {
-    if (statut === 'pending') return 'Commencer consultation';
-    if (statut === 'ongoing') return 'Terminer consultation';
-    return 'Ouvrir';
+  const finishConsultation = async (appointment) => {
+    await fetch(`${API_URL}/consultations/${appointment.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
+      body: JSON.stringify({ statut: 'termine' }),
+    });
+    await loadPlanning(medecinId);
+  };
+
+  const getStatusInfo = (statut) => {
+    switch (statut) {
+      case 'en_attente':
+      case 'pending':
+      case 'programme':
+        return { text: 'En attente', className: 'rdv-status pending' };
+      case 'en_cours':
+      case 'ongoing':
+        return { text: 'En consultation', className: 'rdv-status upcoming' };
+      case 'termine':
+      case 'done':
+        return { text: 'Termine', className: 'rdv-status done' };
+      case 'absent':
+        return { text: 'Absent', className: 'rdv-status cancelled' };
+      default:
+        return { text: statut || 'En attente', className: 'rdv-status pending' };
+    }
   };
 
   if (loading && !medecinId) return <main className="content page-tight">Chargement du planning...</main>;
-  if (error) return <main className="content page-tight">Erreur : {error}</main>;
 
   return (
     <main className="content page-tight">
-      {/* Styles (inchangés) */}
-      <style>{`
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
-        .modal-container {
-          background: #fff;
-          border-radius: 16px;
-          width: 90%;
-          max-width: 500px;
-          max-height: 90vh;
-          overflow-y: auto;
-          box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
-        }
-        .dark-mode .modal-container {
-          background: #1f2937;
-          color: #f9fafb;
-        }
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 1.5rem;
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .dark-mode .modal-header {
-          border-bottom-color: #374151;
-        }
-        .modal-header h3 {
-          margin: 0;
-          font-size: 1.25rem;
-        }
-        .modal-close {
-          background: none;
-          border: none;
-          font-size: 1.8rem;
-          font-weight: bold;
-          cursor: pointer;
-          color: #6b7280;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          transition: all 0.2s;
-        }
-        .modal-close:hover {
-          background: rgba(0,0,0,0.05);
-          color: #111827;
-        }
-        .dark-mode .modal-close {
-          color: #9ca3af;
-        }
-        .dark-mode .modal-close:hover {
-          background: rgba(255,255,255,0.1);
-          color: #f9fafb;
-        }
-        .modal-body {
-          padding: 1.5rem;
-        }
-        .form-group {
-          margin-bottom: 1rem;
-        }
-        .form-group label {
-          display: block;
-          font-weight: 500;
-          margin-bottom: 0.5rem;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-          width: 100%;
-          padding: 0.5rem 0.75rem;
-          border: 1px solid #d1d5db;
-          border-radius: 8px;
-          background: #fff;
-        }
-        .dark-mode .form-group input,
-        .dark-mode .form-group select,
-        .dark-mode .form-group textarea {
-          background: #374151;
-          border-color: #4b5563;
-          color: #f9fafb;
-        }
-        .form-row {
-          display: flex;
-          gap: 1rem;
-        }
-        .form-error {
-          background: #fee2e2;
-          color: #b91c1c;
-          padding: 0.5rem;
-          border-radius: 8px;
-          margin-bottom: 1rem;
-        }
-        .modal-footer {
-          display: flex;
-          justify-content: flex-end;
-          gap: 0.75rem;
-          padding: 1rem 1.5rem;
-          border-top: 1px solid #e5e7eb;
-        }
-        .dark-mode .modal-footer {
-          border-top-color: #374151;
-        }
-        .btn-secondary {
-          background: #e5e7eb;
-          color: #1f2937;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-        .btn-primary {
-          background: #0f9f9b;
-          color: white;
-          border: none;
-          padding: 0.5rem 1rem;
-          border-radius: 8px;
-          cursor: pointer;
-        }
-        .btn-primary:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-      `}</style>
-
       <section className="page-title-card">
         <h1>Mes rendez-vous</h1>
       </section>
@@ -362,39 +230,35 @@ const RendezVousMedecin = () => {
       <section className="table-toolbar">
         <label className="table-search">
           <i className="fa-solid fa-magnifying-glass"></i>
-          <input
-            type="text"
-            placeholder="Chercher un rendez-vous..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <input type="text" placeholder="Chercher un rendez-vous..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </label>
-        <button className="btn transfer-add-btn" onClick={openModal}>
+        {/* <input type="date" className="form-control" value={date} onChange={(e) => setDate(e.target.value)} /> */}
+        <button className="btn transfer-add-btn" type="button" onClick={openModal}>
           <i ></i> Ajouter un rendez-vous
         </button>
       </section>
 
+      {error && <div className="alert alert-danger">{error}</div>}
+
       <section className="rdv-section">
         <article className="rdv-card">
           <div className="rdv-table-wrap">
-            {filteredAppointments.length === 0 ? (
+            {!loading && filteredAppointments.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-state-search"><i className="fa-solid fa-magnifying-glass"></i></div>
-                <h2>Aucun rendez-vous trouvé</h2>
-                <p>Aucun rendez-vous n'est programmé pour cette date.</p>
-                <button className="empty-state-btn" onClick={openModal}>
+                <h2>Aucun rendez-vous trouve</h2>
+                <p>Aucun rendez-vous n'est programme pour cette date.</p>
+                <button className="empty-state-btn" type="button" onClick={openModal}>
                   <i className="fa-solid fa-calendar-plus"></i> Programmer un rendez-vous
                 </button>
               </div>
             ) : (
               <table className="rdv-table">
-                <thead>
-                  <tr><th>Heure</th><th>Patient</th><th>Motif</th><th>Statut</th><th>Action</th></tr>
-                </thead>
+                <thead><tr><th>Heure</th><th>Patient</th><th>Motif</th><th>Statut</th><th>Action</th></tr></thead>
                 <tbody>
-                  {filteredAppointments.map((app) => {
+                  {loading && <tr><td colSpan="5">Chargement...</td></tr>}
+                  {!loading && paginatedAppointments.rows.map((app) => {
                     const { text, className } = getStatusInfo(app.statut);
-                    const buttonText = getButtonText(app.statut);
                     return (
                       <tr key={app.id}>
                         <td>{app.heure}</td>
@@ -402,9 +266,11 @@ const RendezVousMedecin = () => {
                         <td>{app.motif}</td>
                         <td><span className={className}>{text}</span></td>
                         <td>
-                          <button className="btn btn-outline btn-sm" onClick={() => handleConsultation(app.id)}>
-                            {buttonText}
-                          </button>
+                          {app.statut === 'en_cours' ? (
+                            <button className="btn btn-outline btn-sm" type="button" onClick={() => finishConsultation(app)}>Terminer</button>
+                          ) : (
+                            <button className="btn btn-outline btn-sm" type="button" onClick={() => startConsultation(app)}>Commencer</button>
+                          )}
                         </td>
                       </tr>
                     );
@@ -414,83 +280,291 @@ const RendezVousMedecin = () => {
             )}
           </div>
           <div className="table-footer">
-            <span className="table-meta">{filteredAppointments.length} rendez-vous planifié{filteredAppointments.length > 1 ? 's' : ''}</span>
-            <div className="table-pagination">
-              <span className="table-page">Précédent</span>
-              <span className="table-page active">1</span>
-              <span className="table-page">Suivant</span>
-            </div>
+            <span className="table-meta">{filteredAppointments.length === 0 ? 0 : paginatedAppointments.start + 1}-{paginatedAppointments.end} rendez-vous sur {filteredAppointments.length}</span>
+            <Pagination page={paginatedAppointments.page} totalItems={filteredAppointments.length} onPageChange={setPage} />
           </div>
         </article>
       </section>
 
-      {/* MODAL */}
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Programmer un rendez-vous</h3>
-              <button className="modal-close" onClick={closeModal} aria-label="Fermer">✕</button>
+     {isModalOpen && (
+  <div className="rdvmed-modal-overlay" onClick={closeModal}>
+    <div
+      className="rdvmed-modal-container"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="rdvmed-modal-header">
+        <div>
+          <h3>Programmer un rendez-vous</h3>
+          <p>Créer un nouveau rendez-vous médical</p>
+        </div>
+
+        <button
+          type="button"
+          className="rdvmed-modal-close"
+          onClick={closeModal}
+        >
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="rdvmed-modal-body">
+          {formError && (
+            <div className="rdvmed-form-error">
+              {formError}
             </div>
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                {formError && <div className="form-error">{formError}</div>}
-                <div className="form-group">
-                  <label>Patient *</label>
-                  <select
-                    name="patient_id"
-                    value={formData.patient_id}
-                    onChange={handleInputChange}
-                    required
-                    disabled={loadingPatients}
-                  >
-                    <option value="">-- Sélectionner un patient --</option>
-                    {patients.map(p => (
-                     <option key={p.id} value={p.id}>
-  {p.name}
-</option>
-                    ))}
-                  </select>
-                  {loadingPatients && <small>Chargement des patients...</small>}
-                </div>
-                
-            {!loading && !error && filteredData.length === 0 && (
-              <div className="empty-state">
-                <div className="empty-state-search">
-                  <i className="fa-solid fa-magnifying-glass"></i>
-                </div>
-                <h2>Aucune demande de transfert trouvée</h2>
-                <p>Aucune demande de transfert n’a été trouvée pour les critères sélectionnés.</p>
-                <NavLink to="nouvelle-demande" className="empty-state-btn">
-                  <i className="fa-solid fa-plus"></i> Ajouter une demande
-                </NavLink>
-              </div>
+          )}
+
+          <div className="rdvmed-form-group">
+            <label>Patient *</label>
+
+            <select
+              name="patient_id"
+              value={formData.patient_id}
+              onChange={handleInputChange}
+              required
+              disabled={loadingPatients}
+            >
+              <option value="">
+                -- Sélectionner un patient --
+              </option>
+
+              {patients.map((p) => {
+                const id = p?.patient?.id || p?.id;
+
+                return (
+                  <option key={id} value={id}>
+                    {patientLabel(p)}
+                  </option>
+                );
+              })}
+            </select>
+
+            {loadingPatients && (
+              <small>Chargement des patients...</small>
             )}
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Date *</label>
-                    <input type="date" name="date_consultation" value={formData.date_consultation} onChange={handleInputChange} required />
-                  </div>
-                  <div className="form-group">
-                    <label>Heure *</label>
-                    <input type="time" name="heure" value={formData.heure} onChange={handleInputChange} required />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Motif *</label>
-                  <textarea name="motif" rows="3" value={formData.motif} onChange={handleInputChange} required />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={closeModal}>Annuler</button>
-                <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting ? 'Enregistrement...' : 'Enregistrer'}
-                </button>
-              </div>
-            </form>
+          </div>
+
+          <div className="rdvmed-form-row">
+            <div className="rdvmed-form-group">
+              <label>Date *</label>
+
+             <input
+  type="date"
+  name="date_consultation"
+  value={formData.date_consultation}
+  onChange={handleInputChange}
+  min={today}
+  required
+/>
+            </div>
+
+            <div className="rdvmed-form-group">
+              <label>Heure *</label>
+
+              <input
+                type="time"
+                name="heure"
+                value={formData.heure}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="rdvmed-form-group">
+            <label>Motif *</label>
+
+            <textarea
+              name="motif"
+              rows="4"
+              value={formData.motif}
+              onChange={handleInputChange}
+              required
+            />
           </div>
         </div>
-      )}
+
+        <div className="rdvmed-modal-footer">
+          <button
+            type="button"
+            className="rdvmed-btn-cancel"
+            onClick={closeModal}
+          >
+            Annuler
+          </button>
+
+          <button
+            type="submit"
+            className="rdvmed-btn-save"
+            disabled={submitting}
+          >
+            {submitting
+              ? 'Enregistrement...'
+              : 'Enregistrer'}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+ <style>{`
+    
+
+.rdvmed-modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.65);
+  
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+    padding:20px;
+}
+
+.rdvmed-modal-container{
+    width:100%;
+    max-width:700px;
+    background:#fff;
+    border-radius:22px;
+    overflow:hidden;
+    animation:rdvmedOpen .25s ease;
+    box-shadow:
+        0 25px 50px rgba(0,0,0,.25),
+        0 10px 25px rgba(0,0,0,.15);
+}
+
+.rdvmed-modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    padding:30px 30px 20px;
+    background:#ffffff;
+    border-bottom:1px solid #edf2f7;
+}
+
+.rdvmed-modal-header h3{
+    margin:0;
+    font-size:1.5rem;
+    font-weight:700;
+}
+
+.rdvmed-modal-header p{
+    margin-top:6px;
+    opacity:.9;
+}
+
+.rdvmed-modal-close{
+    width:48px;
+    height:48px;
+    border:none;
+    border-radius:50%;
+    background:#f1f5f9;
+    color:#0f172a;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    transition:.2s;
+}
+
+.rdvmed-modal-close:hover{
+    background:#e2e8f0;
+    transform:none;
+}
+
+.rdvmed-modal-body{
+    padding:30px;
+}
+
+.rdvmed-form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+}
+
+.rdvmed-form-group{
+    margin-bottom:20px;
+}
+
+.rdvmed-form-group label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#334155;
+}
+
+.rdvmed-form-group input,
+.rdvmed-form-group select,
+.rdvmed-form-group textarea{
+    width:100%;
+    padding:13px 14px;
+    border:1px solid #dbe2ea;
+    border-radius:12px;
+    font-size:.95rem;
+    transition:.2s;
+}
+
+.rdvmed-form-group input:focus,
+.rdvmed-form-group select:focus,
+.rdvmed-form-group textarea:focus{
+    outline:none;
+    border-color:#14b8a6;
+    box-shadow:0 0 0 4px rgba(20,184,166,.15);
+}
+
+.rdvmed-form-error{
+    margin-bottom:15px;
+    padding:12px;
+    border-radius:10px;
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.rdvmed-modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    padding:20px 30px;
+    border-top:1px solid #eef2f7;
+}
+
+.rdvmed-btn-cancel{
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    background:#e2e8f0;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.rdvmed-btn-save{
+    border:none;
+    padding:12px 22px;
+    border-radius:10px;
+    background:#0f766e;
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.rdvmed-btn-save:hover{
+    background:#115e59;
+}
+
+@keyframes rdvmedOpen{
+    from{
+        opacity:0;
+        transform:translateY(-20px) scale(.95);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+      `}</style>
     </main>
   );
 };

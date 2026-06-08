@@ -4,8 +4,10 @@ import { getAuthUser } from '../../api/client';
 import { getCurrentUser } from '../../api/authApi';
 import { getMesPatientsEtablissement, getPatients as getAllPatients } from '../../api';
 import { getPatients as getDoctorPatients } from '../../api/medecinApi';
+import { getMesPatientsService } from '../../api/serviceApi';
 import { apiErrorMessage, unwrapList, valueAt } from '../DashAdmin/AdminCrudPage.jsx';
 import AvatarInitials from '../AvatarInitials.jsx';
+import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from './Pagination.jsx';
 
 function normalizeAuthPayload(value) {
   return value?.data?.data?.user || value?.data?.user || value?.user || value?.data || value || null;
@@ -47,6 +49,8 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -67,12 +71,14 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
           response = await getDoctorPatients(medecinId);
         } else if (source === 'etablissement') {
           try {
-            response = await getMesPatientsEtablissement({ per_page: 100 });
+            response = await getMesPatientsEtablissement({ per_page: 1000 });
           } catch {
-            response = await getAllPatients({ per_page: 100 });
+            response = await getAllPatients({ per_page: 1000 });
           }
+        } else if (source === 'service') {
+          response = await getMesPatientsService({ per_page: 1000 });
         } else {
-          response = await getAllPatients({ per_page: 100 });
+          response = await getAllPatients({ per_page: 1000 });
         }
         if (mounted) setPatients(unwrapList(response).rows.map(normalizePatient));
       } catch (err) {
@@ -93,6 +99,12 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
     if (!query) return patients;
     return patients.filter((patient) => [patient.name, patient.role, patient.org, ...(patient.tags || []), String(patient.age), patient.lastConsult].join(' ').toLowerCase().includes(query));
   }, [patients, searchQuery]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, patients.length, view]);
+
+  const paginatedPatients = useMemo(() => paginateRows(filteredPatients, page, DEFAULT_PAGE_SIZE), [filteredPatients, page]);
 
   const renderAvatar = (patient) => <AvatarInitials name={patient.name} size={72} bgColor="#13c3b8" />;
 
@@ -121,6 +133,9 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
               <i className="fa-solid fa-list"></i>
             </button>
           </div>
+          <button className="btn transfer-add-btn" onClick={() => setShowAddModal(true)}>
+            <i ></i> Ajouter un patient
+          </button>
         </div>
       </section>
 
@@ -130,7 +145,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
         {loading && <p className="table-meta p-4">Chargement des patients...</p>}
         {!loading && filteredPatients.length === 0 && <p className="table-meta p-4">Aucun patient trouve.</p>}
         <div className="mes-patients-cards">
-          {filteredPatients.map((patient) => (
+          {paginatedPatients.rows.map((patient) => (
             <article key={patient.id} className="mes-patients-card">
               <div className="mes-patients-card-main">
                 <div className="mes-patients-avatar-wrap">{renderAvatar(patient)}</div>
@@ -151,8 +166,12 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
           ))}
         </div>
         <div className="mes-patients-footer">
-          <span>{filteredPatients.length} patient(s) affiche(s) sur {patients.length}</span>
+          <span>
+            {filteredPatients.length === 0 ? 0 : paginatedPatients.start + 1}-{paginatedPatients.end} patient(s) affiche(s) sur {filteredPatients.length}
+          </span>
+          <Pagination page={paginatedPatients.page} totalItems={filteredPatients.length} onPageChange={setPage} />
         </div>
+        
       </section>
 
       <section className={`mes-patients-view mes-patients-list-section ${view === 'list' ? 'active' : ''}`}>
@@ -163,7 +182,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                 <tr><th>Nom</th><th>Age</th><th>Dossier / IMU</th><th>Derniere mise a jour</th><th>Actions</th></tr>
               </thead>
               <tbody>
-                {filteredPatients.map((patient) => (
+                {paginatedPatients.rows.map((patient) => (
                   <tr key={patient.id}>
                     <td>{patient.name}</td>
                     <td>{patient.age}</td>
@@ -182,10 +201,160 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
             </table>
           </div>
           <div className="mes-patients-list-footer">
-            <span className="table-meta">{filteredPatients.length} patients suivis</span>
+            <span className="table-meta">
+              {filteredPatients.length === 0 ? 0 : paginatedPatients.start + 1}-{paginatedPatients.end} patients suivis sur {filteredPatients.length}
+            </span>
+            <Pagination page={paginatedPatients.page} totalItems={filteredPatients.length} onPageChange={setPage} />
           </div>
         </article>
       </section>
+      {showAddModal && (
+  <div
+    className="custom-modal-overlay"
+    onClick={() => setShowAddModal(false)}
+  >
+    <div
+      className="custom-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="custom-modal-header">
+        <h3>Ajouter un patient</h3>
+        <button
+          className="custom-modal-close"
+          onClick={() => setShowAddModal(false)}
+        >
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div className="custom-modal-body">
+        <div className="form-group">
+          <label>Nom complet</label>
+          <input type="text" placeholder="Nom du patient" />
+        </div>
+
+        <div className="form-group">
+          <label>Téléphone</label>
+          <input type="text" placeholder="Téléphone" />
+        </div>
+
+        <div className="form-group">
+          <label>Date de naissance</label>
+          <input type="date" />
+        </div>
+      </div>
+
+      <div className="custom-modal-footer">
+        <button
+          className="btn-cancel"
+          onClick={() => setShowAddModal(false)}
+        >
+          Annuler
+        </button>
+
+        <button className="btn-save">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+<style>
+  {`
+  .add-patient-btn{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 18px;
+  border:none;
+  border-radius:12px;
+  background:#13c3b8;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.add-patient-btn:hover{
+  opacity:.9;
+}
+
+.custom-modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.custom-modal{
+  width:100%;
+  max-width:500px;
+  background:#fff;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.15);
+}
+
+.custom-modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 22px;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.custom-modal-close{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.custom-modal-body{
+  padding:22px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-bottom:16px;
+}
+
+.form-group input{
+  height:44px;
+  border:1px solid #d9e1ea;
+  border-radius:10px;
+  padding:0 14px;
+}
+
+.custom-modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:18px 22px;
+  border-top:1px solid #e5e7eb;
+}
+
+.btn-cancel{
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.btn-save{
+  border:none;
+  padding:10px 18px;
+  border-radius:10px;
+  background:#13c3b8;
+  color:#fff;
+  cursor:pointer;
+}
+  `}
+  </style>
     </main>
   );
 }

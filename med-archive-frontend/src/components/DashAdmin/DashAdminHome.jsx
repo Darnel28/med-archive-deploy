@@ -173,14 +173,14 @@ const DashboardAdmin = () => {
             <div className="dashadmin-metric-item"><span>Consultations aujourd'hui</span><strong>{dashboard?.consultations?.aujourdhui ?? 0}</strong></div>
             <div className="dashadmin-metric-item"><span>Labos actifs / total</span><strong>{counts.laboratoires}</strong></div>
           </div>
-          <div className="dashadmin-info-card">
+          {/* <div className="dashadmin-info-card">
             <h3><i className="fa-regular fa-bell"></i> Alertes système</h3>
             <ul className="dashadmin-alert-list">
               <li><i className="fa-solid fa-vial"></i> Analyses en attente: {dashboard?.analyses?.en_attente ?? 0}</li>
               <li><i className="fa-solid fa-file-medical"></i> Documents: {dashboard?.documents?.total ?? 0}</li>
               <li><i className="fa-solid fa-database"></i> Taille documents: {dashboard?.documents?.taille_totale ?? '0 Mo'}</li>
             </ul>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
