@@ -9,7 +9,7 @@ function navigate(path) {
 function BlogDetail() {
     return (
         <>
-            <div className="slider-area2">
+          <div className="slider-area2 about-cover">
                 <div className="slider-height2 d-flex align-items-center">
                     <div className="container">
                         <div className="row">

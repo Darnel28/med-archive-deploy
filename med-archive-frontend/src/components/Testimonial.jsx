@@ -2,6 +2,7 @@ import logo from "../assets/img/logo11.png";
 
 
 import Homepage_testi from "../assets/img/gallery/Homepage_testi.png";
+import video from "../assets/css/Vidéo illustration.mp4";
 
 function Testimonial() {
   return (
@@ -37,8 +38,13 @@ function Testimonial() {
                
             </div>
            
-            <div className="starups-img"></div>
-        </div>
+          
+                <video className="starups-video" controls>
+                    <source src={video} type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+       
     </header>
   );
 }

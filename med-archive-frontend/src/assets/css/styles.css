@@ -3812,3 +3812,33 @@ body.dark-mode .settings-extra p {
 .dark-mode .empty-state-btn:hover {
     background: #0d9488;
 }
+.starups-img{
+    width: 55%;
+    height: 750px;
+
+    display: flex;
+    justify-content: flex-end; /* pousse vers la droite */
+    align-items: center;
+}
+.starups-video{
+    width: 80%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 24px;
+}
+.medarchive-logo {
+    text-decoration: none;
+    font-size: 2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.medarchive-logo .med {
+    color: #113468;
+}
+
+.medarchive-logo .archive {
+    color: #000;
+}

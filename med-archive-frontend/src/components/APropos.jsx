@@ -1,5 +1,7 @@
 import about1 from "../assets/img/gallery/about1.png";
 import about2 from "../assets/img/gallery/about2.png";
+import about from "../assets/img/about.png";
+import about4 from "../assets/img/about4.png";
 
 function APropos() {
     return (
@@ -28,11 +30,11 @@ function APropos() {
                         </p>
                     </div>
 
-                    <div className="about-modern-card about-feature-card mb-30">
+                    <div className="about-modern-card about-feature-card mb-60">
                         <div className="row align-items-center">
                             <div className="col-lg-6 order-lg-2">
                                 <div className="about-modern-card-image">
-                                    <img src={about1} alt="Aperçu de la plateforme MedArchive" />
+                                    <img src={about} alt="Aperçu de la plateforme MedArchive" />
                                 </div>
                             </div>
                             <div className="col-lg-6 order-lg-1">
@@ -82,16 +84,16 @@ function APropos() {
                         </div>
                     </div>
 
-                    <div className="about-modern-card about-feature-card mb-30">
+                    <div className="about-modern-card about-feature-card mb-60">
                         <div className="row align-items-center">
                             <div className="col-lg-6">
                                 <div className="about-modern-card-image">
-                                    <img src={about2} alt="Suivi mobile MedArchive" />
+                                    <img src={about4} alt="Suivi mobile MedArchive" />
                                 </div>
                             </div>
                             <div className="col-lg-6">
                                 <div className="about-modern-card-content">
-                                    <h3>Une expérience simple sur mobile</h3>
+                                    <h3>Une expérience simple dans le monde du numérique</h3>
                                     <p>
                                         Retrouvez votre dossier où que vous soyez, avec une navigation claire pour les
                                         patients comme pour les soignants.
@@ -102,7 +104,7 @@ function APropos() {
                                         <li>Historique des examens et comptes rendus</li>
                                     </ul>
                                     <a href="#" className="btn about-btn consulter-btn">
-                                        Créer mon dossier <i className="ti-arrow-right"></i>
+                                        Accéder à mon dossier <i className="ti-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
@@ -123,9 +125,9 @@ function APropos() {
                                         <li>Alertes intelligentes pour rendez-vous et traitements</li>
                                         <li>Coordination fluide entre patients et soignants</li>
                                     </ul>
-                                    <a href="#" className="btn about-btn2">
+                                    {/* <a href="#" className="btn about-btn2">
                                         Voir nos services <i className="ti-arrow-right"></i>
-                                    </a>
+                                    </a> */}
                                 </div>
                             </div>
                             <div className="col-lg-6">

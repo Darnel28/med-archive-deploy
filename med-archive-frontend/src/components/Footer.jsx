@@ -1,5 +1,6 @@
 import logo from "../assets/img/logo/logo.png";
 import contact_form from "../assets/img/gallery/contact_form.png"
+import telecharger1 from "../assets/img/télécharger (1).jpeg";
 
 function navigate(path) {
     window.history.pushState({}, "", path);
@@ -13,7 +14,7 @@ function Footer() {
                 <div className="footer-wrap">
                     <div className="newsletter-card">
                         <div className="newsletter-illustration">
-                            <img src={contact_form} alt="Newsletter MedArchive" />
+                            <img src={telecharger1} alt="Newsletter MedArchive" />
                         </div>
                         <div className="newsletter-content">
                             <h3>Restez informé sur votre santé numérique</h3>
@@ -29,7 +30,14 @@ function Footer() {
                         <div className="row">
                             <div className="col-lg-4 col-md-6 mb-4">
                                 <div className="footer-brand">
-                                    <img src={logo} alt="Logo MedArchive" />
+                                     <a
+    href="/"
+    onClick={(event) => navigate(event, "/")}
+    className="medarchive-logo"
+  >
+    <span className="med">Med</span>
+    <span className="archive">Archive</span>
+  </a>
                                     <p>Plateforme nationale de gestion de dossier médical sécurisé pour les patients et
                                         professionnels de santé au Bénin.</p>
                                     <div className="socials">

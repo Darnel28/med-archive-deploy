@@ -31,11 +31,16 @@ function Header() {
           <div className="container-fluid">
             <div className="row align-items-center">
 
-              <div className="col-8 col-sm-8 col-md-3 col-lg-2 col-xl-2">
-                <div className="logo">
-                  <a href="/" onClick={(event) => navigate(event, "/")}><img src={logo} alt="Med-Archive" /></a>
-                </div>
-              </div>
+              <div className="logo">
+  <a
+    href="/"
+    onClick={(event) => navigate(event, "/")}
+    className="medarchive-logo"
+  >
+    <span className="med">Med</span>
+    <span className="archive">Archive</span>
+  </a>
+</div>
               <div className="col-lg-10 col-xl-10 d-none d-lg-block">
                 <div className="menu-main d-flex align-items-center justify-content-end">
 
