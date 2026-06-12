@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api";
-import "../assets/css/Connexion.css";
+// import "../assets/css/Connexion.css";
 import "../assets/css/Deconnexion.css";
 
 export default function DeconnexionPage() {
@@ -36,9 +36,9 @@ export default function DeconnexionPage() {
                                 Votre session Med-Archive protège les données médicales de votre espace patient et professionnel.
                             </p>
 
-                            <button type="button" className="connexion-left-button" onClick={() => navigate(-1)}>
+                            {/* <button type="button" className="connexion-left-button" onClick={() => navigate(-1)}>
                                 Retour
-                            </button>
+                            </button> */}
                         </div>
                     </aside>
 
@@ -52,9 +52,9 @@ export default function DeconnexionPage() {
                             </p>
 
                             <div className="deconnexion-box">
-                                <div className="deconnexion-box-icon">
+                                {/* <div className="deconnexion-box-icon">
                                     <i className="fa-solid fa-shield-heart"></i>
-                                </div>
+                                </div> */}
 
                                 <h2>Confirmer la déconnexion ?</h2>
                                 <p>

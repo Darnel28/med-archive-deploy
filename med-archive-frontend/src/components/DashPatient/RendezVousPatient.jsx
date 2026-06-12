@@ -1,74 +1,148 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getMesConsultations } from '../../api/patientApi';
+import { creerPaiementStripe, payerFacture } from '../../api/factureApi';
+import { updateConsultation } from '../../api/consultationApi';
+import { apiClient } from '../../api/client';
+
+const unwrapRows = (payload) => {
+  if (Array.isArray(payload?.data?.data)) return payload.data.data;
+  if (Array.isArray(payload?.data)) return payload.data;
+  return [];
+};
+
+const formatDate = (value) => value ? new Date(value).toLocaleDateString('fr-FR') : '-';
+const formatHour = (value) => value ? new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-';
+const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} FCFA`;
 
 const RendezVousPatient = () => {
-  // Données statiques des rendez-vous
-  const initialRdv = [
-    { id: 1, date: "18 Mars 2026", heure: "14:30", medecin: "Dr. Martin", service: "Médecine générale", statut: "A venir", rappel: "Active", rappelIcon: "fa-regular fa-bell" },
-    { id: 2, date: "25 Mars 2026", heure: "09:15", medecin: "Dr. Alice", service: "Cardiologie", statut: "A venir", rappel: "Active", rappelIcon: "fa-regular fa-bell" },
-    { id: 3, date: "07 Avr 2026", heure: "11:00", medecin: "Dr. Samba", service: "Dermatologie", statut: "En attente", rappel: "Active", rappelIcon: "fa-regular fa-bell" },
-    { id: 4, date: "12 Fev 2026", heure: "16:00", medecin: "Dr. Kone", service: "Ophtalmologie", statut: "Effectué", rappel: "Inactive", rappelIcon: "fa-regular fa-bell-slash" }
-  ];
-
-  const [rdvList, setRdvList] = useState(initialRdv);
+  const [appointments, setAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [editing, setEditing] = useState(null);
+  const [freeSlots, setFreeSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState('');
   const itemsPerPage = 5;
 
-  // Filtrer les rendez-vous selon la recherche
-  const filteredRdv = rdvList.filter(rdv =>
-    Object.values(rdv).some(val =>
-      String(val).toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
+  const loadAppointments = async () => {
+    setLoading(true);
+    setMessage('');
+    try {
+      const response = await getMesConsultations({ periode: 'avenir', per_page: 50 });
+      setAppointments(unwrapRows(response));
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Impossible de charger vos rendez-vous.');
+      setAppointments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // Pagination
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  const filteredRdv = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+    if (!query) return appointments;
+    return appointments.filter((rdv) => {
+      const text = [
+        rdv?.motif,
+        rdv?.medecin?.user?.name,
+        rdv?.medecin?.specialite?.nom,
+        rdv?.service?.nom,
+        rdv?.statut,
+        rdv?.statut_paiement,
+      ].join(' ').toLowerCase();
+      return text.includes(query);
+    });
+  }, [appointments, searchTerm]);
+
   const indexOfLast = currentPage * itemsPerPage;
-  const indexOfFirst = indexOfLast - itemsPerPage;
-  const currentRdv = filteredRdv.slice(indexOfFirst, indexOfLast);
+  const currentRdv = filteredRdv.slice(indexOfLast - itemsPerPage, indexOfLast);
   const totalPages = Math.ceil(filteredRdv.length / itemsPerPage);
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
     setCurrentPage(1);
   };
 
-  const handleAddRdv = () => {
-    alert("Fonctionnalité : Ajouter un rendez-vous");
-  };
+  const handlePay = async (rdv) => {
+    const facture = rdv?.facture;
 
-  const handleAction = (action, rdv) => {
-    alert(`${action} du rendez-vous du ${rdv.date} avec ${rdv.medecin}`);
-  };
-
-  const getStatutClass = (statut) => {
-    switch (statut) {
-      case 'A venir': return 'rdv-status upcoming';
-      case 'En attente': return 'rdv-status pending';
-      case 'Effectué': return 'rdv-status done';
-      default: return 'rdv-status';
+    if (!facture || facture.statut === 'payee') {
+      setMessage('Ce rendez-vous est deja paye ou aucune facture n est disponible.');
+      return;
     }
+
+    setMessage('Preparation du paiement...');
+    try {
+      try {
+        await creerPaiementStripe(facture.id);
+      } catch {
+        // Le serveur peut ne pas encore avoir STRIPE_SECRET en environnement.
+      }
+
+      await payerFacture(facture.id, {
+        montant: facture.montant_restant,
+        methode: 'stripe',
+        reference: `PATIENT-${Date.now()}`,
+      });
+      setMessage('Paiement enregistre avec succes.');
+      await loadAppointments();
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Paiement impossible pour le moment.');
+    }
+  };
+
+  const openReschedule = async (rdv) => {
+    setEditing(rdv);
+    setSelectedSlot('');
+    setFreeSlots([]);
+    setMessage('');
+    try {
+      const date = new Date(rdv.date_consultation).toISOString().slice(0, 10);
+      const response = await apiClient.get(`/medecins/${rdv.medecin_id}/planning`, { params: { date } });
+      setFreeSlots(response.data?.data?.creneaux_libres || []);
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Impossible de recuperer les heures libres du medecin.');
+    }
+  };
+
+  const submitReschedule = async () => {
+    if (!editing || !selectedSlot) return;
+    setMessage('Modification du rendez-vous...');
+    try {
+      await updateConsultation(editing.id, { date_consultation: selectedSlot });
+      setMessage('Rendez-vous modifie avec succes.');
+      setEditing(null);
+      await loadAppointments();
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Modification impossible.');
+    }
+  };
+
+  const getStatutClass = (rdv) => {
+    if (rdv.statut === 'termine') return 'rdv-status done';
+    if (rdv.statut_paiement !== 'payee') return 'rdv-status pending';
+    return 'rdv-status upcoming';
   };
 
   return (
     <main className="content page-tight">
       <section className="page-title-card">
-        <h1>Rendez-vous médicaux</h1>
+        <h1>Rendez-vous medicaux</h1>
       </section>
 
       <section className="table-toolbar">
         <label className="table-search" aria-label="Recherche rendez-vous">
           <i className="fa-solid fa-magnifying-glass"></i>
-          <input
-            type="text"
-            placeholder="Chercher un rendez-vous..."
-            value={searchTerm}
-            onChange={handleSearch}
-          />
+          <input type="text" placeholder="Chercher un rendez-vous..." value={searchTerm} onChange={handleSearch} />
         </label>
-        {/* <button className="btn btn-solid" onClick={handleAddRdv}>
-          <i className="fa-solid fa-calendar-plus"></i> Ajouter un rendez-vous
-        </button> */}
       </section>
+
+      {message && <p className="form-message">{message}</p>}
 
       <section className="rdv-section">
         <article className="rdv-card">
@@ -78,72 +152,79 @@ const RendezVousPatient = () => {
                 <tr>
                   <th>Date</th>
                   <th>Heure</th>
-                  <th>Médecin</th>
+                  <th>Medecin</th>
                   <th>Service</th>
+                  <th>Montant</th>
                   <th>Statut</th>
-                  {/* <th>Rappel</th> */}
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {currentRdv.map((rdv) => (
+                {loading && <tr><td colSpan="7" style={{ textAlign: 'center' }}>Chargement...</td></tr>}
+                {!loading && currentRdv.map((rdv) => (
                   <tr key={rdv.id}>
-                    <td>{rdv.date}</td>
-                    <td>{rdv.heure}</td>
-                    <td>{rdv.medecin}</td>
-                    <td>{rdv.service}</td>
-                    <td><span className={getStatutClass(rdv.statut)}>{rdv.statut}</span></td>
-                    {/* <td><i className={rdv.rappelIcon}></i> {rdv.rappel}</td> */}
+                    <td>{formatDate(rdv.date_consultation)}</td>
+                    <td>{formatHour(rdv.date_consultation)}</td>
+                    <td>{rdv.medecin?.user?.name || 'Medecin'}</td>
+                    <td>{rdv.service?.nom || rdv.medecin?.specialite?.nom || '-'}</td>
+                    <td>{formatMoney(rdv.facture?.montant_restant ?? rdv.montant_consultation)}</td>
+                    <td>
+                      <span className={getStatutClass(rdv)}>
+                        {rdv.statut_paiement === 'payee' ? 'Paye' : 'A payer'}
+                      </span>
+                    </td>
                     <td className="rdv-actions">
-                      {/* Bouton Payer remplace l'ancien bouton Voir */}
-                      <button className="icon-action" title="Payer" onClick={() => handleAction('Payer', rdv)}>
+                      <button className="icon-action" title="Payer" onClick={() => handlePay(rdv)} disabled={rdv.statut_paiement === 'payee'}>
                         <i className="fa-solid fa-credit-card"></i>
                       </button>
-                      <button className="icon-action" title="Modifier" onClick={() => handleAction('Modifier', rdv)}>
+                      <button className="icon-action" title="Modifier" onClick={() => openReschedule(rdv)}>
                         <i className="fa-regular fa-pen-to-square"></i>
-                      </button>
-                      <button className="icon-action danger" title="Annuler" onClick={() => handleAction('Annuler', rdv)}>
-                        <i className="fa-regular fa-circle-xmark"></i>
                       </button>
                     </td>
                   </tr>
                 ))}
-                {currentRdv.length === 0 && (
-                  <tr><td colSpan="7" style={{ textAlign: 'center' }}>Aucun rendez-vous trouvé</td></tr>
+                {!loading && currentRdv.length === 0 && (
+                  <tr><td colSpan="7" style={{ textAlign: 'center' }}>Aucun rendez-vous a venir</td></tr>
                 )}
               </tbody>
             </table>
           </div>
           <div className="table-footer">
-            <span className="table-meta">{filteredRdv.length} rendez-vous planifiés</span>
+            <span className="table-meta">{filteredRdv.length} rendez-vous planifies</span>
             <div className="table-pagination">
-              <button
-                className="table-page"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                Précédent
+              <button className="table-page" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
+                Precedent
               </button>
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  className={`table-page ${currentPage === i + 1 ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(i + 1)}
-                >
-                  {i + 1}
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <button key={index} className={`table-page ${currentPage === index + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(index + 1)}>
+                  {index + 1}
                 </button>
               ))}
-              <button
-                className="table-page"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages || totalPages === 0}
-              >
+              <button className="table-page" onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>
                 Suivant
               </button>
             </div>
           </div>
         </article>
       </section>
+
+      {editing && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
+            <h2>Choisir une heure libre</h2>
+            <select value={selectedSlot} onChange={(event) => setSelectedSlot(event.target.value)}>
+              <option value="">Selectionner un creneau</option>
+              {freeSlots.map((slot) => (
+                <option key={slot.date_consultation} value={slot.date_consultation}>{slot.heure}</option>
+              ))}
+            </select>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setEditing(null)}>Annuler</button>
+              <button className="btn btn-solid" onClick={submitReschedule} disabled={!selectedSlot}>Valider</button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };

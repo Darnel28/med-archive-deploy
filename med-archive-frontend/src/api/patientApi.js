@@ -21,6 +21,18 @@ export function getPatientQrCode(id) {
   return apiClient.get(`/patients/${id}/qrcode`).then((response) => response.data);
 }
 
+export function getMesConsultations(params) {
+  return apiClient.get("/patients/me/consultations", { params }).then((response) => response.data);
+}
+
+export function getMesAnalyses(params) {
+  return apiClient.get("/patients/me/analyses", { params }).then((response) => response.data);
+}
+
+export function getMesFactures(params) {
+  return apiClient.get("/patients/me/factures", { params }).then((response) => response.data);
+}
+
 export function getPatientsStatistiques() {
   return apiClient.get("/statistiques/patients").then((response) => response.data);
 }

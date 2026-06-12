@@ -138,7 +138,7 @@ const DashboardHomeAccueil = () => {
     <div className="receptionniste-dashboard">
       <div className="dashboard-header">
         <div>
-          <h1>Tableau de bord - Accueil</h1>
+          <h1>Tableau de bord</h1>
           <p className="subtitle">Bienvenue, receptionniste</p>
         </div>
         <div className="header-datetime">

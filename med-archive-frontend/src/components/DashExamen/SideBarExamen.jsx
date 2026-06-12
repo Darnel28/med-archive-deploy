@@ -60,10 +60,10 @@ const SidebarExamen = () => {
                 </div>
 
                 <div className="sidebar-profile">
-                    <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice" />
+                    <img src="https://i.pravatar.cc/80?img=32" alt="CC" />
                     <div>
-                        <strong>BAH Konie</strong>
-                        <span>ID: MED-24-007</span>
+                        <strong>Centre d'Analyse Bio-Sante Cotonou</strong>
+                        {/* <span>ID: MED-24-007</span> */}
                     </div>
                     <a className="settings-link" href="/espacemedecin/parametres">
                         <i className="fa-solid fa-gear"></i>

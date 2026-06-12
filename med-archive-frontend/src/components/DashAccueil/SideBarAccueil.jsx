@@ -75,7 +75,7 @@ const SidebarAccueil = () => {
           {profile.avatar ? <img src={profile.avatar} alt={profile.name} /> : <AvatarInitials name={profile.name} size={45} bgColor="#13c3b8" />}
           <div>
             <strong>{profile.name}</strong>
-            <span>ID: {profile.id}</span>
+            {/* <span>ID: {profile.id}</span> */}
           </div>
           <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se deconnecter">
             <i className="fa-solid fa-right-from-bracket"></i>
