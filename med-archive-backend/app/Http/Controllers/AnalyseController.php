@@ -19,8 +19,21 @@ class AnalyseController extends Controller
         $query = AnalyseLaboratoire::with([
             'consultation.dossier.patient.user',
             'laboratoire.user',
-            'prescripteur.user'
+            'prescripteur.user',
+            'facture'
         ]);
+
+        if ($request->user()->isMedecin()) {
+            $query->where('prescripteur_id', $request->user()->medecin?->id);
+        } elseif ($request->user()->isLaborantin()) {
+            $query->where('laboratoire_id', $request->user()->laboratoire?->id);
+        } elseif ($request->has('prescripteur_id')) {
+            $query->where('prescripteur_id', $request->prescripteur_id);
+        }
+
+        if ($request->filled('statut_paiement')) {
+            $query->where('statut_paiement', $request->statut_paiement);
+        }
 
         // Filtre par statut
         if ($request->has('statut')) {
@@ -68,8 +81,15 @@ class AnalyseController extends Controller
             'date_prelevement' => 'required|date',
             'prescripteur_id' => 'required|exists:medecins,id',
             'commentaires' => 'nullable|string',
-            'montant_analyse' => 'required|numeric|min:0'
+            'montant_analyse' => 'nullable|numeric|min:0'
         ]);
+
+        if ($request->user()->isMedecin()) {
+            $validated['prescripteur_id'] = $request->user()->medecin?->id;
+        }
+
+        $laboratoire = Laboratoire::findOrFail($validated['laboratoire_id']);
+        $montant = $validated['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 10000;
 
         $analyse = AnalyseLaboratoire::create([
             'consultation_id' => $validated['consultation_id'],
@@ -78,10 +98,10 @@ class AnalyseController extends Controller
             'date_prelevement' => $validated['date_prelevement'],
             'prescripteur_id' => $validated['prescripteur_id'],
             'commentaires' => $validated['commentaires'] ?? null,
-            'statut' => 'prescrit'
+            'statut' => 'prescrit',
+            'montant_analyse' => $montant
         ]);
 
-        $montant = $validated['montant_analyse'];
         $latestId = Facture::max('id') ?? 0;
         $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
         $facture = Facture::create([
@@ -179,6 +199,13 @@ class AnalyseController extends Controller
                 'success' => false,
                 'message' => 'Analyse non trouvée'
             ], 404);
+        }
+
+        if ($analyse->statut_paiement !== 'payee') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Analyse non payee.',
+            ], 403);
         }
 
         $validated = $request->validate([

@@ -7,6 +7,10 @@ use App\Models\Dossier;
 use App\Models\Constante;
 use App\Models\Ordonnance;
 use App\Models\Facture;
+use App\Models\AnalyseLaboratoire;
+use App\Models\Laboratoire;
+use App\Models\Service;
+use App\Support\DossierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +24,7 @@ class ConsultationController extends Controller
         $query = Consultation::with([
             'dossier.patient.user',
             'medecin.user',
+            'medecin.etablissement',
             'constantes'
         ]);
 
@@ -56,6 +61,22 @@ class ConsultationController extends Controller
             });
         }
 
+        if ($request->user()->isEtablissement()) {
+            $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {
+                $transferQuery->where('statut', 'accepte')
+                    ->where('etablissement_source_id', $request->user()->id)
+                    ->whereColumn('date_approbation', '<', 'consultations.date_consultation');
+            });
+        }
+
+        if ($request->user()->isService() && $request->user()->service) {
+            $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {
+                $transferQuery->where('statut', 'accepte')
+                    ->where('service_source_id', $request->user()->service->id)
+                    ->whereColumn('date_approbation', '<', 'consultations.date_consultation');
+            });
+        }
+
         $consultations = $query->orderBy('date_consultation', 'desc')
             ->paginate($request->get('per_page', 15));
 
@@ -72,11 +93,13 @@ class ConsultationController extends Controller
     {
         $validated = $request->validate([
             'patient_id' => 'required|exists:patients,id',
-    'medecin_id' => 'required|exists:medecins,id',
-    'date_consultation' => 'required|date',
-    'motif' => 'required|string|max:255',
-    'diagnostic' => 'nullable|string',
-    'observations' => 'nullable|string',
+            'medecin_id' => 'required|exists:medecins,id',
+            'service_id' => 'nullable|exists:services,id',
+            'date_consultation' => 'required|date',
+            'motif' => 'required|string|max:255',
+            'diagnostic' => 'nullable|string',
+            'observations' => 'nullable|string',
+            'statut' => 'nullable|in:en_attente,en_cours,termine,absent',
 
             // Constantes (optionnelles)
             'constantes' => 'nullable|array',
@@ -97,6 +120,13 @@ class ConsultationController extends Controller
 
             'montant_consultation' => 'nullable|numeric|min:0',
             'est_urgence' => 'nullable|boolean',
+
+            'analyses' => 'nullable|array',
+            'analyses.*.laboratoire_id' => 'required_with:analyses|exists:laboratoires,id',
+            'analyses.*.type_analyse' => 'required_with:analyses|string|max:255',
+            'analyses.*.date_prelevement' => 'nullable|date',
+            'analyses.*.commentaires' => 'nullable|string',
+            'analyses.*.montant_analyse' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -109,19 +139,32 @@ class ConsultationController extends Controller
     $validated['patient_id']
 )->firstOrFail();
 
+            if (!DossierAccess::canWrite($request->user(), $dossier)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce dossier a ete transfere et vous ne pouvez plus le modifier.',
+                ], 403);
+            }
+
             // Créer la consultation
+            $estUrgence = $request->boolean('est_urgence', false);
+
             $consultation = Consultation::create([
                 'dossier_id' => $dossier->id,
                 'medecin_id' => $validated['medecin_id'],
+                'service_id' => $validated['service_id'] ?? null,
                 'date_consultation' => $validated['date_consultation'],
                 'motif' => $validated['motif'],
                 'diagnostic' => $validated['diagnostic'] ?? null,
-                'observations' => $validated['observations'] ?? null
+                'observations' => $validated['observations'] ?? null,
+                'statut' => $validated['statut'] ?? 'en_attente',
+                'montant_consultation' => $request->input('montant_consultation'),
+                'est_urgence' => $estUrgence
             ]);
 
-            $estUrgence = $request->input('est_urgence', false);
             if (!$estUrgence) {
-                $montant = $request->input('montant_consultation', 5000);
+                $service = !empty($validated['service_id']) ? Service::find($validated['service_id']) : null;
+                $montant = $request->input('montant_consultation', $service?->tarif_patient_simple ?? 5000);
                 $latestId = Facture::max('id') ?? 0;
                 $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
                 Facture::create([
@@ -135,6 +178,8 @@ class ConsultationController extends Controller
                     'statut' => 'non_payee',
                     'created_by' => $request->user()->id
                 ]);
+
+                $consultation->update(['montant_consultation' => $montant]);
             } else {
                 $consultation->update(['statut_paiement' => 'payee']);
             }
@@ -164,6 +209,37 @@ class ConsultationController extends Controller
                 ]);
             }
 
+            foreach ($validated['analyses'] ?? [] as $analyseData) {
+                $laboratoire = Laboratoire::findOrFail($analyseData['laboratoire_id']);
+                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 10000;
+
+                $analyse = AnalyseLaboratoire::create([
+                    'consultation_id' => $consultation->id,
+                    'laboratoire_id' => $analyseData['laboratoire_id'],
+                    'type_analyse' => $analyseData['type_analyse'],
+                    'date_prelevement' => $analyseData['date_prelevement'] ?? now()->toDateString(),
+                    'prescripteur_id' => $validated['medecin_id'],
+                    'commentaires' => $analyseData['commentaires'] ?? null,
+                    'statut' => 'prescrit',
+                    'montant_analyse' => $montantAnalyse,
+                ]);
+
+                $latestId = Facture::max('id') ?? 0;
+                $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
+                $facture = Facture::create([
+                    'numero' => $numero,
+                    'patient_id' => $dossier->patient_id,
+                    'type' => 'examen',
+                    'montant_total' => $montantAnalyse,
+                    'montant_paye' => 0,
+                    'montant_restant' => $montantAnalyse,
+                    'statut' => 'non_payee',
+                    'created_by' => $request->user()->id,
+                ]);
+
+                $analyse->update(['facture_id' => $facture->id]);
+            }
+
             // Mettre à jour les stats du dossier (on réutilise $dossier)
             $dossier->updateStatistiques();
 
@@ -172,7 +248,7 @@ class ConsultationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Consultation créée avec succès',
-                'data' => $consultation->load(['constantes', 'ordonnance', 'medecin.user'])
+                'data' => $consultation->load(['constantes', 'ordonnance', 'analyses.facture', 'medecin.user'])
             ], 201);
 
         } catch (\Exception $e) {
@@ -187,11 +263,12 @@ class ConsultationController extends Controller
     /**
      * Détails d'une consultation
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $consultation = Consultation::with([
             'dossier.patient.user',
             'medecin.user',
+            'medecin.etablissement',
             'constantes',
             'ordonnance',
             'documents.typeDocument',
@@ -203,6 +280,17 @@ class ConsultationController extends Controller
                 'success' => false,
                 'message' => 'Consultation non trouvée'
             ], 404);
+        }
+
+        $visible = DossierAccess::applyReadableConsultations($request->user(), $consultation->dossier, $consultation->dossier->consultations())
+            ->where('consultations.id', $consultation->id)
+            ->exists();
+
+        if (!$visible) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Consultation non accessible depuis votre établissement ou service.',
+            ], 403);
         }
 
         return response()->json([
@@ -227,8 +315,32 @@ class ConsultationController extends Controller
 
         $validated = $request->validate([
             'diagnostic' => 'nullable|string',
-            'observations' => 'nullable|string'
+            'observations' => 'nullable|string',
+            'statut' => 'nullable|in:en_attente,en_cours,termine,absent',
+            'date_consultation' => 'nullable|date',
         ]);
+
+        if (!DossierAccess::canWrite($request->user(), $consultation->dossier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce dossier a ete transfere et vous ne pouvez plus le modifier.',
+            ], 403);
+        }
+
+        if ($request->user()->isPatient()) {
+            $patient = $request->user()->patient;
+
+            if (!$patient || (int) $consultation->dossier?->patient_id !== (int) $patient->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ce rendez-vous ne vous appartient pas.',
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'date_consultation' => 'required|date|after:now',
+            ]);
+        }
 
         $consultation->update($validated);
 

@@ -8,7 +8,9 @@ use App\Models\AnalyseLaboratoire;
 use App\Models\Consultation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Http;
+use FedaPay\FedaPay;
+use FedaPay\Transaction;
 class FactureController extends Controller
 {
     /**
@@ -112,9 +114,16 @@ class FactureController extends Controller
     {
         $facture = Facture::findOrFail($id);
 
+        if ($request->user()->isPatient() && (int) $request->user()->patient?->id !== (int) $facture->patient_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette facture ne vous appartient pas.',
+            ], 403);
+        }
+
         $validated = $request->validate([
             'montant' => 'required|numeric|min:1|max:' . $facture->montant_restant,
-            'methode' => 'required|in:mobile_money,especes',
+            'methode' => 'required|in:mobile_money,especes,stripe',
             'reference' => 'nullable|string',
         ]);
 
@@ -157,6 +166,108 @@ class FactureController extends Controller
             'data' => $facture->fresh(['paiements', 'consultation']),
         ]);
     }
+
+    public function creerPaiementStripe(Request $request, $id)
+    {
+        $facture = Facture::with('patient.user')->findOrFail($id);
+
+        if ($request->user()->isPatient() && (int) $request->user()->patient?->id !== (int) $facture->patient_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette facture ne vous appartient pas.',
+            ], 403);
+        }
+
+        if ($facture->statut === 'payee') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette facture est deja payee.',
+            ], 422);
+        }
+
+        $secret = config('services.stripe.secret');
+
+        if (!$secret) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Stripe n est pas configure sur le serveur.',
+            ], 500);
+        }
+
+        $fcfaPerEur = max((float) config('services.stripe.fcfa_per_eur'), 1);
+        $montantFcfa = (float) $facture->montant_restant;
+        $montantEur = round($montantFcfa / $fcfaPerEur, 2);
+        $amountInCents = max((int) round($montantEur * 100), 50);
+
+        $response = Http::asForm()
+            ->withBasicAuth($secret, '')
+            ->post('https://api.stripe.com/v1/payment_intents', [
+                'amount' => $amountInCents,
+                'currency' => 'eur',
+                'description' => "Facture {$facture->numero} - Med-Archive",
+                'receipt_email' => $facture->patient?->user?->email,
+                'metadata[facture_id]' => $facture->id,
+                'metadata[numero_facture]' => $facture->numero,
+                'metadata[montant_fcfa]' => $montantFcfa,
+            ]);
+
+        if (!$response->successful()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de preparer le paiement Stripe.',
+                'error' => $response->json('error.message'),
+            ], 502);
+        }
+
+        $intent = $response->json();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'client_secret' => $intent['client_secret'] ?? null,
+                'payment_intent_id' => $intent['id'] ?? null,
+                'montant_fcfa' => $montantFcfa,
+                'montant_eur' => $montantEur,
+                'taux_fcfa_eur' => $fcfaPerEur,
+            ],
+        ]);
+    }
+public function creerPaiementFedapay(Request $request, $id)
+{
+    try {
+
+        $facture = Facture::findOrFail($id);
+
+        FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
+        FedaPay::setEnvironment('sandbox');
+
+       $transaction = Transaction::create([
+    'description' => 'Paiement facture '.$facture->numero,
+    'amount' => 100,
+    'currency' => [
+        'iso' => 'XOF'
+    ]
+]);
+
+        $token = $transaction->generateToken();
+
+        return response()->json([
+            'success' => true,
+            'url' => $token->url,
+            'transaction_id' => $transaction->id
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+        ], 500);
+
+    }
+}
 
     /**
      * Générer le PDF de la facture (nécessite barryvdh/laravel-dompdf)

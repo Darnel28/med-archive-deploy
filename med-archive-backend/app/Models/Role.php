@@ -48,6 +48,14 @@ class Role extends Model
     }
 
     /**
+     * Vérifie si le rôle est un service d'accueil
+     */
+    public function isService(): bool
+    {
+        return $this->nom === 'Service';
+    }
+
+    /**
      * Vérifie si le rôle est un établissement
      */
     public function isEtablissement(): bool

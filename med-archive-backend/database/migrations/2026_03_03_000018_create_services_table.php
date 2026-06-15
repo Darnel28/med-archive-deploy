@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->unique()->constrained('users');
             $table->foreignId('etablissement_id')->constrained('users');
             $table->string('nom');
             $table->string('description')->nullable();

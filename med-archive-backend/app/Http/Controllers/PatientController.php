@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Dossier;
+use App\Support\DossierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -78,14 +80,16 @@ class PatientController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => bcrypt($validated['password']),
+                'password' => Hash::make($validated['password']),
                 'telephone' => $validated['telephone'],
                 'adresse' => $validated['adresse'],
                 'ville' => $validated['ville'],
                 'date_naissance' => $validated['date_naissance'],
                 'sexe' => $validated['sexe'],
                 'role_id' => 3,
-                'statut' => 'actif'
+                'statut' => 'actif',
+                'must_change_password' => true,
+                'temporary_password_expires_at' => now()->addDay(),
             ]);
 
             // Créer le patient
@@ -174,7 +178,7 @@ class PatientController extends Controller
     /**
      * Dossier complet du patient
      */
-    public function dossierComplet($id)
+    public function dossierComplet(Request $request, $id)
     {
         $patient = Patient::with('user')->find($id);
 
@@ -192,11 +196,133 @@ class PatientController extends Controller
             ], 404);
         }
 
-        $contenuComplet = $patient->dossier->contenu_complet;
+        $dossier = $patient->dossier;
+        $consultations = DossierAccess::applyReadableConsultations($request->user(), $dossier, $dossier->consultations())
+            ->with(['medecin.user', 'medecin.etablissement', 'service', 'constantes', 'ordonnance', 'analyses.laboratoire.user', 'documents.typeDocument'])
+            ->latest('date_consultation')
+            ->get();
+        $visibleConsultationIds = $consultations->pluck('id');
+
+        $contenuComplet = [
+            'dossier' => $dossier,
+            'patient' => $patient->load('user'),
+            'consultations' => $consultations,
+            'documents' => $dossier->documents()
+                ->whereIn('consultations.id', $visibleConsultationIds)
+                ->with('typeDocument')
+                ->latest('documents.created_at')
+                ->get(),
+            'analyses' => $dossier->analyses()
+                ->whereIn('consultations.id', $visibleConsultationIds)
+                ->with(['laboratoire.user', 'prescripteur.user'])
+                ->latest('date_prelevement')
+                ->get(),
+            'ordonnances' => $dossier->ordonnances()
+                ->whereIn('consultations.id', $visibleConsultationIds)
+                ->with(['consultation.medecin.user'])
+                ->latest('ordonnances.created_at')
+                ->get(),
+            'statistiques' => [
+                'total_consultations' => $consultations->count(),
+                'total_documents' => $dossier->documents()->whereIn('consultations.id', $visibleConsultationIds)->count(),
+                'total_analyses' => $dossier->analyses()->whereIn('consultations.id', $visibleConsultationIds)->count(),
+                'derniere_activite' => $consultations->first()?->date_consultation,
+            ],
+        ];
 
         return response()->json([
             'success' => true,
             'data' => $contenuComplet
+        ]);
+    }
+
+    public function mesConsultations(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Espace patient introuvable'], 403);
+        }
+
+        $query = $patient->consultations()
+            ->with(['medecin.user', 'medecin.specialite', 'service', 'facture', 'constantes', 'ordonnance'])
+            ->latest('date_consultation');
+
+        if ($request->filled('periode')) {
+            $request->periode === 'avenir'
+                ? $query->where('date_consultation', '>=', now())
+                : $query->where('date_consultation', '<', now());
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->paginate($request->get('per_page', 15)),
+        ]);
+    }
+
+    public function mesOrdonnances(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient || !$patient->dossier) {
+            return response()->json(['success' => false, 'message' => 'Dossier patient introuvable'], 403);
+        }
+
+        $ordonnances = $patient->dossier->ordonnances()
+            ->with(['consultation.medecin.user', 'consultation.medecin.specialite'])
+            ->latest('ordonnances.created_at')
+            ->paginate($request->get('per_page', 15));
+
+        return response()->json(['success' => true, 'data' => $ordonnances]);
+    }
+
+    public function mesAnalyses(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient || !$patient->dossier) {
+            return response()->json(['success' => false, 'message' => 'Dossier patient introuvable'], 403);
+        }
+
+        $query = $patient->dossier->analyses()
+            ->with(['laboratoire.user', 'prescripteur.user', 'consultation', 'facture'])
+            ->latest('analyses_laboratoire.created_at');
+
+        if ($request->filled('statut_paiement')) {
+            $query->where('statut_paiement', $request->statut_paiement);
+        }
+
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->statut);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->paginate($request->get('per_page', 15)),
+        ]);
+    }
+
+    public function mesFactures(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Espace patient introuvable'], 403);
+        }
+
+        $query = $patient->factures()->with(['consultation.medecin.user', 'paiements']);
+
+        if ($request->filled('statut')) {
+            $query->where('statut', $request->statut);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $query->latest()->paginate($request->get('per_page', 15)),
         ]);
     }
 

@@ -72,6 +72,14 @@ class AuthController extends Controller
             ], 403);
         }
 
+        if ($user->temporary_password_expires_at && now()->greaterThan($user->temporary_password_expires_at)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Votre mot de passe temporaire a expire. Veuillez demander un nouveau mot de passe.',
+                'password_expired' => true,
+            ], 403);
+        }
+
         // Supprimer les anciens tokens
         $user->tokens()->delete();
 
@@ -82,7 +90,27 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Connexion réussie',
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'must_change_password' => (bool) $user->must_change_password,
+        ]);
+    }
+
+    public function changerMotDePasse(Request $request)
+    {
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'password' => Hash::make($validated['password']),
+            'must_change_password' => false,
+            'temporary_password_expires_at' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mot de passe modifie avec succes',
         ]);
     }
 
@@ -109,6 +137,7 @@ class AuthController extends Controller
             'etablissement',
             'medecin.specialite',
             'patient',
+            'service',
             'laboratoire'
         ]);
 

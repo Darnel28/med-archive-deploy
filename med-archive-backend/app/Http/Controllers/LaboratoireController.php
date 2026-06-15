@@ -61,7 +61,9 @@ class LaboratoireController extends Controller
             'etablissement_id' => 'required|exists:users,id',
             'nom_laboratoire' => 'required|string|max:255',
             'agrement' => 'required|string|unique:laboratoires,agrement',
-            'specialites_analyse' => 'nullable|array'
+            'specialites_analyse' => 'nullable|array',
+            'tarif_patient_simple' => 'nullable|numeric|min:0',
+            'tarif_patient_assure' => 'nullable|numeric|min:0',
         ]);
 
         DB::beginTransaction();
@@ -86,7 +88,9 @@ class LaboratoireController extends Controller
                 'nom_laboratoire' => $validated['nom_laboratoire'],
                 'agrement' => $validated['agrement'],
                 'specialites_analyse' => $validated['specialites_analyse'] ?? [],
-                'est_actif' => true
+                'est_actif' => true,
+                'tarif_patient_simple' => $validated['tarif_patient_simple'] ?? 10000,
+                'tarif_patient_assure' => $validated['tarif_patient_assure'] ?? 5000,
             ]);
 
             DB::commit();
@@ -166,6 +170,8 @@ class LaboratoireController extends Controller
             'agrement' => 'sometimes|string|unique:laboratoires,agrement,' . $id,
             'specialites_analyse' => 'nullable|array',
             'est_actif' => 'sometimes|boolean',
+            'tarif_patient_simple' => 'nullable|numeric|min:0',
+            'tarif_patient_assure' => 'nullable|numeric|min:0',
             'telephone' => 'sometimes|string|max:20',
             'adresse' => 'sometimes|string'
         ]);
@@ -178,7 +184,9 @@ class LaboratoireController extends Controller
                 'nom_laboratoire' => $validated['nom_laboratoire'] ?? $laboratoire->nom_laboratoire,
                 'agrement' => $validated['agrement'] ?? $laboratoire->agrement,
                 'specialites_analyse' => $validated['specialites_analyse'] ?? $laboratoire->specialites_analyse,
-                'est_actif' => $validated['est_actif'] ?? $laboratoire->est_actif
+                'est_actif' => $validated['est_actif'] ?? $laboratoire->est_actif,
+                'tarif_patient_simple' => $validated['tarif_patient_simple'] ?? $laboratoire->tarif_patient_simple,
+                'tarif_patient_assure' => $validated['tarif_patient_assure'] ?? $laboratoire->tarif_patient_assure,
             ]);
 
             // Mettre à jour l'utilisateur
@@ -203,6 +211,47 @@ class LaboratoireController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur lors de la mise à jour: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Supprimer un laboratoire.
+     */
+    public function destroy($id)
+    {
+        $laboratoire = Laboratoire::with('user')->find($id);
+
+        if (!$laboratoire) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Laboratoire non trouvé'
+            ], 404);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $user = $laboratoire->user;
+            $laboratoire->delete();
+
+            if ($user) {
+                $user->tokens()->delete();
+                $user->delete();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Laboratoire supprimé avec succès'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la suppression: ' . $e->getMessage()
             ], 500);
         }
     }

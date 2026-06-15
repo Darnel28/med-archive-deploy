@@ -25,7 +25,9 @@ class User extends Authenticatable
         'sexe',
         'role_id',
         'etablissement_id',
-        'statut'
+        'statut',
+        'must_change_password',
+        'temporary_password_expires_at'
     ];
 
     protected $hidden = [
@@ -37,6 +39,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'date_naissance' => 'date',
         'password' => 'hashed',
+        'must_change_password' => 'boolean',
+        'temporary_password_expires_at' => 'datetime',
     ];
 
     /**
@@ -91,6 +95,11 @@ class User extends Authenticatable
         return $this->hasOne(Patient::class);
     }
 
+    public function service(): HasOne
+    {
+        return $this->hasOne(Service::class);
+    }
+
     public function laboratoire(): HasOne
     {
         return $this->hasOne(Laboratoire::class);
@@ -112,6 +121,11 @@ class User extends Authenticatable
     public function isPatient(): bool
     {
         return $this->role?->isPatient() ?? false;
+    }
+
+    public function isService(): bool
+    {
+        return $this->role?->isService() ?? false;
     }
 
     public function isEtablissement(): bool

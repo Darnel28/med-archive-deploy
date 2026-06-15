@@ -70,6 +70,11 @@ class Dossier extends Model
         return $this->hasMany(Consultation::class);
     }
 
+    public function transferts(): HasMany
+    {
+        return $this->hasMany(TransfertDossier::class);
+    }
+
     public function etablissementDestination()
     {
         return $this->belongsTo(Etablissement::class, 'etablissement_destination_id');

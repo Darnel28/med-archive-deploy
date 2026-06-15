@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Paiement;
 use Illuminate\Http\Request;
+use FedaPay\FedaPay;
+use FedaPay\Transaction;
 
 class PaiementController extends Controller
 {
@@ -57,4 +59,26 @@ class PaiementController extends Controller
             'data' => $paiement,
         ]);
     }
+    public function initierPaiement(Request $request, $factureId)
+{
+    $facture = Facture::findOrFail($factureId);
+
+    FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
+    FedaPay::setEnvironment('sandbox');
+
+    $transaction = Transaction::create([
+        "description" => "Paiement consultation",
+        "amount" => $facture->montant_restant,
+        "currency" => [
+            "iso" => "XOF"
+        ]
+    ]);
+
+    $token = $transaction->generateToken();
+
+    return response()->json([
+        "success" => true,
+        "url" => $token->url
+    ]);
+}
 }

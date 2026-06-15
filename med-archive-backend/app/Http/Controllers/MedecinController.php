@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Medecin;
 use App\Models\User;
 use App\Models\Consultation;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -230,22 +231,60 @@ class MedecinController extends Controller
 
         $consultations = Consultation::where('medecin_id', $id)
             ->whereDate('date_consultation', $date)
-            ->with(['dossier.patient.user'])
+            ->where(function ($query) {
+                $query->where('statut_paiement', 'payee')
+                    ->orWhere('est_urgence', true);
+            })
+            ->with(['dossier.patient.user', 'medecin.user', 'medecin.etablissement'])
             ->orderBy('date_consultation')
             ->get();
+
+        $occupiedSlots = $consultations
+            ->map(fn ($consultation) => $consultation->date_consultation->format('H:i'))
+            ->all();
+
+        $slots = [];
+        $start = Carbon::parse($date)->setTime(8, 0);
+        $end = Carbon::parse($date)->setTime(17, 0);
+
+        while ($start->lt($end)) {
+            $slot = $start->format('H:i');
+
+            if (!in_array($slot, $occupiedSlots, true)) {
+                $slots[] = [
+                    'heure' => $slot,
+                    'date_consultation' => $start->format('Y-m-d\TH:i:s'),
+                ];
+            }
+
+            $start->addMinutes(30);
+        }
 
         return response()->json([
             'success' => true,
             'data' => [
                 'date' => $date,
                 'total' => $consultations->count(),
+                'creneaux_libres' => $slots,
                 'consultations' => $consultations->map(function($c) {
+                    $patient = $c->dossier?->patient;
+                    $user = $patient?->user;
                     return [
                         'id' => $c->id,
                         'heure' => $c->date_consultation->format('H:i'),
-                        'patient' => $c->dossier->patient->user->name,
+                        'patient' => $user?->name,
+                        'patient_id' => $patient?->id,
+                        'patient_npi' => $patient?->npi,
+                        'patient_imu' => $patient?->imu,
+                        'patient_sexe' => $user?->sexe,
+                        'patient_date_naissance' => $user?->date_naissance,
+                        'numero_dossier' => $c->dossier?->numero_dossier,
                         'motif' => $c->motif,
-                        'statut' => $c->date_consultation->isPast() ? 'termine' : 'programme'
+                        'date_consultation' => $c->date_consultation,
+                        'medecin' => $c->medecin?->user?->name,
+                        'hopital' => $c->medecin?->etablissement?->name,
+                        'hopital_adresse' => $c->medecin?->etablissement?->adresse,
+                        'statut' => $c->statut ?: 'en_attente'
                     ];
                 })
             ]

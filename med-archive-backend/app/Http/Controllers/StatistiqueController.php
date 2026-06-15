@@ -127,10 +127,10 @@ class StatistiqueController extends Controller
                         ->count()
                 ],
                 'consultations' => [
-                    'total' => $consultations->count(),
-                    'mois' => $consultations->whereBetween('date_consultation', [$debutMois, $finMois])->count(),
-                    'aujourdhui' => $consultations->whereDate('date_consultation', today())->count(),
-                    'par_motif' => $consultations->select('motif', DB::raw('count(*) as total'))
+                    'total' => (clone $consultations)->count(),
+                    'mois' => (clone $consultations)->whereBetween('date_consultation', [$debutMois, $finMois])->count(),
+                    'aujourdhui' => (clone $consultations)->whereDate('date_consultation', today())->count(),
+                    'par_motif' => (clone $consultations)->select('motif', DB::raw('count(*) as total'))
                         ->whereNotNull('motif')
                         ->groupBy('motif')
                         ->orderBy('total', 'desc')
@@ -176,10 +176,11 @@ class StatistiqueController extends Controller
                         ->count('dossier_id')
                 ],
                 'consultations' => [
-                    'total' => $consultations->count(),
-                    'mois' => $consultations->whereBetween('date_consultation', [$debutMois, $finMois])->count(),
-                    'aujourdhui' => $consultations->whereDate('date_consultation', today())->count(),
-                    'prochaines' => $consultations->whereDate('date_consultation', '>', today())
+                    'total' => (clone $consultations)->count(),
+                    'mois' => (clone $consultations)->whereBetween('date_consultation', [$debutMois, $finMois])->count(),
+                    'aujourdhui' => (clone $consultations)->whereDate('date_consultation', today())->count(),
+                    'prochaines' => (clone $consultations)->whereDate('date_consultation', '>', today())
+                        ->with(['dossier.patient.user'])
                         ->orderBy('date_consultation')
                         ->limit(5)
                         ->get()

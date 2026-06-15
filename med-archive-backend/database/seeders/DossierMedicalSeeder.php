@@ -2,460 +2,477 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Role;
-use App\Models\User;
-use App\Models\Specialite;
-use App\Models\TypeDocument;
-use App\Models\Etablissement;
-use App\Models\Medecin;
-use App\Models\Patient;
-use App\Models\Laboratoire;
-use App\Models\Dossier;
 use App\Models\Consultation;
 use App\Models\Constante;
+use App\Models\Dossier;
+use App\Models\Etablissement;
+use App\Models\Laboratoire;
+use App\Models\Medecin;
 use App\Models\Ordonnance;
-use App\Models\AnalyseLaboratoire;
-use App\Models\Document;
+use App\Models\Patient;
+use App\Models\Role;
+use App\Models\Service;
+use App\Models\Specialite;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class DossierMedicalSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('🚀 Début du seeding du système Med-Archive...');
+        $this->command->info('Debut du seeding coherent du systeme Med-Archive...');
 
-        // 1. Récupérer les IDs des rôles (déjà créés par RoleSeeder)
-        $this->command->info('Récupération des rôles existants...');
         $roleSuperAdmin = Role::where('nom', 'Super Admin')->first();
         $roleMedecin = Role::where('nom', 'Medecin')->first();
         $rolePatient = Role::where('nom', 'Patient')->first();
+        $roleService = Role::where('nom', 'Service')->first();
         $roleEtablissement = Role::where('nom', 'Responsable Etablissement')->first();
         $roleLaborantin = Role::where('nom', 'Laborantin')->first();
 
-        if (!$roleSuperAdmin || !$roleMedecin || !$rolePatient || !$roleEtablissement || !$roleLaborantin) {
-            $this->command->error('❌ Rôles manquants ! Exécutez d\'abord RoleSeeder.');
+        if (!$roleSuperAdmin || !$roleMedecin || !$rolePatient || !$roleService || !$roleEtablissement || !$roleLaborantin) {
+            $this->command->error('Roles manquants. Executez RoleSeeder avant ce seeder.');
             return;
         }
 
-        // 2. CRÉER L'ADMIN (s'il n'existe pas déjà)
-        $this->command->info('Création de l\'administrateur...');
-        User::firstOrCreate(
-            ['email' => 'admin@medarchive.bj'],
-            [
-                'name' => 'Admin Système',
-                'password' => Hash::make('password'),
-                'telephone' => '+229 97 00 00 01',
-                'adresse' => 'Cotonou, Bénin',
-                'ville' => 'Cotonou',
-                'role_id' => $roleSuperAdmin->id,
-                'statut' => 'actif'
-            ]
-        );
+        $admin = $this->createAdmin($roleSuperAdmin);
+        $this->command->info('Admin cree: ' . $admin->email);
 
-<<<<<<< HEAD
-        User::firstOrCreate(
-            ['email' => 'caisse@medarchive.bj'],
-            [
-                'name' => 'Agent Caisse Principal',
-                'password' => Hash::make('password'),
-                'telephone' => '+229 97 00 00 03',
-                'adresse' => 'Cotonou, Bénin',
-                'ville' => 'Cotonou',
-                'role_id' => $roleAgentCaisse->id,
-                'statut' => 'actif'
-            ]
-        );
-        
-=======
-        // Agent caisse removed — not used in current schema
+        foreach ($this->hospitalDataset() as $hospitalIndex => $hospitalData) {
+            $hospital = $this->createHospital($hospitalData, $roleEtablissement);
 
->>>>>>> origin/Roy
-        // 3. CRÉER LES ÉTABLISSEMENTS
-        $this->command->info('Création des établissements...');
-        $etablissements = $this->createEtablissements($roleEtablissement);
+            foreach ($hospitalData['services'] as $serviceIndex => $serviceData) {
+                $service = $this->createService($hospital, $serviceData, $roleService, $hospitalIndex, $serviceIndex);
+                $specialite = $this->specialite($serviceData['specialite']);
 
-        // 4. CRÉER LES MÉDECINS
-        $this->command->info('Création des médecins...');
-        $medecins = $this->createMedecins($roleMedecin, $etablissements);
+                foreach ($serviceData['medecins'] as $doctorIndex => $doctorData) {
+                    $medecin = $this->createMedecin(
+                        $doctorData,
+                        $roleMedecin,
+                        $hospital,
+                        $service,
+                        $specialite,
+                        $hospitalIndex,
+                        $serviceIndex,
+                        $doctorIndex
+                    );
 
-        // 5. CRÉER LES LABORANTINS
-        $this->command->info('Création des laborantins...');
-        $laboratoires = $this->createLaborantins($roleLaborantin, $etablissements);
+                    for ($patientOffset = 1; $patientOffset <= 3; $patientOffset++) {
+                        $patientNumber = ($hospitalIndex * 27) + ($serviceIndex * 9) + ($doctorIndex * 3) + $patientOffset;
+                        $patient = $this->createPatient($patientNumber, $rolePatient, $hospitalData['ville']);
+                        $this->createDossierEtConsultation($patient, $medecin, $service, $serviceData, $patientNumber);
+                    }
+                }
+            }
+        }
 
-        // 6. CRÉER LES PATIENTS
-        $this->command->info('Création des patients...');
-        $patients = $this->createPatients($rolePatient);
+        $this->createLaboratoire($roleLaborantin);
 
-        // 7. CRÉER LES DOSSIERS ET CONSULTATIONS
-        $this->command->info('Création des dossiers médicaux...');
-        $this->createDossiersEtConsultations($patients, $medecins, $laboratoires);
-
-        $this->command->info('✅ Seeding terminé avec succès !');
+        $this->command->info('Seeding termine avec succes.');
         $this->afficherResume();
     }
 
-    private function createEtablissements($roleEtablissement)
+    private function createAdmin($roleSuperAdmin): User
     {
-        $etablissementsData = [
+        return User::updateOrCreate(
+            ['email' => 'admin@medarchive.bj'],
             [
-                'name' => 'CNHU-HKM Cotonou',
-                'email' => 'contact@cnhu.bj',
-                'type' => 'hopital',
-                'code' => 'HOP-001-COT',
-                'telephone' => '+229 21 30 10 20',
-                'adresse' => 'Cotonou, Bénin',
-                'directeur' => 'Pr. Jean Mensah'
-            ],
-            [
-                'name' => 'Clinique Les Cocotiers',
-                'email' => 'info@cocotiers.bj',
-                'type' => 'clinique',
-                'code' => 'CLI-001-COT',
-                'telephone' => '+229 21 31 40 50',
-                'adresse' => 'Cotonou, Bénin',
-                'directeur' => 'Dr. Marie Adeoti'
-            ],
-            [
-                'name' => 'Hôpital de Zone de Suru Léré',
-                'email' => 'contact@hzsuru.bj',
-                'type' => 'hopital',
-                'code' => 'HOP-002-PNO',
-                'telephone' => '+229 20 21 30 40',
-                'adresse' => 'Porto-Novo, Bénin',
-                'directeur' => 'Dr. Paul Dossou'
-            ],
-            [
-                'name' => 'Laboratoire National de Santé Publique',
-                'email' => 'labo@lnsp.bj',
-                'type' => 'laboratoire',
-                'code' => 'LAB-001-COT',
-                'telephone' => '+229 21 32 45 67',
-                'adresse' => 'Cotonou, Bénin',
-                'directeur' => 'Dr. Luc Sossa'
-            ],
-        ];
-
-        $etablissements = [];
-
-        foreach ($etablissementsData as $data) {
-            // Utiliser firstOrCreate pour éviter les doublons
-            $user = User::firstOrCreate(
-                ['email' => $data['email']],
-                [
-                    'name' => $data['name'],
-                    'password' => Hash::make('password'),
-                    'telephone' => $data['telephone'],
-                    'adresse' => $data['adresse'],
-                    'role_id' => $roleEtablissement->id,
-                    'statut' => 'actif'
-                ]
-            );
-
-            // Créer les informations spécifiques si elles n'existent pas
-            Etablissement::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'type_etablissement' => $data['type'],
-                    'code_etablissement' => $data['code'],
-                    'directeur_nom' => $data['directeur'],
-                    'registre_commerce' => 'RC-' . fake()->bothify('####-####'),
-                ]
-            );
-
-            $etablissements[$data['type']][] = $user;
-        }
-
-        return $etablissements;
-    }
-
-    private function createMedecins($roleMedecin, $etablissements)
-    {
-        $specialites = Specialite::all();
-        $hopitals = $etablissements['hopital'] ?? [];
-        $cliniques = $etablissements['clinique'] ?? [];
-        $tousEtablissements = array_merge($hopitals, $cliniques);
-
-        $medecinUsers = [];
-
-        // Créer 10 médecins
-        for ($i = 1; $i <= 10; $i++) {
-            $etablissement = $tousEtablissements[array_rand($tousEtablissements)];
-            $email = 'medecin' . $i . '@hopital.bj';
-
-            // Vérifier si le médecin existe déjà
-            $existingUser = User::where('email', $email)->first();
-            if ($existingUser) {
-                $medecin = Medecin::where('user_id', $existingUser->id)->first();
-                if ($medecin) {
-                    $medecinUsers[] = $medecin;
-                    continue;
-                }
-            }
-
-            $user = User::create([
-                'name' => 'Dr. ' . fake()->lastName(),
-                'email' => $email,
+                'name' => 'Aminata Kone',
                 'password' => Hash::make('password'),
-                'telephone' => '+229 97 00 00 ' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                'adresse' => 'Cotonou, Bénin',
-                'role_id' => $roleMedecin->id,
-                'etablissement_id' => $etablissement->id,
-                'statut' => 'actif'
-            ]);
-
-            $medecin = Medecin::create([
-                'user_id' => $user->id,
-                'etablissement_id' => $etablissement->id,
-                'specialite_id' => $specialites->random()->id,
-                'numero_professionnel' => 'MED-' . fake()->unique()->bothify('####-####'),
-                'annees_experience' => rand(3, 25)
-            ]);
-
-            $medecinUsers[] = $medecin;
-        }
-
-        return $medecinUsers;
-    }
-
-    private function createLaborantins($roleLaborantin, $etablissements)
-    {
-        $laboratoires = [];
-        $laboEtablissements = $etablissements['laboratoire'] ?? [];
-
-        if (empty($laboEtablissements)) {
-            $this->command->warn('⚠️  Aucun établissement de type laboratoire trouvé!');
-            return [];
-        }
-
-        // Créer 3 laborantins
-        for ($i = 1; $i <= 3; $i++) {
-            $etablissement = $laboEtablissements[array_rand($laboEtablissements)];
-            $email = 'laborantin' . $i . '@labo.bj';
-
-            // Vérifier si le laborantin existe déjà
-            $existingUser = User::where('email', $email)->first();
-            if ($existingUser) {
-                $laboratoire = Laboratoire::where('user_id', $existingUser->id)->first();
-                if ($laboratoire) {
-                    $laboratoires[] = $laboratoire;
-                    continue;
-                }
-            }
-
-            $user = User::create([
-                'name' => fake()->name(),
-                'email' => $email,
-                'password' => Hash::make('password'),
-                'telephone' => '+229 97 00 10 ' . str_pad($i, 2, '0', STR_PAD_LEFT),
-                'adresse' => 'Cotonou, Bénin',
-                'role_id' => $roleLaborantin->id,
-                'etablissement_id' => $etablissement->id,
-                'statut' => 'actif'
-            ]);
-
-            $laboratoire = Laboratoire::create([
-                'user_id' => $user->id,
-                'etablissement_id' => $etablissement->id,
-                'nom_laboratoire' => 'Labo ' . fake()->company(),
-                'agrement' => 'AGR-' . fake()->unique()->bothify('####/####'),
-                'specialites_analyse' => ['Hématologie', 'Biochimie', 'Microbiologie'],
-                'est_actif' => true
-            ]);
-
-            $laboratoires[] = $laboratoire;
-        }
-
-        return $laboratoires;
-    }
-
-    private function createPatients($rolePatient)
-    {
-        $patients = [];
-
-        // Créer 30 patients
-        for ($i = 1; $i <= 30; $i++) {
-            $email = 'patient' . $i . '@email.com';
-
-            // Vérifier si le patient existe déjà
-            $existingUser = User::where('email', $email)->first();
-            if ($existingUser) {
-                $patient = Patient::where('user_id', $existingUser->id)->first();
-                if ($patient) {
-                    $patients[] = $patient;
-                    continue;
-                }
-            }
-
-            $user = User::create([
-                'name' => fake()->name(),
-                'email' => $email,
-                'password' => Hash::make('password'),
-                'telephone' => '+229 96 00 ' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'adresse' => fake()->address(),
-                'date_naissance' => fake()->dateTimeBetween('-80 years', '-18 years'),
-                'sexe' => fake()->randomElement(['M', 'F']),
-                'role_id' => $rolePatient->id,
-                'statut' => 'actif'
-            ]);
-
-            $patient = Patient::create([
-                'user_id' => $user->id,
-                'npi' => 'NPI-' . date('Y') . '-' . str_pad($i, 6, '0', STR_PAD_LEFT),
-                'imu' => 'IMU-' . date('Y') . '-' . str_pad($i, 7, '0', STR_PAD_LEFT),
-                'groupe_sanguin' => fake()->randomElement(['A+', 'A-', 'B+', 'B-', 'O+']),
-                'allergies' => rand(0, 3) ? 'Aucune' : 'Pénicilline',
-                'antecedents_medicaux' => rand(0, 3) ? 'Aucun' : 'Hypertension',
-                'personne_contact' => fake()->name(),
-                'telephone_contact' => fake()->phoneNumber(),
-                'profession' => fake()->jobTitle(),
-                'nationalite' => 'Béninoise',
-                'lieu_naissance' => fake()->city() . ', Bénin'
-            ]);
-
-            $patients[] = $patient;
-        }
-
-        return $patients;
-    }
-
-   private function createDossiersEtConsultations($patients, $medecins, $laboratoires)
-{
-    if (empty($medecins)) {
-        $this->command->error('❌ Aucun médecin disponible!');
-        return;
-    }
-
-    $motifs = [
-        'Fièvre persistante',
-        'Toux sèche',
-        'Douleur thoracique',
-        'Maux de tête intenses',
-        'Douleur abdominale',
-        'Fatigue chronique',
-        'Suivi hypertension',
-        'Consultation de routine',
-        'Problème cutané',
-        'Difficultés respiratoires'
-    ];
-
-    // 1. D'abord, créer les dossiers et consultations pour tous les patients (comme avant)
-    foreach ($patients as $patient) {
-        $dossier = Dossier::firstOrCreate(
-            ['patient_id' => $patient->id],
-            [
-                'numero_dossier' => 'DOS-' . date('Y') . '-' . str_pad($patient->id, 6, '0', STR_PAD_LEFT),
-                'imu' => $patient->imu,
+                'telephone' => '+229 97 00 00 01',
+                'adresse' => 'Quartier Ganhi',
+                'ville' => 'Cotonou',
+                'role_id' => $roleSuperAdmin->id,
                 'statut' => 'actif',
-                'date_ouverture' => now()->subMonths(rand(1, 24)),
-                'medecin_traitant' => 'Dr. ' . fake()->lastName()
+            ]
+        );
+    }
+
+    private function createHospital(array $data, $roleEtablissement): User
+    {
+        $hospital = User::updateOrCreate(
+            ['email' => $data['email']],
+            [
+                'name' => $data['name'],
+                'password' => Hash::make('password'),
+                'telephone' => $data['telephone'],
+                'adresse' => $data['adresse'],
+                'ville' => $data['ville'],
+                'role_id' => $roleEtablissement->id,
+                'statut' => 'actif',
             ]
         );
 
-        $nbConsultations = rand(2, 5);
-        for ($j = 0; $j < $nbConsultations; $j++) {
-            $medecin = $medecins[array_rand($medecins)];
-            $consultation = Consultation::create([
+        Etablissement::updateOrCreate(
+            ['user_id' => $hospital->id],
+            [
+                'type_etablissement' => 'hopital',
+                'code_etablissement' => $data['code'],
+                'registre_commerce' => $data['registre'],
+                'directeur_nom' => $data['directeur'],
+            ]
+        );
+
+        return $hospital;
+    }
+
+    private function createService(User $hospital, array $data, $roleService, int $hospitalIndex, int $serviceIndex): Service
+    {
+        $number = ($hospitalIndex * 3) + $serviceIndex + 1;
+        $serviceUser = User::updateOrCreate(
+            ['email' => 'service.' . str_pad($number, 2, '0', STR_PAD_LEFT) . '@medarchive.bj'],
+            [
+                'name' => 'Accueil ' . $data['nom'] . ' - ' . $hospital->ville,
+                'password' => Hash::make('password'),
+                'telephone' => '+229 93 40 ' . str_pad($number, 4, '0', STR_PAD_LEFT),
+                'adresse' => $hospital->adresse,
+                'ville' => $hospital->ville,
+                'role_id' => $roleService->id,
+                'etablissement_id' => $hospital->id,
+                'statut' => 'actif',
+            ]
+        );
+
+        return Service::updateOrCreate(
+            [
+                'etablissement_id' => $hospital->id,
+                'nom' => $data['nom'],
+            ],
+            [
+                'user_id' => $serviceUser->id,
+                'description' => $data['description'],
+                'est_actif' => true,
+            ]
+        );
+    }
+
+    private function createLaboratoire($roleLaborantin): Laboratoire
+    {
+        $hospital = User::where('email', 'chu.cotonou@medarchive.bj')->first();
+
+        $user = User::updateOrCreate(
+            ['email' => 'labo.central@medarchive.bj'],
+            [
+                'name' => 'Centre d Analyse Bio-Sante Cotonou',
+                'password' => Hash::make('password'),
+                'telephone' => '+229 91 50 00 01',
+                'adresse' => 'Quartier Cadjehoun',
+                'ville' => 'Cotonou',
+                'role_id' => $roleLaborantin->id,
+                'etablissement_id' => $hospital?->id,
+                'statut' => 'actif',
+            ]
+        );
+
+        return Laboratoire::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'etablissement_id' => $hospital->id,
+                'nom_laboratoire' => 'Centre d Analyse Bio-Sante Cotonou',
+                'agrement' => 'LAB-BJ-2026-001',
+                'specialites_analyse' => ['Hematologie', 'Biochimie', 'Microbiologie'],
+                'est_actif' => true,
+            ]
+        );
+    }
+
+    private function createMedecin(
+        array $data,
+        $roleMedecin,
+        User $hospital,
+        Service $service,
+        Specialite $specialite,
+        int $hospitalIndex,
+        int $serviceIndex,
+        int $doctorIndex
+    ): Medecin {
+        $number = ($hospitalIndex * 9) + ($serviceIndex * 3) + $doctorIndex + 1;
+        $email = 'medecin.' . str_pad($number, 2, '0', STR_PAD_LEFT) . '@medarchive.bj';
+
+        $user = User::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $data['name'],
+                'password' => Hash::make('password'),
+                'telephone' => '+229 96 10 ' . str_pad($number, 4, '0', STR_PAD_LEFT),
+                'adresse' => $hospital->adresse,
+                'ville' => $hospital->ville,
+                'date_naissance' => $data['date_naissance'],
+                'sexe' => $data['sexe'],
+                'role_id' => $roleMedecin->id,
+                'etablissement_id' => $hospital->id,
+                'statut' => 'actif',
+            ]
+        );
+
+        return Medecin::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'etablissement_id' => $hospital->id,
+                'service_id' => $service->id,
+                'specialite_id' => $specialite->id,
+                'numero_professionnel' => 'MED-BJ-' . str_pad($number, 4, '0', STR_PAD_LEFT),
+                'diplome' => 'Doctorat en medecine',
+                'annees_experience' => $data['experience'],
+            ]
+        );
+    }
+
+    private function createPatient(int $number, $rolePatient, string $ville): Patient
+    {
+        $firstNames = [
+            'Koffi', 'Awa', 'Moussa', 'Fatou', 'Sena', 'Yao', 'Aissatou', 'Kwame', 'Mariama',
+            'Abdoulaye', 'Akouavi', 'Ibrahim', 'Nafiou', 'Adjoa', 'Cheikh', 'Binta', 'Tchalla',
+            'Aminata', 'Kodjo', 'Salimata', 'Basile', 'Fanta', 'Souleymane', 'Akossiwa', 'Mawuli',
+            'Rokia', 'Issa'
+        ];
+
+        $lastNames = [
+            'Mensah', 'Dossou', 'Traore', 'Ouattara', 'Adeoti', 'Sow', 'Agbessi', 'Dieng', 'Kone',
+            'Bio', 'Sissoko', 'Houngbedji', 'Diop', 'Adjovi', 'Balde', 'Gueye', 'Toure', 'Zinsou',
+            'Kouassi', 'Sanogo', 'Azon', 'Camara', 'Gnassingbe', 'Diallo', 'Lawson', 'Ndiaye', 'Sagna'
+        ];
+
+        $jobs = [
+            'Enseignant', 'Commercante', 'Chauffeur', 'Etudiante', 'Cultivateur', 'Comptable',
+            'Infirmiere', 'Menuisier', 'Couturiere'
+        ];
+
+        $bloodGroups = ['O+', 'A+', 'B+', 'AB+', 'O-', 'A-', 'B-', 'AB-'];
+        $firstName = $firstNames[($number - 1) % count($firstNames)];
+        $lastName = $lastNames[($number - 1) % count($lastNames)];
+        $sexe = in_array($firstName, ['Awa', 'Fatou', 'Aissatou', 'Mariama', 'Akouavi', 'Adjoa', 'Binta', 'Aminata', 'Salimata', 'Fanta', 'Akossiwa', 'Rokia'], true) ? 'F' : 'M';
+
+        $user = User::updateOrCreate(
+            ['email' => 'patient.' . str_pad($number, 3, '0', STR_PAD_LEFT) . '@medarchive.bj'],
+            [
+                'name' => $firstName . ' ' . $lastName,
+                'password' => Hash::make('password'),
+                'telephone' => '+229 95 20 ' . str_pad($number, 4, '0', STR_PAD_LEFT),
+                'adresse' => 'Quartier ' . $this->quartier($number),
+                'ville' => $ville,
+                'date_naissance' => (1970 + ($number % 32)) . '-' . str_pad(($number % 12) + 1, 2, '0', STR_PAD_LEFT) . '-' . str_pad(($number % 27) + 1, 2, '0', STR_PAD_LEFT),
+                'sexe' => $sexe,
+                'role_id' => $rolePatient->id,
+                'statut' => 'actif',
+            ]
+        );
+
+        return Patient::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'npi' => 'NPI-2026-' . str_pad($number, 6, '0', STR_PAD_LEFT),
+                'imu' => 'IMU-2026-' . str_pad($number, 7, '0', STR_PAD_LEFT),
+                'groupe_sanguin' => $bloodGroups[($number - 1) % count($bloodGroups)],
+                'allergies' => $number % 7 === 0 ? 'Allergie connue a la penicilline' : 'Aucune allergie connue',
+                'antecedents_medicaux' => $number % 5 === 0 ? 'Hypertension familiale' : 'Aucun antecedent majeur',
+                'personne_contact' => 'Contact ' . $lastName,
+                'telephone_contact' => '+229 94 30 ' . str_pad($number, 4, '0', STR_PAD_LEFT),
+                'profession' => $jobs[($number - 1) % count($jobs)],
+                'nationalite' => 'Beninoise',
+                'lieu_naissance' => $ville . ', Benin',
+            ]
+        );
+    }
+
+    private function createDossierEtConsultation(
+        Patient $patient,
+        Medecin $medecin,
+        Service $service,
+        array $serviceData,
+        int $patientNumber
+    ): void {
+        $dossier = Dossier::updateOrCreate(
+            ['patient_id' => $patient->id],
+            [
+                'numero_dossier' => 'DOS-2026-' . str_pad($patientNumber, 6, '0', STR_PAD_LEFT),
+                'imu' => $patient->imu,
+                'statut' => 'actif',
+                'date_ouverture' => now()->subDays(120 - ($patientNumber % 60))->toDateString(),
+                'medecin_traitant' => $medecin->user->name,
+                'diagnostics_principaux' => $serviceData['diagnostic'],
+                'traitements_en_cours' => $serviceData['traitement'],
+                'allergies_importantes' => $patient->allergies,
+                'notes_importantes' => 'Suivi assure par le service ' . $service->nom,
+            ]
+        );
+
+        $consultation = Consultation::firstOrCreate(
+            [
                 'dossier_id' => $dossier->id,
                 'medecin_id' => $medecin->id,
-                'date_consultation' => now()->subDays(rand(1, 365)),
-                'motif' => $motifs[array_rand($motifs)],
-                'diagnostic' => rand(0, 1) ? 'Diagnostic ' . fake()->word() : null,
-                'observations' => rand(0, 1) ? 'Patient à revoir dans 1 mois' : null
-            ]);
+            ],
+            [
+                'service_id' => $service->id,
+                'date_consultation' => now()->subDays(30 - ($patientNumber % 20)),
+                'motif' => $serviceData['motif'],
+                'diagnostic' => $serviceData['diagnostic'],
+                'observations' => 'Patient stable. Controle programme dans un mois.',
+                'statut_paiement' => 'payee',
+                'montant_consultation' => 5000,
+                'est_urgence' => false,
+            ]
+        );
 
-            Constante::create([
-                'consultation_id' => $consultation->id,
-                'tension_arterielle' => rand(0, 1) ? '12/8' : '13/8',
-                'temperature' => rand(36, 38) . '.' . rand(0, 9),
-                'poids' => rand(60, 90) . '.' . rand(0, 9),
-                'taille' => rand(160, 185),
-                'frequence_cardiaque' => rand(65, 85),
-            ]);
+        Constante::firstOrCreate(
+            ['consultation_id' => $consultation->id],
+            [
+                'tension_arterielle' => $patientNumber % 4 === 0 ? '13/8' : '12/8',
+                'temperature' => 36.5 + (($patientNumber % 4) / 10),
+                'poids' => 55 + ($patientNumber % 35),
+                'taille' => 155 + ($patientNumber % 30),
+                'frequence_cardiaque' => 68 + ($patientNumber % 15),
+                'glycemie' => 0.85 + (($patientNumber % 5) / 100),
+                'saturation_oxygene' => 97 + ($patientNumber % 3),
+            ]
+        );
 
-            if (rand(0, 1)) {
-                Ordonnance::create([
-                    'consultation_id' => $consultation->id,
-                    'medicaments' => ['Paracétamol 500mg', 'Vitamine C'],
-                    'posologie' => '1 comprimé matin et soir',
-                    'instructions' => 'Pendant 5 jours'
-                ]);
-            }
-
-            if (!empty($laboratoires) && rand(0, 2) === 0) {
-                AnalyseLaboratoire::create([
-                    'consultation_id' => $consultation->id,
-                    'laboratoire_id' => $laboratoires[array_rand($laboratoires)]->id,
-                    'prescripteur_id' => $medecin->id,
-                    'type_analyse' => 'NFS',
-                    'date_prelevement' => $consultation->date_consultation,
-                    'statut' => 'termine'
-                ]);
-            }
-        }
+        Ordonnance::firstOrCreate(
+            ['consultation_id' => $consultation->id],
+            [
+                'medicaments' => $serviceData['medicaments'],
+                'posologie' => $serviceData['posologie'],
+                'instructions' => 'Respecter le traitement et revenir en controle si les symptomes persistent.',
+                'date_validite' => now()->addDays(30)->toDateString(),
+                'est_executee' => false,
+            ]
+        );
 
         $dossier->update([
             'total_consultations' => $dossier->consultations()->count(),
-            'derniere_consultation' => $dossier->consultations()->max('date_consultation')
+            'total_ordonnances' => $dossier->ordonnances()->count(),
+            'derniere_consultation' => $dossier->consultations()->max('date_consultation'),
         ]);
     }
 
-    // 2. Ensuite, s'assurer que le médecin par défaut (medecin.default@example.com) a au moins 3 patients
-    $defaultMedecin = Medecin::whereHas('user', function($q) {
-        $q->where('email', 'medecin.default@example.com');
-    })->first();
-
-    if ($defaultMedecin) {
-        // Vérifier combien de patients il a déjà
-        $existingPatientsCount = $defaultMedecin->patients()->count();
-        if ($existingPatientsCount < 3) {
-            // Prendre des patients au hasard qui n'ont pas encore de consultation avec ce médecin
-            $patientsWithoutDefault = Patient::whereDoesntHave('consultations', function($q) use ($defaultMedecin) {
-                $q->where('medecin_id', $defaultMedecin->id);
-            })->limit(3 - $existingPatientsCount)->get();
-
-            foreach ($patientsWithoutDefault as $patient) {
-                $dossier = Dossier::where('patient_id', $patient->id)->first();
-                if (!$dossier) {
-                    $dossier = Dossier::create([
-                        'patient_id' => $patient->id,
-                        'numero_dossier' => 'DOS-' . date('Y') . '-' . str_pad($patient->id, 6, '0', STR_PAD_LEFT),
-                        'imu' => $patient->imu,
-                        'statut' => 'actif',
-                        'date_ouverture' => now(),
-                    ]);
-                }
-
-                Consultation::create([
-                    'dossier_id' => $dossier->id,
-                    'medecin_id' => $defaultMedecin->id,
-                    'date_consultation' => now()->subDays(rand(1, 30)),
-                    'motif' => $motifs[array_rand($motifs)],
-                    'diagnostic' => 'Consultation de routine',
-                ]);
-            }
-
-            $this->command->info("✅ {$defaultMedecin->user->name} a maintenant au moins 3 patients.");
-        } else {
-            $this->command->info("ℹ️ Le médecin par défaut a déjà {$existingPatientsCount} patients.");
-        }
-    } else {
-        $this->command->warn("⚠️ Médecin par défaut (medecin.default@example.com) non trouvé.");
-    }
-}
-
-    private function afficherResume()
+    private function specialite(string $nom): Specialite
     {
-        $this->command->info("\n📊 RÉSUMÉ DU SYSTÈME MED-ARCHIVE");
-        $this->command->info("==================================");
-        $this->command->info("Établissements : " . Etablissement::count());
-        $this->command->info("Médecins : " . Medecin::count());
-        $this->command->info("Laborantins : " . Laboratoire::count());
-        $this->command->info("Patients : " . Patient::count());
-        $this->command->info("Dossiers médicaux : " . Dossier::count());
-        $this->command->info("Consultations : " . Consultation::count());
-        $this->command->info("==================================\n");
+        return Specialite::where('nom', $nom)->first() ?? Specialite::firstOrCreate(
+            ['nom' => $nom],
+            ['description' => 'Specialite medicale']
+        );
     }
-    
+
+    private function quartier(int $number): string
+    {
+        $quartiers = ['Zongo', 'Akpakpa', 'Tokpota', 'Banikanni', 'Fidjrosse', 'Gbegamey', 'Kandebi', 'Akonabo'];
+
+        return $quartiers[($number - 1) % count($quartiers)];
+    }
+
+    private function hospitalDataset(): array
+    {
+        $doctors = [
+            ['Dr. Kossi Mensah', 'Dr. Awa Dossou', 'Dr. Ibrahim Traore'],
+            ['Dr. Mariama Sow', 'Dr. Yao Kouassi', 'Dr. Fatou Diop'],
+            ['Dr. Sena Adeoti', 'Dr. Cheikh Ndiaye', 'Dr. Akouavi Lawson'],
+            ['Dr. Moussa Kone', 'Dr. Rokia Camara', 'Dr. Kodjo Zinsou'],
+            ['Dr. Aminata Diallo', 'Dr. Abdoulaye Sissoko', 'Dr. Adjoa Toure'],
+            ['Dr. Basile Houngbedji', 'Dr. Fanta Gueye', 'Dr. Mawuli Agbessi'],
+            ['Dr. Nafiou Bio', 'Dr. Binta Balde', 'Dr. Issa Sanogo'],
+            ['Dr. Salimata Ouattara', 'Dr. Kwame Adjovi', 'Dr. Aissatou Dieng'],
+            ['Dr. Souleymane Gnassingbe', 'Dr. Akossiwa Azon', 'Dr. Tchalla Sagna'],
+        ];
+
+        return [
+            [
+                'name' => 'Centre Hospitalier Universitaire de Cotonou',
+                'email' => 'chu.cotonou@medarchive.bj',
+                'telephone' => '+229 21 30 10 20',
+                'adresse' => 'Avenue Jean-Paul II',
+                'ville' => 'Cotonou',
+                'code' => 'HOP-BJ-COT-001',
+                'registre' => 'RB-COT-2026-A001',
+                'directeur' => 'Pr. Jean Mensah',
+                'services' => $this->servicesForHospital(array_slice($doctors, 0, 3)),
+            ],
+            [
+                'name' => 'Hopital Regional de Parakou',
+                'email' => 'hopital.parakou@medarchive.bj',
+                'telephone' => '+229 23 61 04 44',
+                'adresse' => 'Route de Banikanni',
+                'ville' => 'Parakou',
+                'code' => 'HOP-BJ-PAR-002',
+                'registre' => 'RB-PAR-2026-B002',
+                'directeur' => 'Dr. Paul Dossou',
+                'services' => $this->servicesForHospital(array_slice($doctors, 3, 3)),
+            ],
+            [
+                'name' => 'Hopital Saint Jean de Porto-Novo',
+                'email' => 'saintjean.portonovo@medarchive.bj',
+                'telephone' => '+229 20 21 30 40',
+                'adresse' => 'Boulevard Tokpota',
+                'ville' => 'Porto-Novo',
+                'code' => 'HOP-BJ-PNO-003',
+                'registre' => 'RB-PNO-2026-C003',
+                'directeur' => 'Dr. Marie Adeoti',
+                'services' => $this->servicesForHospital(array_slice($doctors, 6, 3)),
+            ],
+        ];
+    }
+
+    private function servicesForHospital(array $doctorGroups): array
+    {
+        $serviceTemplates = [
+            [
+                'nom' => 'Medecine generale',
+                'description' => 'Consultations generales, prevention et suivi des maladies courantes.',
+                'specialite' => 'Médecine Générale',
+                'motif' => 'Consultation generale et suivi de sante',
+                'diagnostic' => 'Etat general stable',
+                'traitement' => 'Conseils hygieno-dietetiques et controle medical',
+                'medicaments' => ['Paracetamol 500mg', 'Sels de rehydratation orale'],
+                'posologie' => 'Selon les symptomes, pendant 3 a 5 jours',
+            ],
+            [
+                'nom' => 'Pediatrie',
+                'description' => 'Prise en charge medicale des enfants et adolescents.',
+                'specialite' => 'Pédiatrie',
+                'motif' => 'Fievre et controle pediatrique',
+                'diagnostic' => 'Infection virale simple',
+                'traitement' => 'Hydratation, surveillance de la temperature',
+                'medicaments' => ['Paracetamol sirop', 'Zinc pediatrique'],
+                'posologie' => 'Dose adaptee au poids de l enfant',
+            ],
+            [
+                'nom' => 'Cardiologie',
+                'description' => 'Suivi de la tension arterielle et des pathologies cardiovasculaires.',
+                'specialite' => 'Cardiologie',
+                'motif' => 'Controle tensionnel',
+                'diagnostic' => 'Hypertension arterielle controlee',
+                'traitement' => 'Surveillance tensionnelle et activite physique reguliere',
+                'medicaments' => ['Amlodipine 5mg', 'Hydrochlorothiazide 25mg'],
+                'posologie' => 'Un comprime le matin selon avis medical',
+            ],
+        ];
+
+        return array_map(function (array $service, int $index) use ($doctorGroups) {
+            $service['medecins'] = array_map(function (string $name, int $doctorIndex) use ($index) {
+                return [
+                    'name' => $name,
+                    'sexe' => str_contains($name, 'Awa') || str_contains($name, 'Mariama') || str_contains($name, 'Fatou') || str_contains($name, 'Akouavi') || str_contains($name, 'Rokia') || str_contains($name, 'Aminata') || str_contains($name, 'Adjoa') || str_contains($name, 'Fanta') || str_contains($name, 'Binta') || str_contains($name, 'Salimata') || str_contains($name, 'Aissatou') || str_contains($name, 'Akossiwa') ? 'F' : 'M',
+                    'date_naissance' => (1974 + $index + $doctorIndex) . '-05-12',
+                    'experience' => 6 + $index + $doctorIndex,
+                ];
+            }, $doctorGroups[$index], array_keys($doctorGroups[$index]));
+
+            return $service;
+        }, $serviceTemplates, array_keys($serviceTemplates));
+    }
+
+    private function afficherResume(): void
+    {
+        $this->command->info('');
+        $this->command->info('Resume du systeme Med-Archive');
+        $this->command->info('==================================');
+        $this->command->info('Etablissements : ' . Etablissement::count());
+        $this->command->info('Services : ' . Service::count());
+        $this->command->info('Medecins : ' . Medecin::count());
+        $this->command->info('Laboratoires : ' . Laboratoire::count());
+        $this->command->info('Patients : ' . Patient::count());
+        $this->command->info('Dossiers medicaux : ' . Dossier::count());
+        $this->command->info('Consultations : ' . Consultation::count());
+        $this->command->info('==================================');
+        $this->command->info('');
+    }
 }

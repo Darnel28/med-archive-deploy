@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dossier;
 use App\Models\User;
+use App\Support\DossierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -54,22 +55,9 @@ class DossierController extends Controller
     /**
      * Détails d'un dossier
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $dossier = Dossier::with([
-            'patient.user',
-            'consultations' => function($q) {
-                $q->with(['medecin.user', 'constantes', 'ordonnance'])
-                  ->latest('date_consultation');
-            },
-            'documents' => function($q) {
-                $q->with('typeDocument')->latest();
-            },
-            'analyses' => function($q) {
-                $q->with(['laboratoire.user', 'prescripteur.user'])
-                  ->latest('date_prelevement');
-            }
-        ])->find($id);
+        $dossier = Dossier::with('patient.user')->find($id);
 
         if (!$dossier) {
             return response()->json([
@@ -77,6 +65,25 @@ class DossierController extends Controller
                 'message' => 'Dossier non trouvé'
             ], 404);
         }
+
+        $consultations = DossierAccess::applyReadableConsultations($request->user(), $dossier, $dossier->consultations())
+            ->with(['medecin.user', 'medecin.etablissement', 'service', 'constantes', 'ordonnance', 'analyses.laboratoire.user', 'documents.typeDocument'])
+            ->latest('date_consultation')
+            ->get();
+
+        $visibleConsultationIds = $consultations->pluck('id');
+
+        $dossier->setRelation('consultations', $consultations);
+        $dossier->setRelation('documents', $dossier->documents()
+            ->whereIn('consultations.id', $visibleConsultationIds)
+            ->with('typeDocument')
+            ->latest('documents.created_at')
+            ->get());
+        $dossier->setRelation('analyses', $dossier->analyses()
+            ->whereIn('consultations.id', $visibleConsultationIds)
+            ->with(['laboratoire.user', 'prescripteur.user'])
+            ->latest('date_prelevement')
+            ->get());
 
         return response()->json([
             'success' => true,
@@ -144,16 +151,9 @@ class DossierController extends Controller
     /**
      * Résumé du dossier
      */
-    public function resume($id)
+    public function resume(Request $request, $id)
     {
-        $dossier = Dossier::with([
-            'patient.user',
-            'consultations' => function($q) {
-                $q->select('id', 'dossier_id', 'date_consultation', 'motif', 'diagnostic')
-                  ->latest('date_consultation')
-                  ->limit(5);
-            }
-        ])->find($id);
+        $dossier = Dossier::with('patient.user')->find($id);
 
         if (!$dossier) {
             return response()->json([
@@ -161,6 +161,12 @@ class DossierController extends Controller
                 'message' => 'Dossier non trouvé'
             ], 404);
         }
+
+        $dernieresConsultations = DossierAccess::applyReadableConsultations($request->user(), $dossier, $dossier->consultations())
+            ->select('id', 'dossier_id', 'date_consultation', 'motif', 'diagnostic')
+            ->latest('date_consultation')
+            ->limit(5)
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -181,7 +187,7 @@ class DossierController extends Controller
                     'total_documents' => $dossier->total_documents,
                     'derniere_consultation' => $dossier->derniere_consultation,
                 ],
-                'dernieres_consultations' => $dossier->consultations
+                'dernieres_consultations' => $dernieresConsultations
             ]
         ]);
     }

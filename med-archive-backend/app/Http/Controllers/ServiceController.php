@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Service;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -29,7 +30,7 @@ class ServiceController extends Controller
     private function canReadServices(Request $request): bool
     {
         $user = $request->user();
-        return $user?->isAdmin() || $user?->isEtablissement() || $user?->isMedecin();
+        return $user?->isAdmin() || $user?->isEtablissement() || $user?->isMedecin() || $user?->isService();
     }
 
     private function canManageServices(Request $request): bool
@@ -43,6 +44,10 @@ class ServiceController extends Controller
         $user = $request->user();
         $query = Service::with('etablissement');
 
+        if ($request->filled('etablissement_id')) {
+            return $query->where('etablissement_id', $request->etablissement_id);
+        }
+
         if ($user?->isAdmin()) {
             return $query;
         }
@@ -53,6 +58,10 @@ class ServiceController extends Controller
 
         if ($user?->isMedecin() && $user->medecin?->etablissement_id) {
             return $query->where('etablissement_id', $user->medecin->etablissement_id);
+        }
+
+        if ($user?->isService() && $user->service?->etablissement_id) {
+            return $query->where('etablissement_id', $user->service->etablissement_id);
         }
 
         return $query->whereRaw('1 = 0');
@@ -69,6 +78,23 @@ class ServiceController extends Controller
         return $this->success($services, 'Services récupérés avec succès');
     }
 
+    public function mesPatients(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user?->isService() || !$user->service) {
+            return $this->error('Accès réservé au service connecté', Response::HTTP_FORBIDDEN);
+        }
+
+        $patients = Patient::with(['user', 'dossier'])
+            ->whereHas('consultations', function ($query) use ($user) {
+                $query->where('service_id', $user->service->id);
+            })
+            ->paginate($request->get('per_page', 15));
+
+        return $this->success($patients, 'Patients du service récupérés avec succès');
+    }
+
     public function store(Request $request)
     {
         if (!$this->canManageServices($request)) {
@@ -79,6 +105,8 @@ class ServiceController extends Controller
             'nom' => 'required|string|max:255',
             'description' => 'nullable|string',
             'est_actif' => 'boolean',
+            'tarif_patient_simple' => 'nullable|numeric|min:0',
+            'tarif_patient_assure' => 'nullable|numeric|min:0',
         ];
 
         if ($request->user()->isAdmin()) {
@@ -123,6 +151,8 @@ class ServiceController extends Controller
             'nom' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'est_actif' => 'boolean',
+            'tarif_patient_simple' => 'nullable|numeric|min:0',
+            'tarif_patient_assure' => 'nullable|numeric|min:0',
         ]);
 
         $service->update($data);

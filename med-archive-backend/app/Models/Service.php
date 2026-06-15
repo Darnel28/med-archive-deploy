@@ -12,14 +12,19 @@ class Service extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'etablissement_id',
         'nom',
         'description',
         'est_actif',
+        'tarif_patient_simple',
+        'tarif_patient_assure',
     ];
 
     protected $casts = [
         'est_actif' => 'boolean',
+        'tarif_patient_simple' => 'decimal:2',
+        'tarif_patient_assure' => 'decimal:2',
     ];
 
     /**
@@ -28,6 +33,11 @@ class Service extends Model
     public function etablissement(): BelongsTo
     {
         return $this->belongsTo(User::class, 'etablissement_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function transfertsSource(): HasMany

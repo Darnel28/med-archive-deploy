@@ -17,12 +17,16 @@ class Laboratoire extends Model
         'nom_laboratoire',
         'agrement',
         'specialites_analyse',
-        'est_actif'
+        'est_actif',
+        'tarif_patient_simple',
+        'tarif_patient_assure'
     ];
 
     protected $casts = [
         'specialites_analyse' => 'array',
-        'est_actif' => 'boolean'
+        'est_actif' => 'boolean',
+        'tarif_patient_simple' => 'decimal:2',
+        'tarif_patient_assure' => 'decimal:2'
     ];
 
     /**

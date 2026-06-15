@@ -20,6 +20,7 @@ class Consultation extends Model
         'motif',
         'diagnostic',
         'observations',
+        'statut',
         'statut_paiement',
         'montant_consultation',
         'est_urgence'

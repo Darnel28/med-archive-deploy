@@ -27,6 +27,10 @@ class RoleSeeder extends Seeder
                 'description' => 'Patient',
             ],
             [
+                'nom' => 'Service',
+                'description' => 'Compte de service d\'accueil hospitalier',
+            ],
+            [
                 'nom' => 'Laborantin',
                 'description' => 'Personnel de laboratoire',
             ],

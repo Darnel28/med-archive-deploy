@@ -16,8 +16,10 @@ use App\Http\Controllers\StatistiqueController;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\PatientMedecinController;
 use App\Http\Controllers\ParametreController;
 use App\Http\Controllers\TransfertDossierController;
+use App\Models\Role;
 
 Route::get('/ping', function() {
     return response()->json(['message' => 'pong']);
@@ -36,14 +38,25 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::post('/me/mot-de-passe', [AuthController::class, 'changerMotDePasse']);
 
     // Users
+    Route::get('/roles', function () {
+        return response()->json([
+            'success' => true,
+            'data' => Role::orderBy('nom')->get()
+        ]);
+    });
     Route::apiResource('users', UserController::class);
     Route::post('/users/{id}/desactiver', [UserController::class, 'desactiver']);
     Route::post('/users/{id}/activer', [UserController::class, 'activer']);
     Route::get('/statistiques/utilisateurs', [UserController::class, 'statistiques']);
 
     // Patients
+    Route::get('/patients/me/consultations', [PatientController::class, 'mesConsultations']);
+    Route::get('/patients/me/ordonnances', [PatientController::class, 'mesOrdonnances']);
+    Route::get('/patients/me/analyses', [PatientController::class, 'mesAnalyses']);
+    Route::get('/patients/me/factures', [PatientController::class, 'mesFactures']);
     Route::apiResource('patients', PatientController::class);
     Route::get('/patients/{id}/dossier-complet', [PatientController::class, 'dossierComplet']);
     Route::get('/statistiques/patients', [PatientController::class, 'statistiques']);
@@ -82,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/laboratoires/{id}/statistiques', [LaboratoireController::class, 'statistiques']);
 
     // Services
+    Route::get('/services/mes-patients', [ServiceController::class, 'mesPatients']);
     Route::apiResource('services', ServiceController::class);
 
     // Paramètres
@@ -114,7 +128,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [FactureController::class, 'store'])->middleware('role:Administrateur');
         Route::get('/{id}', [FactureController::class, 'show'])->middleware('role:Administrateur,Patient');
         Route::post('/{id}/paiement', [FactureController::class, 'payer'])->middleware('role:Administrateur,Patient');
+        Route::post('/{id}/stripe-intent', [FactureController::class, 'creerPaiementStripe'])->middleware('role:Administrateur,Patient');
         Route::get('/{id}/pdf', [FactureController::class, 'pdf'])->middleware('role:Administrateur,Patient');
+        Route::post( '/{id}/fedapay', [FactureController::class, 'creerPaiementFedapay'])->middleware('role:Administrateur,Patient');
     });
 
     // Paiements
