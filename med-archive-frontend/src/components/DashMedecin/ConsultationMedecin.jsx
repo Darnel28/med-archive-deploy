@@ -294,7 +294,7 @@ export default function ConsultationMedecin() {
   </div>
 </section>
           <section className="sheet-section">
-            <h3>7. Notes médicales</h3>
+            <h3>8. Notes médicales</h3>
             <div className="line-field"><label>Commentaires du médecin</label><textarea value={formData.notesMedicales} onChange={(e) => change('notesMedicales', e.target.value)} /></div>
           </section>
           <div className="sheet-actions"><button className="btn-validate" type="submit" disabled={!consultationId || saving}><i className="fa-solid fa-check"></i> {saving ? 'Enregistrement...' : 'Valider'}</button></div>

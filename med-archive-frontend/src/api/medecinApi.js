@@ -8,6 +8,11 @@ export async function listMedecins(params = {}) {
   return res.data;
 }
 
+export async function createMedecin(payload) {
+  const res = await apiClient.post(`/medecins`, payload);
+  return res.data;
+}
+
 export async function getMedecin(id) {
   const res = await apiClient.get(`/medecins/${id}`);
   return res.data;
@@ -62,6 +67,7 @@ export async function getPatients(id) {
 
 export default {
   listMedecins,
+  createMedecin,
   getMedecin,
   getMedecinById,
   updateMedecin,

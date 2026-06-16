@@ -75,9 +75,9 @@ const SecuriteCompteMed = () => {
             <a className="settings-nav-item" href="/espacemedecin/profil">
               <i className="fa-regular fa-user"></i><span>Profil</span>
             </a>
-            <a className="settings-nav-item" href="/espacemedecin/parametres">
+            {/* <a className="settings-nav-item" href="/espacemedecin/parametres">
               <i className="fa-regular fa-user"></i><span>Paramètres du profil</span>
-            </a>
+            </a> */}
             <a className="settings-nav-item active" href="/espacemedecin/securite-compte">
               <i className="fa-solid fa-lock"></i><span>Sécurité du compte</span>
             </a>

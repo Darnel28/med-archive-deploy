@@ -14,6 +14,7 @@ class TransfertDossier extends Model
         'dossier_id',
         'service_source_id',
         'service_destination_id',
+        'medecin_referent_destination_id',
         'etablissement_source_id',
         'etablissement_destination_id',
         'statut',
@@ -53,6 +54,11 @@ class TransfertDossier extends Model
     public function etablissementSource(): BelongsTo
     {
         return $this->belongsTo(User::class, 'etablissement_source_id');
+    }
+
+    public function medecinReferentDestination(): BelongsTo
+    {
+        return $this->belongsTo(Medecin::class, 'medecin_referent_destination_id');
     }
 
     public function etablissementDestination(): BelongsTo

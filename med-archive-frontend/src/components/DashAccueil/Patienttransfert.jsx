@@ -55,6 +55,7 @@ const TransfertPatientServiceForm = () => {
     [patients, form.patient_id]
   );
   const destinationServices = services.filter((service) => String(service.id) !== String(currentService?.id));
+  const destinationMedecins = medecins.filter((medecin) => !form.service_destination_id || String(medecin.service_id) === String(form.service_destination_id));
 
   useEffect(() => {
     let ignore = false;
@@ -94,7 +95,11 @@ const TransfertPatientServiceForm = () => {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((state) => ({ ...state, [name]: value }));
+    setForm((state) => ({
+      ...state,
+      [name]: value,
+      ...(name === "service_destination_id" ? { medecin_traitant_id: "" } : {}),
+    }));
   }
 
   async function handleSubmit(event) {
@@ -116,7 +121,7 @@ const TransfertPatientServiceForm = () => {
         service_destination_id: form.service_destination_id,
         etablissement_source_id: etablissementId,
         etablissement_destination_id: etablissementId,
-        medecin_traitant_id: form.medecin_traitant_id || null,
+        medecin_referent_destination_id: form.medecin_traitant_id || null,
         motif: form.motif,
         observations: [form.observations, form.date_validation ? `Date de validation: ${form.date_validation}` : ""]
           .filter(Boolean)
@@ -246,10 +251,10 @@ const TransfertPatientServiceForm = () => {
               <legend className="tp-legend">6. Validation</legend>
               <div className="tp-row">
                 <div className="tp-field">
-                  <label>Médecin traitant *</label>
+                  <label>Médecin référent destinataire *</label>
                   <select name="medecin_traitant_id" value={form.medecin_traitant_id} onChange={updateField} required>
                     <option value="">Choisir un médecin</option>
-                    {medecins.map((medecin) => (
+                    {destinationMedecins.map((medecin) => (
                       <option key={medecin.id} value={medecin.id}>
                         {medecin.user?.name || `Médecin #${medecin.id}`}
                       </option>

@@ -24,3 +24,7 @@ export function transfererDossier(id, payload) {
 export function transfererDossierPost(id, payload) {
   return apiClient.post(`/dossiers/${id}/transferer`, payload).then((response) => response.data);
 }
+
+export function affecterDossierMedecin(id, payload) {
+  return apiClient.post(`/dossiers/${id}/affecter-medecin`, payload).then((response) => response.data);
+}

@@ -21,6 +21,8 @@ class Dossier extends Model
         'date_ouverture',
         'date_fermeture',
         'medecin_traitant',
+        'medecin_referent_id',
+        'service_proprietaire_id',
         'diagnostics_principaux',
         'traitements_en_cours',
         'allergies_importantes',
@@ -73,6 +75,16 @@ class Dossier extends Model
     public function transferts(): HasMany
     {
         return $this->hasMany(TransfertDossier::class);
+    }
+
+    public function medecinReferent(): BelongsTo
+    {
+        return $this->belongsTo(Medecin::class, 'medecin_referent_id');
+    }
+
+    public function serviceProprietaire(): BelongsTo
+    {
+        return $this->belongsTo(Service::class, 'service_proprietaire_id');
     }
 
     public function etablissementDestination()

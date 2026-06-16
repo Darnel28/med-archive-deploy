@@ -24,6 +24,7 @@ export * from "./authRoutes";
 export * from "./resourceApi";
 export * from "./userApi";
 export * from "./roleApi";
+export * from "./specialiteApi";
 
 // patientApi : exclure getPatients pour éviter le conflit
 export {
