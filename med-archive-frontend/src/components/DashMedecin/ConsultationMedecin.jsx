@@ -29,6 +29,13 @@ const emptyForm = {
   notesMedicales: '',
   statut: 'en_cours',
 
+  examens: {
+  analyseSang: false,
+  radiographie: false,
+  scanner: false,
+  testLabo: false,
+},
+
   prescriptions: [
     {
       medicament: '',
@@ -99,6 +106,17 @@ export default function ConsultationMedecin() {
   const [formData, setFormData] = useState(emptyForm);
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  const handleExamenCheckbox = (e) => {
+  const { name, checked } = e.target;
+
+  setFormData((current) => ({
+    ...current,
+    examens: {
+      ...current.examens,
+      [name]: checked,
+    },
+  }));
+};
 
   useEffect(() => {
     let active = true;
@@ -184,7 +202,7 @@ export default function ConsultationMedecin() {
     <main className="content page-tight sheet-wrap">
       <section className="medical-sheet">
         <div className="sheet-top">
-          <div className="sheet-brand"><strong>{formData.consultHopital || 'MedArchive Medical Clinic'}</strong><span>Dossier médical numérique</span></div>
+          <div className="sheet-brand"><strong>{formData.consultHopital || 'MedArchive Medical Clinic'}</strong><span>Fiche médical numérique</span></div>
           <div className="sheet-date">{formData.consultDate ? new Date(`${formData.consultDate}T00:00:00`).toLocaleDateString('fr-FR') : ''}</div>
         </div>
         <form className="sheet-form" onSubmit={save}>
@@ -230,6 +248,51 @@ export default function ConsultationMedecin() {
               {formData.prescriptions.map((row, index) => <tr key={index}>{['medicament', 'dosage', 'duree', 'frequence'].map((key) => <td key={key}><input value={row[key]} onChange={(e) => changePrescription(index, key, e.target.value)} /></td>)}</tr>)}
             </tbody></table></div>
           </section>
+          <section className="sheet-section">
+  <h3>7. Examens demandés (si nécessaire)</h3>
+
+  <div className="check-row">
+    <label>
+      <input
+        type="checkbox"
+        name="analyseSang"
+        checked={formData.examens.analyseSang}
+        onChange={handleExamenCheckbox}
+      />
+      Analyse de sang
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        name="radiographie"
+        checked={formData.examens.radiographie}
+        onChange={handleExamenCheckbox}
+      />
+      Radiographie
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        name="scanner"
+        checked={formData.examens.scanner}
+        onChange={handleExamenCheckbox}
+      />
+      Scanner
+    </label>
+
+    <label>
+      <input
+        type="checkbox"
+        name="testLabo"
+        checked={formData.examens.testLabo}
+        onChange={handleExamenCheckbox}
+      />
+      Test laboratoire
+    </label>
+  </div>
+</section>
           <section className="sheet-section">
             <h3>7. Notes médicales</h3>
             <div className="line-field"><label>Commentaires du médecin</label><textarea value={formData.notesMedicales} onChange={(e) => change('notesMedicales', e.target.value)} /></div>

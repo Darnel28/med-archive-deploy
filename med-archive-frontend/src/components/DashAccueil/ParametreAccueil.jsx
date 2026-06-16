@@ -47,149 +47,146 @@ const ParametresAccueil = () => {
         {/* Menu latéral des paramètres */}
         <aside className="settings-nav-card">
           <h2>Configuration</h2>
-          <a className="settings-nav-item" href="/espacemedecin/profil">
+          {/* <a className="settings-nav-item" href="/espacemedecin/profil">
             <i className="fa-regular fa-user"></i><span>Profil</span>
-          </a>
+          </a> */}
           <a className="settings-nav-item active" href="/espacemedecin/parametres">
-            <i className="fa-regular fa-user"></i><span>Paramètres du profil</span>
+            <i className="fa-regular fa-user"></i><span>Modalites de paiment</span>
           </a>
-          <a className="settings-nav-item" href="/espacemedecin/securite-compte">
+          {/* <a className="settings-nav-item" href="/espacemedecin/securite-compte">
             <i className="fa-solid fa-lock"></i><span>Sécurité du compte</span>
-          </a>
-          <a className="settings-nav-item" href="/espacemedecin/preferences-notifications">
+          </a> */}
+          {/* <a className="settings-nav-item" href="/espacemedecin/preferences-notifications">
             <i className="fa-regular fa-bell"></i><span>Modalites de paiment</span>
-          </a>
-          <a className="settings-nav-item" href="/espacemedecin/contacts-medicaux">
+          </a> */}
+          <a className="settings-nav-item" href="/espaceaccueil/contacts-medicaux">
             <i className="fa-regular fa-circle-check"></i><span>Contacts médicaux</span>
           </a>
         </aside>
 
-        {/* Carte principale du formulaire */}
-        <article className="settings-main-card">
-          <div className="settings-profile-head">
-            <div className="settings-avatar-wrap">
-              <img
-                src="https://i.pravatar.cc/300?img=12"
-                alt="Avatar"
-                className="settings-avatar"
-              />
-              <button
-                className="settings-avatar-camera"
-                type="button"
-                title="Modifier la photo"
-                onClick={handleUploadPhoto}
-              >
-                <i className="fa-solid fa-camera"></i>
-              </button>
-            </div>
-            <div className="settings-avatar-actions">
-              <button className="btn btn-solid settings-btn-compact" type="button" onClick={handleUploadPhoto}>
-                Téléverser une photo
-              </button>
-              <button className="btn btn-outline settings-btn-compact" type="button" onClick={handleDeleteAvatar}>
-                Supprimer avatar
-              </button>
-            </div>
-          </div>
+    <form className="settings-form-grid" onSubmit={handleSubmit}>
 
-          <form className="settings-form-grid" onSubmit={handleSubmit}>
-            <label className="settings-field">
-              <span>Prénom</span>
-              <input
-                type="text"
-                name="prenom"
-                value={formData.prenom}
-                onChange={handleChange}
-                placeholder="Prénom"
-              />
-            </label>
-            <label className="settings-field">
-              <span>Nom</span>
-              <input
-                type="text"
-                name="nom"
-                value={formData.nom}
-                onChange={handleChange}
-                placeholder="Nom"
-              />
-            </label>
+  <label className="settings-field settings-field-full">
+    <span>Service concerné</span>
+    <input
+      type="text"
+      value="Pédiatrie"
+      readOnly
+    />
+  </label>
 
-            <label className="settings-field">
-              <span>Email</span>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-              />
-            </label>
-            <label className="settings-field">
-              <span>Numéro de téléphone</span>
-              <input
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleChange}
-                placeholder="Téléphone"
-              />
-            </label>
+  <label className="settings-field">
+    <span>Tarif consultation (patient non assuré)</span>
+    <input
+      type="number"
+      name="tarifNonAssure"
+      placeholder="5000"
+    />
+  </label>
 
-            <label className="settings-field">
-              <span>Sexe</span>
-              <div className="settings-radio-group">
-                <label>
-                  <input
-                    type="radio"
-                    name="sexe"
-                    value="homme"
-                    checked={formData.sexe === 'homme'}
-                    onChange={handleChange}
-                  /> Homme
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="sexe"
-                    value="femme"
-                    checked={formData.sexe === 'femme'}
-                    onChange={handleChange}
-                  /> Femme
-                </label>
-              </div>
-            </label>
-            <label className="settings-field">
-              <span>Date de naissance</span>
-              <input
-                type="date"
-                name="dateNaissance"
-                value={formData.dateNaissance}
-                onChange={handleChange}
-              />
-            </label>
+  <label className="settings-field">
+    <span>Tarif consultation (patient assuré)</span>
+    <input
+      type="number"
+      name="tarifAssure"
+      placeholder="1000"
+    />
+  </label>
 
-            <label className="settings-field settings-field-full">
-              <span>Adresse / Ville</span>
-              <textarea
-                name="adresse"
-                rows="3"
-                value={formData.adresse}
-                onChange={handleChange}
-                placeholder="Saisir votre adresse"
-              ></textarea>
-            </label>
+  <label className="settings-field">
+    <span>Taux de prise en charge assurance (%)</span>
+    <input
+      type="number"
+      name="priseEnCharge"
+      placeholder="80"
+      min="0"
+      max="100"
+    />
+  </label>
 
-            <div className="settings-submit-wrap settings-field-full">
-              <button className="btn btn-solid settings-btn-compact" type="submit">
-                Enregistrer les modifications
-              </button>
-              <a className="btn btn-outline settings-btn-compact" href="/espacemedecin/profil">
-                Voir le profil
-              </a>
-            </div>
-          </form>
-        </article>
+  <label className="settings-field">
+    <span>Mode de paiement accepté</span>
+    <select name="modePaiement">
+      <option>Espèces</option>
+      <option>Mobile Money</option>
+      <option>Carte bancaire</option>
+      <option>Tous</option>
+    </select>
+  </label>
+
+  {/* <label className="settings-field settings-field-full">
+    <span>Informations complémentaires</span>
+    <textarea
+      rows="4"
+      placeholder="Conditions particulières de paiement du service..."
+    />
+  </label> */}
+
+  <div className="settings-submit-wrap settings-field-full">
+    <button
+      className="btn btn-solid settings-btn-compact"
+      type="submit"
+    >
+      Enregistrer les modalités
+    </button>
+  </div>
+
+</form>
       </div>
+      <style>
+        { `
+        /* Carte du formulaire */
+.settings-form-grid {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+/* Champs */
+.settings-field input,
+.settings-field select,
+.settings-field textarea {
+  border-radius: 12px;
+  border: 1px solid #d9e2ec;
+  padding: 12px 15px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Focus */
+.settings-field input:focus,
+.settings-field select:focus,
+.settings-field textarea:focus {
+  outline: none;
+  border-color: #24c0f1;
+  box-shadow: 0 0 0 3px rgba(36, 192, 241, 0.15);
+}
+
+/* Bouton */
+.settings-btn-compact {
+  border-radius: 12px !important;
+  padding: 12px 24px;
+}
+
+/* Menu latéral */
+.settings-nav-card {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+/* Liens du menu */
+.settings-nav-item {
+  border-radius: 10px;
+  margin: 6px;
+}
+
+/* Carte titre */
+.page-title-card {
+  border-radius: 20px;
+}
+
+      `  }
+      </style>
     </main>
   );
 };

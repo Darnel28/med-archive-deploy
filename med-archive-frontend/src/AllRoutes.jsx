@@ -58,6 +58,7 @@ import TransfertService from "./components/DashAccueil/TransfertService.jsx";
 import RendezVousService from "./components/DashAccueil/RendezVousService.jsx";
 import DossierDuPatient from "./components/DashAccueil/DossierDuPatient.jsx";
 import TransfertPatientServiceForm from "./components/DashAccueil/Patienttransfert.jsx";
+import ParametresAccueil from "./components/DashAccueil/ParametreAccueil.jsx";
 // Examens
 import DashboardLabo from "./components/DashExamen/DashExamHome.jsx";
 import DemandeExamLabo from "./components/DashExamen/DemandeExam.jsx";
@@ -180,6 +181,7 @@ function AllRoutes() {
                 <Route path="dossier-patient" element={<DossierDuPatient />} />
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="transfert-patient-service" element={<TransfertPatientServiceForm />} />
+                <Route path="parametres" element={<ParametresAccueil />} />
             </Route>
             <Route path="/espaceexamen" element={protect(<DashExamen />, ["laborantin", "laboratoire"])} >
                 <Route index element={<DashboardLabo />} />

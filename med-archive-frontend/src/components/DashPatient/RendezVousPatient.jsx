@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getMesConsultations } from '../../api/patientApi';
-import { creerPaiementStripe, payerFacture } from '../../api/factureApi';
+import { creerPaiementFedapay } from '../../api/factureApi';
 import { updateConsultation } from '../../api/consultationApi';
 import { apiClient } from '../../api/client';
 
@@ -68,34 +68,31 @@ const RendezVousPatient = () => {
     setCurrentPage(1);
   };
 
-  const handlePay = async (rdv) => {
+const handlePay = async (rdv) => {
+  try {
     const facture = rdv?.facture;
 
-    if (!facture || facture.statut === 'payee') {
-      setMessage('Ce rendez-vous est deja paye ou aucune facture n est disponible.');
+    if (!facture) {
+      setMessage("Aucune facture associée à ce rendez-vous.");
       return;
     }
 
-    setMessage('Preparation du paiement...');
-    try {
-      try {
-        await creerPaiementStripe(facture.id);
-      } catch {
-        // Le serveur peut ne pas encore avoir STRIPE_SECRET en environnement.
-      }
+    const response = await creerPaiementFedapay(facture.id);
 
-      await payerFacture(facture.id, {
-        montant: facture.montant_restant,
-        methode: 'stripe',
-        reference: `PATIENT-${Date.now()}`,
-      });
-      setMessage('Paiement enregistre avec succes.');
-      await loadAppointments();
-    } catch (error) {
-      setMessage(error?.response?.data?.message || 'Paiement impossible pour le moment.');
+    console.log("REPONSE FEDAPAY =", response);
+
+    if (response?.url) {
+      window.location.href = response.url;
+      return;
     }
-  };
 
+    console.error("URL de paiement introuvable", response);
+
+  } catch (error) {
+    console.error(error);
+    setMessage("Impossible d'initialiser le paiement.");
+  }
+};
   const openReschedule = async (rdv) => {
     setEditing(rdv);
     setSelectedSlot('');

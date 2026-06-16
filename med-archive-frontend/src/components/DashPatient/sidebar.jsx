@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { getAuthUser } from '../../api/client';
+import AvatarInitials from '../AvatarInitials.jsx';
+import { patientFromUser, loadPatientDashboardData } from './patientDashboardData';
 
 const Sidebar = () => {
   const location = useLocation();
+
+
   const [isDossierOpen, setIsDossierOpen] = useState(false);
   const [isUserPanelOpen, setIsUserPanelOpen] = useState(false);
+  const [patient, setPatient] = useState(null);
+
+  const auth = getAuthUser() || {};
+  const user = auth?.user || auth;
+ 
+
+  const name = user?.name || '—';
+  const avatar = user?.avatar || null;
+  const imu = patient?.imu || '—';
 
   const dossierPaths = [
     '/espacepatient/consultations',
@@ -12,11 +26,21 @@ const Sidebar = () => {
     '/espacepatient/ordonnances',
     '/espacepatient/documents-medicaux'
   ];
-  const isDossierActive = dossierPaths.some(path => location.pathname === path);
+ console.log(getAuthUser());
+  const isDossierActive = dossierPaths.some(
+    (path) => location.pathname === path
+  );
 
   useEffect(() => {
     setIsDossierOpen(isDossierActive);
   }, [isDossierActive]);
+  useEffect(() => {
+  loadPatientDashboardData()
+    .then((data) => {
+      setPatient(patientFromUser(data.user));
+    })
+    .catch(console.error);
+}, []);
 
   const toggleDossierMenu = (e) => {
     e.preventDefault();
@@ -39,14 +63,30 @@ const Sidebar = () => {
       </div>
 
       <div className={`sidebar-user-panel ${isUserPanelOpen ? 'open' : ''}`}>
-        <img src="https://i.pravatar.cc/200?img=12" alt="John Doe" />
-        <strong>John Doe</strong>
-        <span>IMU: 24P-001</span>
+        {avatar ? (
+          <img src={avatar} alt={name} />
+        ) : (
+          <AvatarInitials
+            name={name}
+            size={56}
+            bgColor="#13c3b8"
+          />
+        )}
+
+        <strong>{name}</strong>
+      <span> {patient?.imu || '...'}</span>
       </div>
 
       <div className="menu-block">
-        <NavLink to="/espacepatient" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`} end>
-          <i className="fa-solid fa-house"></i><span>Dashboard</span>
+        <NavLink
+          to="/espacepatient"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+          end
+        >
+          <i className="fa-solid fa-house"></i>
+          <span>Dashboard</span>
         </NavLink>
 
         <a
@@ -55,62 +95,140 @@ const Sidebar = () => {
           onClick={toggleDossierMenu}
           aria-expanded={isDossierOpen}
         >
-          <i className="fa-solid fa-folder-open"></i><span>Mon dossier médical</span>
+          <i className="fa-solid fa-folder-open"></i>
+          <span>Mon dossier médical</span>
           <i className="fa-solid fa-chevron-down submenu-arrow"></i>
         </a>
 
         <div className={`submenu-block ${isDossierOpen ? 'open' : ''}`}>
-          <NavLink to="/espacepatient/consultations" className={({ isActive }) => `submenu-item ${isActive ? 'active' : ''}`}>
+          <NavLink
+            to="/espacepatient/consultations"
+            className={({ isActive }) =>
+              `submenu-item ${isActive ? 'active' : ''}`
+            }
+          >
             Historique des consultations
           </NavLink>
-          <NavLink to="/espacepatient/resultats-analyses" className={({ isActive }) => `submenu-item ${isActive ? 'active' : ''}`}>
+
+          <NavLink
+            to="/espacepatient/resultats-analyses"
+            className={({ isActive }) =>
+              `submenu-item ${isActive ? 'active' : ''}`
+            }
+          >
             Résultats d'analyses
           </NavLink>
-          <NavLink to="/espacepatient/ordonnances" className={({ isActive }) => `submenu-item ${isActive ? 'active' : ''}`}>
+
+          <NavLink
+            to="/espacepatient/ordonnances"
+            className={({ isActive }) =>
+              `submenu-item ${isActive ? 'active' : ''}`
+            }
+          >
             Ordonnances
           </NavLink>
-          <NavLink to="/espacepatient/documents-medicaux" className={({ isActive }) => `submenu-item ${isActive ? 'active' : ''}`}>
+
+          <NavLink
+            to="/espacepatient/documents-medicaux"
+            className={({ isActive }) =>
+              `submenu-item ${isActive ? 'active' : ''}`
+            }
+          >
             Documents médicaux
           </NavLink>
         </div>
-        <NavLink to="/espacepatient/rendez-vous" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
-          <i className="fa-solid fa-calendar"></i><span>Mes Rendez-vous</span>
+
+        <NavLink
+          to="/espacepatient/rendez-vous"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+        >
+          <i className="fa-solid fa-calendar"></i>
+          <span>Mes Rendez-vous</span>
         </NavLink>
 
-        <NavLink to="/espacepatient/traitements" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
-          <i className="fa-solid fa-pills"></i><span>Mes traitements</span>
+        <NavLink
+          to="/espacepatient/traitements"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+        >
+          <i className="fa-solid fa-pills"></i>
+          <span>Mes traitements</span>
         </NavLink>
 
-        <NavLink to="/espacepatient/acces-donnees" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
-          <i className="fa-solid fa-key"></i><span>Accès à mes données</span>
+        <NavLink
+          to="/espacepatient/acces-donnees"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+        >
+          <i className="fa-solid fa-key"></i>
+          <span>Accès à mes données</span>
         </NavLink>
       </div>
 
       <h4>Gestion du compte</h4>
+
       <div className="menu-block">
-        <NavLink to="/espacepatient/notifications" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
-          <i className="fa-regular fa-bell"></i><span>Notifications</span>
+        <NavLink
+          to="/espacepatient/notifications"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+        >
+          <i className="fa-regular fa-bell"></i>
+          <span>Notifications</span>
         </NavLink>
-        <NavLink to="/espacepatient/profil" className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}>
-          <i className="fa-regular fa-user"></i><span>Profil</span>
+
+        <NavLink
+          to="/espacepatient/profil"
+          className={({ isActive }) =>
+            `menu-item ${isActive ? 'active' : ''}`
+          }
+        >
+          <i className="fa-regular fa-user"></i>
+          <span>Profil</span>
         </NavLink>
       </div>
 
       <div className="sidebar-profile">
-        <img src="https://i.pravatar.cc/80?img=12" alt="John Doe" />
+        {avatar ? (
+          <img src={avatar} alt={name} />
+        ) : (
+          <AvatarInitials
+            name={name}
+            size={45}
+            bgColor="#13c3b8"
+          />
+        )}
+
         <div>
-          <strong>John Doe</strong>
-          <span>IMU: 24P-001</span>
+          <strong>{name}</strong>
+         <span> {patient?.imu || '...'}</span>
         </div>
-        <NavLink to="/espacepatient/parametres" className="settings-link">
+
+        <NavLink
+          to="/espacepatient/parametres"
+          className="settings-link"
+        >
           <i className="fa-solid fa-gear"></i>
         </NavLink>
-        <NavLink to="/deconnexion" className="settings-link logout-link" aria-label="Se déconnecter">
+
+        <NavLink
+          to="/deconnexion"
+          className="settings-link logout-link"
+          aria-label="Se déconnecter"
+        >
           <i className="fa-solid fa-right-from-bracket"></i>
         </NavLink>
       </div>
 
-      <NavLink to="/espacepatient/besoin-aide" className="sidebar-help">
+      <NavLink
+        to="/espacepatient/besoin-aide"
+        className="sidebar-help"
+      >
         <i className="fa-solid fa-headset"></i>
         <span>Besoin d'aide ? Contacter le support</span>
         <i className="fa-solid fa-arrow-up-right-from-square"></i>

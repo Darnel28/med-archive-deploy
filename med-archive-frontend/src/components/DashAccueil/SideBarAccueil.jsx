@@ -77,6 +77,9 @@ const SidebarAccueil = () => {
             <strong>{profile.name}</strong>
             {/* <span>ID: {profile.id}</span> */}
           </div>
+          <NavLink className="settings-link" to="/espaceaccueil/parametres">
+                          <i className="fa-solid fa-gear"></i>
+                        </NavLink>
           <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se deconnecter">
             <i className="fa-solid fa-right-from-bracket"></i>
           </NavLink>

@@ -20,6 +20,11 @@ export function creerPaiementStripe(id) {
   return apiClient.post(`/factures/${id}/stripe-intent`).then((response) => response.data);
 }
 
+export function creerPaiementFedapay(id) {
+  return apiClient.post(`/factures/${id}/fedapay`).then((response) => response.data);
+}
+
 export function downloadFacturePdf(id) {
   return apiClient.get(`/factures/${id}/pdf`, { responseType: "blob" }).then((response) => response.data);
 }
+
