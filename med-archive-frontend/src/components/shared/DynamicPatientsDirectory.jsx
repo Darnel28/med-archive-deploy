@@ -228,21 +228,109 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
       </div>
 
       <div className="custom-modal-body">
-        <div className="form-group">
-          <label>Nom complet</label>
-          <input type="text" placeholder="Nom du patient" />
-        </div>
+  <div className="form-grid">
 
-        <div className="form-group">
-          <label>Téléphone</label>
-          <input type="text" placeholder="Téléphone" />
-        </div>
+    <div className="form-group">
+      <label>NPI *</label>
+      <input type="text" name="npi" />
+    </div>
 
-        <div className="form-group">
-          <label>Date de naissance</label>
-          <input type="date" />
-        </div>
-      </div>
+    <div className="form-group">
+      <label>Nom complet *</label>
+      <input type="text" name="name" />
+    </div>
+
+    <div className="form-group">
+      <label>Email *</label>
+      <input type="email" name="email" />
+    </div>
+
+    <div className="form-group">
+      <label>Mot de passe *</label>
+      <input type="password" name="password" />
+    </div>
+
+    <div className="form-group">
+      <label>Téléphone *</label>
+      <input type="text" name="telephone" />
+    </div>
+
+    <div className="form-group">
+      <label>Adresse *</label>
+      <input type="text" name="adresse" />
+    </div>
+
+    <div className="form-group">
+      <label>Ville *</label>
+      <input type="text" name="ville" />
+    </div>
+
+    <div className="form-group">
+      <label>Date de naissance *</label>
+      <input type="date" name="date_naissance" />
+    </div>
+
+    <div className="form-group">
+      <label>Sexe *</label>
+      <select name="sexe">
+        <option value="">Sélectionner</option>
+        <option value="M">Masculin</option>
+        <option value="F">Féminin</option>
+      </select>
+    </div>
+
+    <div className="form-group">
+      <label>Groupe sanguin</label>
+      <select name="groupe_sanguin">
+        <option value="">Sélectionner</option>
+        <option value="A+">A+</option>
+        <option value="A-">A-</option>
+        <option value="B+">B+</option>
+        <option value="B-">B-</option>
+        <option value="AB+">AB+</option>
+        <option value="AB-">AB-</option>
+        <option value="O+">O+</option>
+        <option value="O-">O-</option>
+      </select>
+    </div>
+
+    <div className="form-group">
+      <label>Allergies</label>
+      <textarea name="allergies"></textarea>
+    </div>
+
+    <div className="form-group">
+      <label>Antécédents médicaux</label>
+      <textarea name="antecedents_medicaux"></textarea>
+    </div>
+
+    <div className="form-group">
+      <label>Personne à contacter</label>
+      <input type="text" name="personne_contact" />
+    </div>
+
+    <div className="form-group">
+      <label>Téléphone du contact</label>
+      <input type="text" name="telephone_contact" />
+    </div>
+
+    <div className="form-group">
+      <label>Profession</label>
+      <input type="text" name="profession" />
+    </div>
+
+    <div className="form-group">
+      <label>Nationalité</label>
+      <input type="text" name="nationalite" />
+    </div>
+
+    <div className="form-group">
+      <label>Lieu de naissance</label>
+      <input type="text" name="lieu_naissance" />
+    </div>
+
+  </div>
+</div>
 
       <div className="custom-modal-footer">
         <button
@@ -352,6 +440,45 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   background:#13c3b8;
   color:#fff;
   cursor:pointer;
+}
+  .custom-modal {
+  width: 95%;
+  max-width: 950px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d9e1ea;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.form-group textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
   `}
   </style>
