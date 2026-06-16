@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAuthUser } from '../../api/client';
 import { getCurrentUser } from '../../api/authApi';
-import { getMesPatientsEtablissement, getPatients as getAllPatients } from '../../api';
+import { createPatient, getMesPatientsEtablissement, getPatients as getAllPatients } from '../../api';
 import { getPatients as getDoctorPatients } from '../../api/medecinApi';
 import { getMesPatientsService } from '../../api/serviceApi';
 import { apiErrorMessage, unwrapList, valueAt } from '../DashAdmin/AdminCrudPage.jsx';
@@ -51,48 +51,99 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [patientForm, setPatientForm] = useState({
+    npi: '',
+    name: '',
+    email: '',
+    password: '',
+    telephone: '',
+    adresse: '',
+    ville: '',
+    date_naissance: '',
+    sexe: 'M',
+    groupe_sanguin: '',
+    allergies: '',
+    antecedents_medicaux: '',
+    personne_contact: '',
+    telephone_contact: '',
+    profession: '',
+    nationalite: 'Beninoise',
+    lieu_naissance: '',
+  });
+  const [modalSaving, setModalSaving] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalError, setModalError] = useState('');
+
+  async function loadPatients() {
+    setLoading(true);
+    setError('');
+    try {
+      let response = null;
+      if (source === 'doctor') {
+        let auth = normalizeAuthPayload(getAuthUser());
+        let medecinId = extractMedecinId(auth);
+        if (!medecinId) {
+          auth = normalizeAuthPayload(await getCurrentUser());
+          medecinId = extractMedecinId(auth);
+        }
+        if (!medecinId) throw new Error('Impossible d identifier le medecin connecte.');
+        response = await getDoctorPatients(medecinId);
+      } else if (source === 'etablissement') {
+        try {
+          response = await getMesPatientsEtablissement({ per_page: 1000 });
+        } catch {
+          response = await getAllPatients({ per_page: 1000 });
+        }
+      } else if (source === 'service') {
+        response = await getMesPatientsService({ per_page: 1000 });
+      } else {
+        response = await getAllPatients({ per_page: 1000 });
+      }
+      setPatients(unwrapList(response).rows.map(normalizePatient));
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     let mounted = true;
-
-    async function loadPatients() {
-      setLoading(true);
-      setError('');
-      try {
-        let response = null;
-        if (source === 'doctor') {
-          let auth = normalizeAuthPayload(getAuthUser());
-          let medecinId = extractMedecinId(auth);
-          if (!medecinId) {
-            auth = normalizeAuthPayload(await getCurrentUser());
-            medecinId = extractMedecinId(auth);
-          }
-          if (!medecinId) throw new Error('Impossible d identifier le medecin connecte.');
-          response = await getDoctorPatients(medecinId);
-        } else if (source === 'etablissement') {
-          try {
-            response = await getMesPatientsEtablissement({ per_page: 1000 });
-          } catch {
-            response = await getAllPatients({ per_page: 1000 });
-          }
-        } else if (source === 'service') {
-          response = await getMesPatientsService({ per_page: 1000 });
-        } else {
-          response = await getAllPatients({ per_page: 1000 });
-        }
-        if (mounted) setPatients(unwrapList(response).rows.map(normalizePatient));
-      } catch (err) {
-        if (mounted) setError(apiErrorMessage(err));
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
 
     loadPatients();
     return () => {
       mounted = false;
     };
   }, [source]);
+
+  function updatePatientForm(event) {
+    const { name, value } = event.target;
+    setPatientForm((current) => ({ ...current, [name]: value }));
+  }
+
+  async function handleCreatePatient(event) {
+    event.preventDefault();
+    setModalSaving(true);
+    setModalError('');
+    setModalMessage('');
+
+    const payload = Object.fromEntries(
+      Object.entries(patientForm).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])
+    );
+    if (!payload.password) delete payload.password;
+    if (!payload.groupe_sanguin) delete payload.groupe_sanguin;
+
+    try {
+      const response = await createPatient(payload);
+      setModalMessage(response?.message || 'Patient cree avec succes.');
+      await loadPatients();
+      setTimeout(() => setShowAddModal(false), 900);
+    } catch (err) {
+      setModalError(apiErrorMessage(err));
+    } finally {
+      setModalSaving(false);
+    }
+  }
 
   const filteredPatients = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -157,7 +208,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                 </div>
               </div>
               <div className="mes-patients-actions">
-                <Link className="mes-patients-action-btn" to={detailPath}>
+                <Link className="mes-patients-action-btn" to={`${detailPath}?patient_id=${patient.id}`}>
                   <i className="fa-solid fa-folder-open"></i>
                 </Link>
                 {patient.phone && <a className="mes-patients-action-btn" href={`tel:${patient.phone}`}><i className="fa-solid fa-phone"></i></a>}
@@ -190,7 +241,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                     <td>{patient.lastConsult ? new Date(patient.lastConsult).toLocaleDateString('fr-FR') : '-'}</td>
                     <td>
                       <div className="mes-patients-list-actions">
-                        <Link className="icon-action" to={detailPath}><i className="fa-solid fa-folder-open"></i></Link>
+                        <Link className="icon-action" to={`${detailPath}?patient_id=${patient.id}`}><i className="fa-solid fa-folder-open"></i></Link>
                         {patient.phone && <a className="icon-action" href={`tel:${patient.phone}`}><i className="fa-solid fa-phone"></i></a>}
                       </div>
                     </td>
@@ -209,145 +260,44 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
         </article>
       </section>
       {showAddModal && (
-  <div
-    className="custom-modal-overlay"
-    onClick={() => setShowAddModal(false)}
-  >
-    <div
-      className="custom-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="custom-modal-header">
-        <h3>Ajouter un patient</h3>
-        <button
-          className="custom-modal-close"
-          onClick={() => setShowAddModal(false)}
-        >
-          <i className="fa-solid fa-xmark"></i>
-        </button>
-      </div>
+        <div className="custom-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <form className="custom-modal custom-modal-wide" onSubmit={handleCreatePatient} onClick={(e) => e.stopPropagation()}>
+            <div className="custom-modal-header">
+              <h3>Ajouter un patient</h3>
+              <button className="custom-modal-close" type="button" onClick={() => setShowAddModal(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
 
-      <div className="custom-modal-body">
-  <div className="form-grid">
+            <div className="custom-modal-body custom-modal-grid">
+              {modalError && <p className="modal-alert modal-alert-error">{modalError}</p>}
+              {modalMessage && <p className="modal-alert modal-alert-success">{modalMessage}</p>}
 
-    <div className="form-group">
-      <label>NPI *</label>
-      <input type="text" name="npi" />
-    </div>
+              <div className="form-group"><label>NPI</label><input name="npi" type="text" value={patientForm.npi} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Nom complet</label><input name="name" type="text" value={patientForm.name} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Email</label><input name="email" type="email" value={patientForm.email} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Mot de passe initial</label><input name="password" type="text" value={patientForm.password} onChange={updatePatientForm} placeholder="Genere automatiquement si vide" /></div>
+              <div className="form-group"><label>Telephone</label><input name="telephone" type="tel" value={patientForm.telephone} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Date de naissance</label><input name="date_naissance" type="date" value={patientForm.date_naissance} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Sexe</label><select name="sexe" value={patientForm.sexe} onChange={updatePatientForm} required><option value="M">Masculin</option><option value="F">Feminin</option></select></div>
+              <div className="form-group"><label>Groupe sanguin</label><select name="groupe_sanguin" value={patientForm.groupe_sanguin} onChange={updatePatientForm}><option value="">Non renseigne</option>{['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group) => <option key={group} value={group}>{group}</option>)}</select></div>
+              <div className="form-group"><label>Ville</label><input name="ville" type="text" value={patientForm.ville} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Adresse</label><input name="adresse" type="text" value={patientForm.adresse} onChange={updatePatientForm} required /></div>
+              <div className="form-group"><label>Personne a contacter</label><input name="personne_contact" type="text" value={patientForm.personne_contact} onChange={updatePatientForm} /></div>
+              <div className="form-group"><label>Telephone contact</label><input name="telephone_contact" type="tel" value={patientForm.telephone_contact} onChange={updatePatientForm} /></div>
+              <div className="form-group"><label>Profession</label><input name="profession" type="text" value={patientForm.profession} onChange={updatePatientForm} /></div>
+              <div className="form-group"><label>Lieu de naissance</label><input name="lieu_naissance" type="text" value={patientForm.lieu_naissance} onChange={updatePatientForm} /></div>
+              <div className="form-group form-group-full"><label>Allergies</label><textarea name="allergies" rows="2" value={patientForm.allergies} onChange={updatePatientForm} /></div>
+              <div className="form-group form-group-full"><label>Antecedents medicaux</label><textarea name="antecedents_medicaux" rows="2" value={patientForm.antecedents_medicaux} onChange={updatePatientForm} /></div>
+            </div>
 
-    <div className="form-group">
-      <label>Nom complet *</label>
-      <input type="text" name="name" />
-    </div>
-
-    <div className="form-group">
-      <label>Email *</label>
-      <input type="email" name="email" />
-    </div>
-
-    <div className="form-group">
-      <label>Mot de passe *</label>
-      <input type="password" name="password" />
-    </div>
-
-    <div className="form-group">
-      <label>Téléphone *</label>
-      <input type="text" name="telephone" />
-    </div>
-
-    <div className="form-group">
-      <label>Adresse *</label>
-      <input type="text" name="adresse" />
-    </div>
-
-    <div className="form-group">
-      <label>Ville *</label>
-      <input type="text" name="ville" />
-    </div>
-
-    <div className="form-group">
-      <label>Date de naissance *</label>
-      <input type="date" name="date_naissance" />
-    </div>
-
-    <div className="form-group">
-      <label>Sexe *</label>
-      <select name="sexe">
-        <option value="">Sélectionner</option>
-        <option value="M">Masculin</option>
-        <option value="F">Féminin</option>
-      </select>
-    </div>
-
-    <div className="form-group">
-      <label>Groupe sanguin</label>
-      <select name="groupe_sanguin">
-        <option value="">Sélectionner</option>
-        <option value="A+">A+</option>
-        <option value="A-">A-</option>
-        <option value="B+">B+</option>
-        <option value="B-">B-</option>
-        <option value="AB+">AB+</option>
-        <option value="AB-">AB-</option>
-        <option value="O+">O+</option>
-        <option value="O-">O-</option>
-      </select>
-    </div>
-
-    <div className="form-group">
-      <label>Allergies</label>
-      <textarea name="allergies"></textarea>
-    </div>
-
-    <div className="form-group">
-      <label>Antécédents médicaux</label>
-      <textarea name="antecedents_medicaux"></textarea>
-    </div>
-
-    <div className="form-group">
-      <label>Personne à contacter</label>
-      <input type="text" name="personne_contact" />
-    </div>
-
-    <div className="form-group">
-      <label>Téléphone du contact</label>
-      <input type="text" name="telephone_contact" />
-    </div>
-
-    <div className="form-group">
-      <label>Profession</label>
-      <input type="text" name="profession" />
-    </div>
-
-    <div className="form-group">
-      <label>Nationalité</label>
-      <input type="text" name="nationalite" />
-    </div>
-
-    <div className="form-group">
-      <label>Lieu de naissance</label>
-      <input type="text" name="lieu_naissance" />
-    </div>
-
-  </div>
-</div>
-
-      <div className="custom-modal-footer">
-        <button
-          className="btn-cancel"
-          onClick={() => setShowAddModal(false)}
-        >
-          Annuler
-        </button>
-
-        <button className="btn-save">
-          Enregistrer
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-<style>
+            <div className="custom-modal-footer">
+              <button className="btn-cancel" type="button" onClick={() => setShowAddModal(false)}>Annuler</button>
+              <button className="btn-save" type="submit" disabled={modalSaving}>{modalSaving ? 'Enregistrement...' : 'Enregistrer'}</button>
+            </div>
+          </form>
+        </div>
+      )}<style>
   {`
   .add-patient-btn{
   display:flex;
@@ -385,6 +335,10 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   box-shadow:0 20px 50px rgba(0,0,0,.15);
 }
 
+.custom-modal-wide{
+  max-width:860px;
+}
+
 .custom-modal-header{
   display:flex;
   justify-content:space-between;
@@ -404,6 +358,35 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   padding:22px;
 }
 
+.custom-modal-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+  max-height:65vh;
+  overflow:auto;
+}
+
+.form-group-full,
+.modal-alert{
+  grid-column:1 / -1;
+}
+
+.modal-alert{
+  margin:0;
+  padding:10px 12px;
+  border-radius:8px;
+}
+
+.modal-alert-error{
+  color:#b42318;
+  background:#fff1f0;
+}
+
+.modal-alert-success{
+  color:#027a48;
+  background:#ecfdf3;
+}
+
 .form-group{
   display:flex;
   flex-direction:column;
@@ -411,11 +394,18 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   margin-bottom:16px;
 }
 
-.form-group input{
-  height:44px;
+.form-group input,
+.form-group select,
+.form-group textarea{
   border:1px solid #d9e1ea;
   border-radius:10px;
-  padding:0 14px;
+  padding:10px 14px;
+  font:inherit;
+}
+
+.form-group input,
+.form-group select{
+  height:44px;
 }
 
 .custom-modal-footer{
@@ -478,6 +468,15 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
+
+.btn-save:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+}
+
+@media (max-width:720px){
+  .custom-modal-grid{
+    grid-template-columns:1fr;
   }
 }
   `}

@@ -23,7 +23,8 @@ class Patient extends Model
         'telephone_contact',
         'profession',
         'nationalite',
-        'lieu_naissance'
+        'lieu_naissance',
+        'service_id'
     ];
 
     /**
@@ -51,6 +52,11 @@ class Patient extends Model
     public function dossier(): HasOne
     {
         return $this->hasOne(Dossier::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function factures()

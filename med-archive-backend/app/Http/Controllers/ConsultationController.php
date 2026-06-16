@@ -70,6 +70,15 @@ class ConsultationController extends Controller
         }
 
         if ($request->user()->isService() && $request->user()->service) {
+            $serviceId = $request->user()->service->id;
+
+            $query->where(function ($serviceQuery) use ($serviceId) {
+                $serviceQuery->where('service_id', $serviceId)
+                    ->orWhereHas('medecin', function ($medecinQuery) use ($serviceId) {
+                        $medecinQuery->where('service_id', $serviceId);
+                    });
+            });
+
             $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {
                 $transferQuery->where('statut', 'accepte')
                     ->where('service_source_id', $request->user()->service->id)

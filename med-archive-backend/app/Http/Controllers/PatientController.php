@@ -9,6 +9,8 @@ use App\Support\DossierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -57,7 +59,7 @@ class PatientController extends Controller
             'npi' => 'required|string|unique:patients,npi',
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => 'nullable|string|min:6',
             'telephone' => 'required|string|max:20',
             'adresse' => 'required|string',
             'ville' => 'required|string|max:255',
@@ -73,6 +75,9 @@ class PatientController extends Controller
             'lieu_naissance' => 'nullable|string'
         ]);
 
+        $plainPassword = $validated['password'] ?? Str::password(12);
+        $mailWarning = null;
+
         DB::beginTransaction();
 
         try {
@@ -80,7 +85,7 @@ class PatientController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
+                'password' => Hash::make($plainPassword),
                 'telephone' => $validated['telephone'],
                 'adresse' => $validated['adresse'],
                 'ville' => $validated['ville'],
@@ -95,6 +100,7 @@ class PatientController extends Controller
             // Créer le patient
             $patient = Patient::create([
                 'user_id' => $user->id,
+                'service_id' => $request->user()?->isService() ? $request->user()->service?->id : null,
                 'npi' => $validated['npi'],
                 'imu' => Patient::generateIMU(),
                 'groupe_sanguin' => $validated['groupe_sanguin'] ?? null,
@@ -119,9 +125,22 @@ class PatientController extends Controller
 
             DB::commit();
 
+            try {
+                Mail::raw(
+                    "Bonjour {$user->name},\n\nVotre compte patient MedArchive a ete cree.\nEmail: {$user->email}\nMot de passe temporaire: {$plainPassword}\n\nVous devrez modifier ce mot de passe lors de votre premiere connexion.",
+                    function ($message) use ($user) {
+                        $message->to($user->email)
+                            ->subject('Vos identifiants patient MedArchive');
+                    }
+                );
+            } catch (\Throwable $mailException) {
+                $mailWarning = 'Patient cree, mais l email des identifiants n a pas pu etre envoye.';
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Patient créé avec succès',
+                'message' => $mailWarning ?: 'Patient cree avec succes. Les identifiants ont ete envoyes par email.',
+                'warning' => $mailWarning,
                 'data' => $patient->load('user', 'dossier')
             ], 201);
 
