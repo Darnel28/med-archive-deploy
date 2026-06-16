@@ -58,6 +58,29 @@ class TransfertDossierController extends Controller
             && (int) $transfert->service_destination_id === (int) $user->service->id;
     }
 
+    private function canManageSentTransfer(Request $request, TransfertDossier $transfert): bool
+    {
+        $user = $request->user();
+
+        if ($user?->isAdmin()) {
+            return true;
+        }
+
+        if ($transfert->statut !== 'demande') {
+            return false;
+        }
+
+        if ($user?->isEtablissement()) {
+            return (int) $transfert->etablissement_source_id === (int) $user->id;
+        }
+
+        if ($user?->isService() && $user->service) {
+            return (int) $transfert->service_source_id === (int) $user->service->id;
+        }
+
+        return $user?->isMedecin() && (int) $transfert->demandeur_id === (int) $user->id;
+    }
+
     private function scopeForUser(Request $request)
     {
         $user = $request->user();
@@ -203,31 +226,40 @@ class TransfertDossierController extends Controller
         $transfert = $this->scopeForUser($request)->find($id);
 
         if (!$transfert) {
-            return $this->error('Transfert non trouvé', Response::HTTP_NOT_FOUND);
-        }
-
-        if (!$this->canApproveTransfer($request, $transfert)) {
-            return $this->error('Seul l’administrateur ou l’établissement destinataire peut valider ce transfert', Response::HTTP_FORBIDDEN);
+            return $this->error('Transfert non trouve', Response::HTTP_NOT_FOUND);
         }
 
         $data = $request->validate([
-            'statut' => 'required|in:demande,accepte,refuse',
+            'dossier_id' => 'sometimes|exists:dossiers,id',
+            'service_destination_id' => 'sometimes|exists:services,id',
+            'etablissement_destination_id' => 'sometimes|exists:users,id',
+            'statut' => 'sometimes|in:demande,accepte,refuse',
+            'motif' => 'nullable|string',
             'observations' => 'nullable|string',
         ]);
 
-        if ($data['statut'] !== $transfert->statut) {
+        $nextStatus = $data['statut'] ?? $transfert->statut;
+        $statusChanged = $nextStatus !== $transfert->statut;
+
+        if ($statusChanged) {
+            if (!$this->canApproveTransfer($request, $transfert)) {
+                return $this->error('Seul le service destinataire peut valider ce transfert', Response::HTTP_FORBIDDEN);
+            }
+
             $data['approbateur_id'] = $request->user()->id;
-            $data['date_approbation'] = in_array($data['statut'], ['accepte', 'refuse'], true) ? now() : null;
+            $data['date_approbation'] = in_array($nextStatus, ['accepte', 'refuse'], true) ? now() : null;
+        } elseif (!$this->canManageSentTransfer($request, $transfert)) {
+            return $this->error('Vous ne pouvez modifier que les demandes envoyees par votre service et encore en attente', Response::HTTP_FORBIDDEN);
         }
 
         $transfert->update($data);
 
-        if ($data['statut'] === 'accepte') {
+        if ($nextStatus === 'accepte') {
             $transfert->dossier?->update([
                 'statut' => 'transfere',
                 'statut_transfert' => 'accepte',
             ]);
-        } elseif ($data['statut'] === 'refuse') {
+        } elseif ($nextStatus === 'refuse') {
             $transfert->dossier?->update([
                 'statut_transfert' => 'refuse',
             ]);
@@ -235,24 +267,24 @@ class TransfertDossierController extends Controller
 
         return $this->success(
             $transfert->fresh(['dossier.patient.user', 'serviceSource', 'serviceDestination', 'demandeur', 'approbateur']),
-            'Transfert mis à jour avec succès'
+            'Transfert mis a jour avec succes'
         );
     }
 
     public function destroy(Request $request, $id)
     {
-        if (!$request->user()?->isAdmin()) {
-            return $this->error('Seuls les administrateurs peuvent supprimer un transfert', Response::HTTP_FORBIDDEN);
-        }
-
-        $transfert = TransfertDossier::find($id);
+        $transfert = $this->scopeForUser($request)->find($id);
 
         if (!$transfert) {
-            return $this->error('Transfert non trouvé', Response::HTTP_NOT_FOUND);
+            return $this->error('Transfert non trouve', Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$this->canManageSentTransfer($request, $transfert)) {
+            return $this->error('Vous ne pouvez supprimer que les demandes envoyees par votre service et encore en attente', Response::HTTP_FORBIDDEN);
         }
 
         $transfert->delete();
 
-        return $this->success(null, 'Transfert supprimé avec succès');
+        return $this->success(null, 'Transfert supprime avec succes');
     }
 }

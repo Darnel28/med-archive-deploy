@@ -36,7 +36,7 @@ class ServiceController extends Controller
     private function canManageServices(Request $request): bool
     {
         $user = $request->user();
-        return $user?->isAdmin() || $user?->isEtablissement();
+        return $user?->isAdmin() || $user?->isEtablissement() || $user?->isService();
     }
 
     private function scopeForUser(Request $request)
@@ -87,12 +87,53 @@ class ServiceController extends Controller
         }
 
         $patients = Patient::with(['user', 'dossier'])
-            ->whereHas('consultations', function ($query) use ($user) {
-                $query->where('service_id', $user->service->id);
+            ->where(function ($patientQuery) use ($user) {
+                $patientQuery->where('service_id', $user->service->id)
+                    ->orWhereHas('consultations', function ($query) use ($user) {
+                        $query->where('service_id', $user->service->id);
+                    });
             })
             ->paginate($request->get('per_page', 15));
 
         return $this->success($patients, 'Patients du service récupérés avec succès');
+    }
+
+    public function current(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user?->isService() || !$user->service) {
+            return $this->error('Accès réservé au service connecté', Response::HTTP_FORBIDDEN);
+        }
+
+        return $this->success(
+            $user->service->load(['etablissement', 'user']),
+            'Service connecté récupéré avec succès'
+        );
+    }
+
+    public function updateCurrent(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user?->isService() || !$user->service) {
+            return $this->error('Accès réservé au service connecté', Response::HTTP_FORBIDDEN);
+        }
+
+        $data = $request->validate([
+            'nom' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'est_actif' => 'boolean',
+            'tarif_patient_simple' => 'nullable|numeric|min:0',
+            'tarif_patient_assure' => 'nullable|numeric|min:0',
+        ]);
+
+        $user->service->update($data);
+
+        return $this->success(
+            $user->service->fresh(['etablissement', 'user']),
+            'Paramètres du service mis à jour avec succès'
+        );
     }
 
     public function store(Request $request)
@@ -145,6 +186,10 @@ class ServiceController extends Controller
 
         if (!$service) {
             return $this->error('Service non trouvé', Response::HTTP_NOT_FOUND);
+        }
+
+        if ($request->user()->isService() && (int) $request->user()->service?->id !== (int) $service->id) {
+            return $this->error('Vous ne pouvez modifier que votre propre service', Response::HTTP_FORBIDDEN);
         }
 
         $data = $request->validate([

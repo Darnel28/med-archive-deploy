@@ -17,7 +17,11 @@ class MedecinController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Medecin::with(['user', 'specialite', 'etablissement']);
+        $query = Medecin::with(['user', 'specialite', 'etablissement', 'service']);
+
+        if ($request->user()?->isService() && $request->user()->service) {
+            $query->where('service_id', $request->user()->service->id);
+        }
 
         // Filtre par spécialité
         if ($request->has('specialite')) {
@@ -29,6 +33,10 @@ class MedecinController extends Controller
         // Filtre par établissement
         if ($request->has('etablissement_id')) {
             $query->where('etablissement_id', $request->etablissement_id);
+        }
+
+        if ($request->has('service_id')) {
+            $query->where('service_id', $request->service_id);
         }
 
         // Recherche

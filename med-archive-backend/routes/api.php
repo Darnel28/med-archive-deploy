@@ -96,6 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Services
     Route::get('/services/mes-patients', [ServiceController::class, 'mesPatients']);
+    Route::get('/services/me', [ServiceController::class, 'current']);
+    Route::put('/services/me', [ServiceController::class, 'updateCurrent']);
     Route::apiResource('services', ServiceController::class);
 
     // Paramètres
