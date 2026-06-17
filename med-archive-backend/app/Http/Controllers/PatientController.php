@@ -216,6 +216,14 @@ class PatientController extends Controller
         }
 
         $dossier = $patient->dossier;
+
+        if (!DossierAccess::canRead($request->user(), $dossier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acces refuse',
+            ], 403);
+        }
+
         $consultations = DossierAccess::applyReadableConsultations($request->user(), $dossier, $dossier->consultations())
             ->with(['medecin.user', 'medecin.etablissement', 'service', 'constantes', 'ordonnance', 'analyses.laboratoire.user', 'documents.typeDocument'])
             ->latest('date_consultation')
@@ -246,6 +254,10 @@ class PatientController extends Controller
                 'total_documents' => $dossier->documents()->whereIn('consultations.id', $visibleConsultationIds)->count(),
                 'total_analyses' => $dossier->analyses()->whereIn('consultations.id', $visibleConsultationIds)->count(),
                 'derniere_activite' => $consultations->first()?->date_consultation,
+            ],
+            'permissions' => [
+                'can_read' => true,
+                'can_write' => DossierAccess::canWrite($request->user(), $dossier),
             ],
         ];
 

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dossier;
+use App\Models\Consultation;
+use App\Models\Medecin;
 use App\Models\User;
 use App\Support\DossierAccess;
 use Illuminate\Http\Request;
@@ -66,6 +68,13 @@ class DossierController extends Controller
             ], 404);
         }
 
+        if (!DossierAccess::canRead($request->user(), $dossier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acces refuse',
+            ], 403);
+        }
+
         $consultations = DossierAccess::applyReadableConsultations($request->user(), $dossier, $dossier->consultations())
             ->with(['medecin.user', 'medecin.etablissement', 'service', 'constantes', 'ordonnance', 'analyses.laboratoire.user', 'documents.typeDocument'])
             ->latest('date_consultation')
@@ -103,6 +112,13 @@ class DossierController extends Controller
                 'success' => false,
                 'message' => 'Dossier non trouvé'
             ], 404);
+        }
+
+        if (!DossierAccess::canWrite($request->user(), $dossier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce dossier ne peut plus etre modifie par votre service ou votre medecin.',
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -146,6 +162,71 @@ class DossierController extends Controller
             'success' => true,
             'message' => 'Dossier archivé avec succès'
         ]);
+    }
+
+    public function affecterMedecin(Request $request, $id)
+    {
+        $dossier = Dossier::with('patient.user')->find($id);
+
+        if (!$dossier) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dossier non trouve',
+            ], 404);
+        }
+
+        if (!DossierAccess::canWrite($request->user(), $dossier)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez pas affecter ce dossier.',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'medecin_id' => 'required|exists:medecins,id',
+            'date_consultation' => 'required|date',
+            'motif' => 'nullable|string|max:255',
+            'observations' => 'nullable|string',
+        ]);
+
+        $medecin = Medecin::with('user')->findOrFail($validated['medecin_id']);
+
+        if ($request->user()->isService() && (int) $medecin->service_id !== (int) $request->user()->service?->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Le medecin choisi doit appartenir a votre service.',
+            ], 422);
+        }
+
+        $consultation = Consultation::create([
+            'dossier_id' => $dossier->id,
+            'medecin_id' => $medecin->id,
+            'service_id' => $medecin->service_id,
+            'date_consultation' => $validated['date_consultation'],
+            'motif' => $validated['motif'] ?? 'Rendez-vous d affectation',
+            'observations' => $validated['observations'] ?? null,
+            'statut' => 'en_attente',
+            'statut_paiement' => 'payee',
+            'est_urgence' => false,
+        ]);
+
+        $dossier->update([
+            'medecin_referent_id' => $medecin->id,
+            'service_proprietaire_id' => $medecin->service_id,
+            'medecin_traitant' => $medecin->user?->name,
+            'derniere_consultation' => $consultation->date_consultation,
+        ]);
+
+        $dossier->patient?->update(['service_id' => $medecin->service_id]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dossier affecte au medecin et rendez-vous cree avec succes',
+            'data' => [
+                'dossier' => $dossier->fresh(['patient.user', 'medecinReferent.user', 'serviceProprietaire']),
+                'consultation' => $consultation->load(['medecin.user', 'service']),
+            ],
+        ], 201);
     }
 
     /**

@@ -5,7 +5,6 @@ import {
   getCurrentUser,
   getMesPatientsService,
   getServices,
-  listMedecins,
 } from "../../api";
 
 function rowsFromPaginated(response) {
@@ -26,6 +25,8 @@ function mapPatient(row) {
     address: row.adresse || patient.user?.adresse || "",
     contactName: patient.personne_contact || "",
     contactPhone: patient.telephone_contact || "",
+    currentDoctorName: patient.dossier?.medecin_referent?.user?.name || patient.dossier?.medecin_traitant || "",
+    currentDoctorPhone: patient.dossier?.medecin_referent?.user?.telephone || "",
   };
 }
 
@@ -34,11 +35,9 @@ const TransfertPatientServiceForm = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [patients, setPatients] = useState([]);
   const [services, setServices] = useState([]);
-  const [medecins, setMedecins] = useState([]);
   const [form, setForm] = useState({
     patient_id: "",
     service_destination_id: "",
-    medecin_traitant_id: "",
     motif: "",
     observations: "",
     date_validation: new Date().toISOString().slice(0, 10),
@@ -67,10 +66,9 @@ const TransfertPatientServiceForm = () => {
         const user = meResponse?.data?.user ?? meResponse?.user ?? meResponse;
         const hospitalId = user?.service?.etablissement_id || user?.etablissement_id;
 
-        const [patientsResponse, servicesResponse, medecinsResponse] = await Promise.all([
+        const [patientsResponse, servicesResponse] = await Promise.all([
           getMesPatientsService({ per_page: 100 }),
           getServices(hospitalId ? { etablissement_id: hospitalId, per_page: 100 } : { per_page: 100 }),
-          listMedecins(hospitalId ? { etablissement_id: hospitalId, per_page: 100 } : { per_page: 100 }),
         ]);
 
         if (ignore) return;
@@ -78,7 +76,6 @@ const TransfertPatientServiceForm = () => {
         setCurrentUser(user);
         setPatients(rowsFromPaginated(patientsResponse).map(mapPatient).filter((patient) => patient.dossierId));
         setServices(rowsFromPaginated(servicesResponse));
-        setMedecins(rowsFromPaginated(medecinsResponse));
       } catch (err) {
         if (!ignore) setError(err.response?.data?.message || "Impossible de charger les données du transfert.");
       } finally {
@@ -94,7 +91,10 @@ const TransfertPatientServiceForm = () => {
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((state) => ({ ...state, [name]: value }));
+    setForm((state) => ({
+      ...state,
+      [name]: value,
+    }));
   }
 
   async function handleSubmit(event) {
@@ -116,7 +116,6 @@ const TransfertPatientServiceForm = () => {
         service_destination_id: form.service_destination_id,
         etablissement_source_id: etablissementId,
         etablissement_destination_id: etablissementId,
-        medecin_traitant_id: form.medecin_traitant_id || null,
         motif: form.motif,
         observations: [form.observations, form.date_validation ? `Date de validation: ${form.date_validation}` : ""]
           .filter(Boolean)
@@ -207,6 +206,16 @@ const TransfertPatientServiceForm = () => {
                   <input type="text" value={currentService?.nom || ""} readOnly />
                 </div>
                 <div className="tp-field">
+                  <label>Médecin actuel</label>
+                  <input type="text" value={selectedPatient?.currentDoctorName || ""} readOnly />
+                </div>
+                <div className="tp-field">
+                  <label>Numéro du médecin actuel</label>
+                  <input type="tel" value={selectedPatient?.currentDoctorPhone || ""} readOnly />
+                </div>
+              </div>
+              <div className="tp-row">
+                <div className="tp-field">
                   <label>Service d'accueil *</label>
                   <select name="service_destination_id" value={form.service_destination_id} onChange={updateField} required>
                     <option value="">Choisir le service</option>
@@ -245,17 +254,6 @@ const TransfertPatientServiceForm = () => {
             <fieldset className="tp-fieldset">
               <legend className="tp-legend">6. Validation</legend>
               <div className="tp-row">
-                <div className="tp-field">
-                  <label>Médecin traitant *</label>
-                  <select name="medecin_traitant_id" value={form.medecin_traitant_id} onChange={updateField} required>
-                    <option value="">Choisir un médecin</option>
-                    {medecins.map((medecin) => (
-                      <option key={medecin.id} value={medecin.id}>
-                        {medecin.user?.name || `Médecin #${medecin.id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
                 <div className="tp-field">
                   <label>Date *</label>
                   <input type="date" name="date_validation" value={form.date_validation} onChange={updateField} required />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getAuthUser } from '../../api/client';
+import { getNotifications } from '../../api/notificationApi';
 import AvatarInitials from '../AvatarInitials.jsx';
 import Chart from '../Chart.jsx';
 import { applyLanguage } from '../../utils/language.js';
@@ -22,6 +23,7 @@ export default function DashboardTopbar({
   const [isScrolled, setIsScrolled] = useState(false);
   const [language, setLanguage] = useState(() => localStorage.getItem('medarchive-language') || 'fr');
   const [showChart, setShowChart] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const user = unwrapUser(getAuthUser());
   const name = user.name || fallbackName;
   const role = user.role?.nom || user.role?.name || user.numero_professionnel || user.imu || fallbackRole;
@@ -39,6 +41,26 @@ export default function DashboardTopbar({
     const timer = window.setTimeout(() => applyLanguage(language), 0);
     return () => window.clearTimeout(timer);
   }, [language, location.pathname]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadUnreadNotifications() {
+      try {
+        const response = await getNotifications({ unread: true, per_page: 1 });
+        if (mounted) setUnreadNotifications(response?.unread_count ?? 0);
+      } catch {
+        if (mounted) setUnreadNotifications(0);
+      }
+    }
+
+    loadUnreadNotifications();
+    const timer = window.setInterval(loadUnreadNotifications, 15000);
+    return () => {
+      mounted = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   const toggleLanguage = () => {
     const next = language === 'fr' ? 'en' : 'fr';
@@ -69,7 +91,7 @@ export default function DashboardTopbar({
         </button>
         <button className="icon-btn has-badge" type="button" aria-label="Ouvrir les notifications" onClick={() => navigate(notificationsPath)}>
           <i className="fa-regular fa-bell"></i>
-          <span className="badge">4</span>
+          {unreadNotifications > 0 && <span className="badge">{unreadNotifications}</span>}
         </button>
         <div className="profile">
           {avatar ? <img src={avatar} alt="" /> : <AvatarInitials name={name} size={45} bgColor="#13c3b8" />}

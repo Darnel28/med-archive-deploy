@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Medecin;
+use App\Models\Role;
+use App\Models\Service;
 use App\Models\User;
 use App\Models\Consultation;
 use Carbon\Carbon;
@@ -66,64 +68,91 @@ class MedecinController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:6',
             'telephone' => 'required|string|max:20',
             'adresse' => 'required|string',
             'date_naissance' => 'required|date',
             'sexe' => 'required|in:M,F',
             'specialite_id' => 'required|exists:specialites,id',
-            'etablissement_id' => 'required|exists:users,id',
+            'etablissement_id' => 'nullable|exists:users,id',
+            'service_id' => 'nullable|exists:services,id',
             'numero_professionnel' => 'required|string|unique:medecins,numero_professionnel',
             'diplome' => 'nullable|string',
-            'annees_experience' => 'nullable|integer|min:0'
+            'annees_experience' => 'nullable|integer|min:0',
         ]);
 
         DB::beginTransaction();
 
         try {
-            // Créer l'utilisateur
+            $service = !empty($validated['service_id']) ? Service::find($validated['service_id']) : null;
+
+            if ($request->user()?->isService()) {
+                $service = $request->user()->service;
+            }
+
+            $etablissementId = $service?->etablissement_id ?? $validated['etablissement_id'] ?? null;
+
+            if (!$etablissementId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Etablissement ou service requis pour creer un medecin',
+                ], 422);
+            }
+
+            if ($request->user()?->isEtablissement() && (int) $etablissementId !== (int) $request->user()->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez creer un medecin que dans votre etablissement',
+                ], 403);
+            }
+
+            if ($request->user()?->isService() && (int) $service?->id !== (int) $request->user()->service?->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez creer un medecin que dans votre service',
+                ], 403);
+            }
+
+            $roleMedecin = Role::where('nom', 'Medecin')->firstOrFail();
+
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($validated['password'] ?? 'password123'),
                 'telephone' => $validated['telephone'],
                 'adresse' => $validated['adresse'],
                 'date_naissance' => $validated['date_naissance'],
                 'sexe' => $validated['sexe'],
-                'role_id' => 2, // Medecin (à adapter)
-                'etablissement_id' => $validated['etablissement_id'],
-                'statut' => 'actif'
+                'role_id' => $roleMedecin->id,
+                'etablissement_id' => $etablissementId,
+                'statut' => 'actif',
             ]);
 
-            // Créer le médecin
             $medecin = Medecin::create([
                 'user_id' => $user->id,
-                'etablissement_id' => $validated['etablissement_id'],
+                'etablissement_id' => $etablissementId,
+                'service_id' => $service?->id,
                 'specialite_id' => $validated['specialite_id'],
                 'numero_professionnel' => $validated['numero_professionnel'],
                 'diplome' => $validated['diplome'] ?? null,
-                'annees_experience' => $validated['annees_experience'] ?? 0
+                'annees_experience' => $validated['annees_experience'] ?? 0,
             ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Médecin créé avec succès',
-                'data' => $medecin->load(['user', 'specialite', 'etablissement'])
+                'message' => 'Medecin cree avec succes',
+                'data' => $medecin->load(['user', 'specialite', 'etablissement', 'service']),
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création: ' . $e->getMessage()
+                'message' => 'Erreur lors de la creation: ' . $e->getMessage(),
             ], 500);
         }
     }
-
-    /**
-     * Détails d'un médecin
-     */
     public function show($id)
     {
         $medecin = Medecin::with([

@@ -69,6 +69,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dossiers
     Route::apiResource('dossiers', DossierController::class);
     Route::get('/dossiers/{id}/resume', [DossierController::class, 'resume']);
+    Route::post('/dossiers/{id}/affecter-medecin', [DossierController::class, 'affecterMedecin']);
     Route::post('/dossiers/{id}/archiver', [DossierController::class, 'archiver']);
     Route::post('/dossiers/{id}/transferer', [DossierController::class, 'transferer']);
 
