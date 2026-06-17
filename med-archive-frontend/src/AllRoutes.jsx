@@ -75,6 +75,7 @@ import LoginPage from "./components/Connexion.jsx";
 import LogoutPage from "./components/Deconnexion.jsx";
 import MedecinHopital from "./components/DashHopital/MedecinHopital.jsx";
 import DashboardAdmin from "./components/DashAdmin/DashAdminHome.jsx";
+import DossierPatientHopital from "./components/DashHopital/DossierPatientHopital.jsx";
 //  Admin
 import RapportAdmin from "./components/DashAdmin/RapportAdmin.jsx";
 import Utilisateurs from "./components/DashAdmin/Utilisateurs.jsx";
@@ -199,6 +200,7 @@ function AllRoutes() {
                 <Route path="patients" element={<PatientsHopital />} />
                 <Route path="transfert/nouvelle-demande" element={<NouvelleDemandeTransfert />} />
                 <Route path="tout-les-medecins" element={<MedecinHopital />} />
+                <Route path="dossier-patient" element={<DossierPatientHopital/>} />
                 {/* Ajoute ici les autres routes propres à l'hôpital */}
             </Route>
             <Route path="/espaceadmin" element={protect(<DashAdmin />, ["super admin", "admin regional", "administrateur"])} >
