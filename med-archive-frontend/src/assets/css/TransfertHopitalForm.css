@@ -301,3 +301,42 @@ body.dark-mode .hopital-transfer-form-back:hover {
         width: 100%;
     }
 }
+.hopital-transfer-form-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 168px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  background: #1d6dff;
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.92rem;
+  box-shadow: 0 10px 20px rgba(29, 109, 255, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  cursor: pointer;
+}
+
+.hopital-transfer-form-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(29, 109, 255, 0.35);
+  background: #1557d6;
+}
+
+.hopital-transfer-form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Version dark mode */
+body.dark-mode .hopital-transfer-form-submit {
+  background: #3b82f6;
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+}
+
+body.dark-mode .hopital-transfer-form-submit:hover:not(:disabled) {
+  background: #2563eb;
+}

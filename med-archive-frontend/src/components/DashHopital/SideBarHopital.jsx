@@ -10,6 +10,7 @@ function normalizeUser(value) {
 
 const menuItems = [
   { to: '/espacehopital', label: 'Dashboard', icon: 'fa-house', end: true },
+  { to: '/espacehopital/services', label: 'Services', icon: 'fa-building' },
   { to: '/espacehopital/tout-les-medecins', label: 'Medecins', icon: 'fa-user-doctor' },
   { to: '/espacehopital/patients', label: 'Patients', icon: 'fa-user-injured' },
   { to: '/espacehopital/transfert', label: 'Transfert', icon: 'fa-exchange-alt' },

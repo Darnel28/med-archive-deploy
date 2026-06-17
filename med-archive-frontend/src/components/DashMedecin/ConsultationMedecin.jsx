@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAuthUser } from '../../api/client';
 import { getConsultation, updateConsultation } from '../../api/consultationApi';
+import { getLaboratoires } from '../../api/laboratoireApi';
 
 const emptyForm = {
   patientNom: '',
@@ -23,6 +24,11 @@ const emptyForm = {
   motifDetails: '',
   tension: '',
   temperature: '',
+  poids: '',
+  taille: '',
+  frequenceCardiaque: '',
+  saturationOxygene: '',
+  glycemie: '',
   autresObs: '',
 
   diagnostic: '',
@@ -65,6 +71,18 @@ function textValue(...values) {
   return values.find((value) => typeof value === 'string' && value.trim()) || '';
 }
 
+function rowsFromPaginated(response) {
+  const payload = response?.data ?? response;
+  return Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
+}
+
+const examenLabels = {
+  analyseSang: 'Analyse de sang',
+  radiographie: 'Radiographie',
+  scanner: 'Scanner',
+  testLabo: 'Test laboratoire',
+};
+
 function formFromConsultation(item) {
   const patient = item?.dossier?.patient;
   const patientUser = patient?.user;
@@ -104,6 +122,7 @@ function formFromConsultation(item) {
 export default function ConsultationMedecin() {
   const [consultationId, setConsultationId] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [laboratoires, setLaboratoires] = useState([]);
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const handleExamenCheckbox = (e) => {
@@ -152,6 +171,18 @@ export default function ConsultationMedecin() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    getLaboratoires({ per_page: 100 })
+      .then((response) => {
+        if (active) setLaboratoires(rowsFromPaginated(response));
+      })
+      .catch(() => {
+        if (active) setLaboratoires([]);
+      });
+    return () => { active = false; };
+  }, []);
+
   const change = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
   const changePrescription = (index, key, value) => setFormData((current) => ({
     ...current,
@@ -178,11 +209,34 @@ export default function ConsultationMedecin() {
   setMessage('');
 
   try {
+    const selectedExamens = Object.entries(formData.examens)
+      .filter(([, checked]) => checked)
+      .map(([key]) => ({
+        laboratoire_id: laboratoires[0]?.id,
+        type_analyse: examenLabels[key],
+        date_prelevement: new Date().toISOString().slice(0, 10),
+        commentaires: `Demande creee depuis la consultation #${consultationId}`,
+      }));
+
+    if (selectedExamens.length > 0 && !laboratoires[0]?.id) {
+      throw new Error("Aucun laboratoire disponible pour creer les demandes d'examens.");
+    }
+
     await updateConsultation(consultationId, {
-  diagnostic: formData.diagnostic,
-  observations: formData.notesMedicales || formData.autresObs,
-  statut: 'termine',
-});
+      diagnostic: formData.diagnostic,
+      observations: formData.notesMedicales || formData.autresObs,
+      statut: 'termine',
+      constantes: {
+        tension_arterielle: formData.tension || null,
+        temperature: formData.temperature || null,
+        poids: formData.poids || null,
+        taille: formData.taille || null,
+        frequence_cardiaque: formData.frequenceCardiaque || null,
+        saturation_oxygene: formData.saturationOxygene || null,
+        glycemie: formData.glycemie || null,
+      },
+      analyses: selectedExamens,
+    });
 
     resetForm();
 
@@ -235,6 +289,11 @@ export default function ConsultationMedecin() {
             <div className="line-grid three">
               <div className="line-field"><label>Tension artérielle</label><input value={formData.tension} onChange={(e) => change('tension', e.target.value)} /></div>
               <div className="line-field"><label>Température</label><input value={formData.temperature} onChange={(e) => change('temperature', e.target.value)} /></div>
+              <div className="line-field"><label>Poids (kg)</label><input type="number" step="0.1" value={formData.poids} onChange={(e) => change('poids', e.target.value)} /></div>
+              <div className="line-field"><label>Taille (cm)</label><input type="number" value={formData.taille} onChange={(e) => change('taille', e.target.value)} /></div>
+              <div className="line-field"><label>Frequence cardiaque</label><input type="number" value={formData.frequenceCardiaque} onChange={(e) => change('frequenceCardiaque', e.target.value)} /></div>
+              <div className="line-field"><label>Saturation oxygene (%)</label><input type="number" step="0.1" value={formData.saturationOxygene} onChange={(e) => change('saturationOxygene', e.target.value)} /></div>
+              <div className="line-field"><label>Glycemie</label><input type="number" step="0.1" value={formData.glycemie} onChange={(e) => change('glycemie', e.target.value)} /></div>
               <div className="line-field"><label>Autres observations</label><input value={formData.autresObs} onChange={(e) => change('autresObs', e.target.value)} /></div>
             </div>
           </section>

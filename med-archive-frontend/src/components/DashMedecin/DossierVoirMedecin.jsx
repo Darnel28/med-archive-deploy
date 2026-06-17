@@ -1,443 +1,163 @@
-// import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getPatientDossierComplet } from "../../api/patientApi";
+import { getMesPatientsService } from "../../api/serviceApi";
+import AvatarInitials from "../AvatarInitials.jsx"; // Import du composant
 
-// import '../../assets/css/DossierDuPatient.css';
+// Fonctions utilitaires reprises du code original
+function rowsFromPaginated(response) {
+  const payload = response?.data ?? response;
+  return Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
+}
 
-// const DossierVoirMedecin = () => {
-//     const [activeFilter, setActiveFilter] = useState('date');
-//     const [activeTab, setActiveTab] = useState('historique');
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "-" : date.toLocaleDateString("fr-FR");
+}
 
-//     return (
-//         <main className="content page-tight">
-//             <nav className="ddp-top-tabs" aria-label="Navigation dossier">
-//                 <button
-//                     className={`ddp-tab ${activeTab === 'historique' ? 'active' : ''}`}
-//                     type="button"
-//                     onClick={() => setActiveTab('historique')}
-//                 >
-//                     Historique medical
-//                 </button>
-//                 <button
-//                     className={`ddp-tab ${activeTab === 'analyses' ? 'active' : ''}`}
-//                     type="button"
-//                     onClick={() => setActiveTab('analyses')}
-//                 >
-//                     Resultats d'analyses
-//                 </button>
-//                 <button
-//                     className={`ddp-tab ${activeTab === 'ordonnances' ? 'active' : ''}`}
-//                     type="button"
-//                     onClick={() => setActiveTab('ordonnances')}
-//                 >
-//                     Ordonnances <i className="fa-solid fa-chevron-down ddp-tab-caret"></i>
-//                 </button>
-//                 <button
-//                     className={`ddp-tab ${activeTab === 'documents' ? 'active' : ''}`}
-//                     type="button"
-//                     onClick={() => setActiveTab('documents')}
-//                 >
-//                     Documents
-//                 </button>
-//                 <button
-//                     className={`ddp-tab ${activeTab === 'hospitalisation' ? 'active' : ''}`}
-//                     type="button"
-//                     onClick={() => setActiveTab('hospitalisation')}
-//                 >
-//                     Hospitalisation
-//                 </button>
-//             </nav>
+function patientName(patient) {
+  return patient?.user?.name || patient?.name || "-";
+}
 
-//             <section className="ddp-board">
-//                 <aside className="ddp-aside" aria-label="Resume patient">
-//                     <img className="ddp-photo"
-//                         src="https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=480&q=80"
-//                         alt="Portrait patient" />
+function displayValue(value, suffix = "") {
+  if (value === null || value === undefined || value === "") return "-";
+  return `${value}${suffix}`;
+}
 
-//                     <div className="ddp-patient-id">
-//                         <h2>Marie Lefevre</h2>
-//                         <span>IMU: MA-24-5108</span>
-//                     </div>
+export default function DossierVoirMedecin() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [patients, setPatients] = useState([]);
+  const [selectedPatientId, setSelectedPatientId] = useState(searchParams.get("patient_id") || "");
+  const [dossierData, setDossierData] = useState(null);
+  const [activeTab, setActiveTab] = useState("consultations");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-//                     <ul className="ddp-facts">
-//                         <li><i className="fa-regular fa-calendar"></i> 14/03/1950</li>
-//                         <li><i className="fa-solid fa-phone"></i> +229 00 00 00 00</li>
-//                         <li><i className="fa-solid fa-droplet"></i> O+ | 163 cm | 78 kg</li>
-//                         <li><i className="fa-solid fa-house"></i> Zogbo, Benin Rue 123</li>
-//                         <li><i className="fa-solid fa-user-doctor"></i> Medecin referent: Dr Jean Martin</li>
-//                     </ul>
+  // Charger la liste des patients du service
+  useEffect(() => {
+    let ignore = false;
 
-//                     <section className="ddp-aside-block" aria-label="Allergies principales">
-//                         <div className="ddp-aside-head">
-//                             <h3>Allergies</h3>
-//                             <a href="#">Voir tout</a>
-//                         </div>
+    async function loadPatients() {
+      try {
+        const response = await getMesPatientsService({ per_page: 1000 });
+        const rows = rowsFromPaginated(response).map((row) => row.patient ?? row).filter(Boolean);
+        if (ignore) return;
+        setPatients(rows);
+        setSelectedPatientId((current) => current || searchParams.get("patient_id") || (rows[0]?.id ? String(rows[0].id) : ""));
+      } catch (err) {
+        if (!ignore) setError(err.response?.data?.message || "Impossible de charger les patients du service.");
+      }
+    }
 
-//                         <article className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-danger"></i> Penicilline</strong>
-//                             <span>Reponse severe observee en 2024</span>
-//                         </article>
+    loadPatients();
+    return () => {
+      ignore = true;
+    };
+  }, [searchParams]);
 
-//                         <article className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-warning"></i> Ibuprofene</strong>
-//                             <span>Reaction moderee, surveillance recommandee</span>
-//                         </article>
-//                     </section>
-//                     <section className="ddp-aside-block">
-//                         <div className="ddp-aside-head">
-//                             <h3>Antécédents</h3>
-//                         </div>
+  // Charger le dossier complet du patient sélectionné
+  useEffect(() => {
+    let ignore = false;
 
-//                         <div className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-danger"></i> Hypertension</strong>
-//                             <span>Diagnostiquée en 2018 - traitement en cours</span>
-//                         </div>
+    async function loadDossier() {
+      if (!selectedPatientId) {
+        setLoading(false);
+        setDossierData(null);
+        return;
+      }
 
-//                         <div className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-warning"></i> Diabète type 2</strong>
-//                             <span>Suivi régulier - régime contrôlé</span>
-//                         </div>
-//                     </section>
-//                     <section className="ddp-aside-block">
-//                         <div className="ddp-aside-head">
-//                             <h3>Traitements</h3>
-//                         </div>
+      try {
+        setLoading(true);
+        setError("");
+        const response = await getPatientDossierComplet(selectedPatientId);
+        if (!ignore) setDossierData(response?.data ?? response);
+      } catch (err) {
+        if (!ignore) {
+          setDossierData(null);
+          setError(err.response?.data?.message || "Impossible de charger le dossier patient.");
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
 
-//                         <div className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-info"></i> Metformine 500mg</strong>
-//                             <span>2 fois par jour</span>
-//                         </div>
+    loadDossier();
+    return () => {
+      ignore = true;
+    };
+  }, [selectedPatientId]);
 
-//                         <div className="ddp-info-item">
-//                             <strong><i className="fa-solid fa-circle ddp-dot-teal"></i> Amlodipine 10mg</strong>
-//                             <span>1 fois par jour</span>
-//                         </div>
-//                     </section>
+  // Extraire les données du dossier
+  const patient = dossierData?.patient;
+  const dossier = dossierData?.dossier;
+  const consultations = dossierData?.consultations || [];
+  const analyses = dossierData?.analyses || [];
+  const ordonnances = dossierData?.ordonnances || [];
+  const documents = dossierData?.documents || [];
+  const permissions = dossierData?.permissions || {};
+  const latestConstantes = dossierData?.dernieres_constantes || consultations.find((consultation) => consultation.constantes)?.constantes || null;
 
-//                     <section className="ddp-aside-block" aria-label="Derniers resultats">
-//                         <div className="ddp-aside-head">
-//                             <h3>Derniers resultats</h3>
-//                         </div>
+  // Regrouper les consultations par année
+  const consultationsByYear = useMemo(() => {
+    return consultations.reduce((groups, consultation) => {
+      const year = consultation.date_consultation ? new Date(consultation.date_consultation).getFullYear() : "Sans date";
+      groups[year] = groups[year] || [];
+      groups[year].push(consultation);
+      return groups;
+    }, {});
+  }, [consultations]);
 
-//                         <article className="ddp-result-item">
-//                             <label><span>Cholesterol total</span><strong>2.15 g/L</strong></label>
-//                             <div className="ddp-result-track"><span className="ddp-result-fill warn" style={{ width: '68%' }}></span></div>
-//                         </article>
+  // Changement de patient
+  function handlePatientChange(event) {
+    const id = event.target.value;
+    setSelectedPatientId(id);
+    setSearchParams(id ? { patient_id: id } : {});
+  }
 
-//                         <article className="ddp-result-item">
-//                             <label><span>Creatinine</span><strong>12 mg/L</strong></label>
-//                             <div className="ddp-result-track"><span className="ddp-result-fill alert" style={{ width: '82%' }}></span></div>
-//                         </article>
+  // Calcul de l'âge
+  const age = patient?.user?.date_naissance
+    ? new Date().getFullYear() - new Date(patient.user.date_naissance).getFullYear()
+    : "-";
 
-//                         <article className="ddp-result-item">
-//                             <label><span>Glucose a jeun</span><strong>0.98 g/L</strong></label>
-//                             <div className="ddp-result-track"><span className="ddp-result-fill" style={{ width: '48%' }}></span></div>
-//                         </article>
-//                     </section>
-//                 </aside>
+  const metrics = {
+    bpm: displayValue(latestConstantes?.frequence_cardiaque),
+    tension: displayValue(latestConstantes?.tension_arterielle),
+    respiration: "-",
+    glucose: displayValue(latestConstantes?.glycemie),
+  };
+  const patientWeight = latestConstantes?.poids ?? patient?.poids;
 
-//                 {activeTab === 'historique' && (
-//                     <section className="ddp-history-shell" aria-label="Historique medical">
-//                         <header className="ddp-history-toolbar ddp-analyses-toolbar">
-//                             <h1>Historique medical</h1>
-//                             <div className="ddp-history-filters">
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'date' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('date')}>Par date</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'condition' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('condition')}>Par condition</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'type' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('type')}>Par type</button>
-//                             </div>
-//                         </header>
-
-//                         <div className="ddp-history-scale" aria-label="Echelle chronologique">
-//                             <div className="ddp-scale-bars">
-//                                 <span style={{ height: '11px' }}></span><span style={{ height: '18px' }}></span><span
-//                                     style={{ height: '8px' }}></span><span style={{ height: '25px' }}></span><span
-//                                         style={{ height: '13px' }}></span><span style={{ height: '22px' }}></span><span
-//                                             style={{ height: '9px' }}></span><span style={{ height: '15px' }}></span><span
-//                                                 style={{ height: '7px' }}></span><span style={{ height: '19px' }}></span><span
-//                                                     style={{ height: '10px' }}></span><span style={{ height: '16px' }}></span><span
-//                                                         style={{ height: '23px' }}></span><span style={{ height: '14px' }}></span><span
-//                                                             style={{ height: '12px' }}></span><span style={{ height: '9px' }}></span><span
-//                                                                 style={{ height: '20px' }}></span><span style={{ height: '6px' }}></span><span
-//                                                                     style={{ height: '18px' }}></span><span style={{ height: '13px' }}></span>
-//                             </div>
-//                             <div className="ddp-scale-steps">
-//                                 <span>15</span>
-//                                 <span>1M</span>
-//                                 <span>3M</span>
-//                                 <span>6M</span>
-//                                 <span>1A</span>
-//                             </div>
-//                             <div className="ddp-scale-date">27/10/2024 - 27/04/2026</div>
-//                         </div>
-
-//                         <div className="ddp-timeline">
-//                             <section className="ddp-year-group">
-//                                 <div className="ddp-year-label">2026</div>
-//                                 <div className="ddp-year-track">
-//                                     <span className="ddp-year-node" aria-hidden="true"></span>
-//                                     <div className="ddp-annual-ribbon"><i className="fa-regular fa-file-lines"></i> Voir rapport annuel
-//                                     </div>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Lundi</span>
-//                                         <h4>Consultation generale</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-user-doctor"></i> Dr Jean Martin</p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-building"></i> Hopital Saint-Antoine,
-//                                             Paris</p>
-//                                     </article>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Jeudi</span>
-//                                         <h4>Controle d'asthme</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-user-doctor"></i> Dr Bernard Simon</p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-building"></i> Clinique du Marais,
-//                                             Paris</p>
-//                                     </article>
-//                                 </div>
-//                             </section>
-
-//                             <section className="ddp-year-group">
-//                                 <div className="ddp-year-label">2025</div>
-//                                 <div className="ddp-year-track">
-//                                     <span className="ddp-year-node" aria-hidden="true"></span>
-//                                     <div className="ddp-annual-ribbon"><i className="fa-regular fa-file-lines"></i> Voir rapport annuel
-//                                     </div>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Mardi</span>
-//                                         <h4>Vaccin contre la grippe</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-regular fa-calendar"></i> 31 Aout 2025</p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-location-dot"></i> Cabinet D-attrinand
-//                                             Simorkina, Paris</p>
-//                                     </article>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Mars</span>
-//                                         <h4>Chirurgie de la vesicule biliaire</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-user-doctor"></i> Dr Bernard Durnad
-//                                         </p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-building"></i> Hopital Bichat Claude
-//                                             Bernard, Paris</p>
-//                                     </article>
-//                                 </div>
-//                             </section>
-
-//                             <section className="ddp-year-group">
-//                                 <div className="ddp-year-label">2024</div>
-//                                 <div className="ddp-year-track">
-//                                     <span className="ddp-year-node" aria-hidden="true"></span>
-//                                     <div className="ddp-annual-ribbon"><i className="fa-regular fa-file-lines"></i> Voir rapport annuel
-//                                     </div>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Jeudi</span>
-//                                         <h4>Consultation de suivi cardiaque</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-user-doctor"></i> Dr Jean Martin</p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-building"></i> Institut Med Archive,
-//                                             antenne Cotonou</p>
-//                                     </article>
-//                                     <article className="ddp-history-event">
-//                                         <span className="ddp-event-day">Avril</span>
-//                                         <h4>Controle d'asthme chronique</h4>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-user-doctor"></i> Dr Bernard Simon</p>
-//                                         <p className="ddp-history-meta"><i className="fa-solid fa-building"></i> Hopital Saint-Antoine,
-//                                             Paris</p>
-//                                     </article>
-//                                 </div>
-//                             </section>
-//                         </div>
-//                     </section>
-//                 )}
-
-//                 {activeTab === 'analyses' && (
-//                     <section className="ddp-history-shell ddp-analyses-shell" aria-label="Resultats d'analyses">
-//                         <header className="ddp-history-toolbar ddp-analyses-toolbar">
-//                             <h1>Resultats d'analyses</h1>
-//                             <div className="ddp-history-filters">
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'date' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('date')}>Par date</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'condition' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('condition')}>Par condition</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'type' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('type')}>Par type</button>
-//                             </div>
-//                         </header>
-//                         <section className="ddp-analyses-card" aria-label="Tableau des resultats d'analyses">
-//                             <div className="ddp-analyses-card-head">
-//                                 {/* <h3>Resultats d'analyses</h3> */}
-//                                 {/* <a href="#">Voir tous les examens</a> */}
-//                             </div>
-//                             <div className="ddp-analyses-table-wrap">
-//                                 <table className="ddp-analyses-table">
-//                                     <thead>
-//                                         <tr>
-//                                             <th>DATE</th>
-//                                             <th>EXAMEN</th>
-//                                             <th>VALEUR</th>
-//                                             <th>STATUT</th>
-//                                         </tr>
-//                                     </thead>
-//                                     <tbody>
-//                                         <tr>
-//                                             <td>21/03/2026</td>
-//                                             <td>Hemoglobine glyquee (HbA1c)</td>
-//                                             <td>6.8%</td>
-//                                             <td><span className="ddp-status ddp-status-watch">A surveiller</span></td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>18/03/2026</td>
-//                                             <td>Creatinine</td>
-//                                             <td>12 mg/L</td>
-//                                             <td><span className="ddp-status ddp-status-alert">Eleve</span></td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>12/03/2026</td>
-//                                             <td>Glycemie a jeun</td>
-//                                             <td>0.98 g/L</td>
-//                                             <td><span className="ddp-status ddp-status-ok">Normal</span></td>
-//                                         </tr>
-//                                     </tbody>
-//                                 </table>
-//                             </div>
-//                         </section>
-//                     </section>
-//                 )}
-
-//                 {activeTab === 'ordonnances' && (
-//                     <section className="ddp-history-shell ddp-ord-shell" aria-label="Ordonnances">
-//                         <header className="ddp-history-toolbar ddp-analyses-toolbar">
-//                             <h1>Ordonnances</h1>
-//                             <div className="ddp-history-filters">
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'date' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('date')}>Par date</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'condition' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('condition')}>Par condition</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'type' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('type')}>Par type</button>
-//                             </div>
-//                         </header>
-//                         <section className="ddp-ord-card" aria-label="Tableau des ordonnances">
-//                             <div className="ddp-ord-card-head">
-//                                 {/* <h3>Liste Ordonnances </h3> */}
-//                                 <a href="#">Nouvelle ordonnance</a>
-//                             </div>
-//                             <div className="ddp-ord-table-wrap">
-//                                 <table className="ddp-ord-table">
-//                                     <thead>
-//                                         <tr>
-//                                             <th>PRESCRIPTION</th>
-//                                             <th>POSOLOGIE</th>
-//                                             <th>DUREE</th>
-//                                             <th>PRESCRIPTEUR</th>
-//                                         </tr>
-//                                     </thead>
-//                                     <tbody>
-//                                         <tr>
-//                                             <td>Metformine 500mg</td>
-//                                             <td>2 fois par jour</td>
-//                                             <td>90 jours</td>
-//                                             <td>Dr Jean Martin</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Amlodipine 10mg</td>
-//                                             <td>1 fois par jour</td>
-//                                             <td>60 jours</td>
-//                                             <td>Dr Bernard Simon</td>
-//                                         </tr>
-//                                         <tr>
-//                                             <td>Atorvastatine 20mg</td>
-//                                             <td>Le soir apres repas</td>
-//                                             <td>30 jours</td>
-//                                             <td>Dr Jean Martin</td>
-//                                         </tr>
-//                                     </tbody>
-//                                 </table>
-//                             </div>
-//                         </section>
-//                     </section>
-//                 )}
-
-//                 {activeTab === 'documents' && (
-//                     <section className="ddp-history-shell ddp-doc-shell" aria-label="Documents patient">
-//                         <header className="ddp-history-toolbar ddp-analyses-toolbar">
-//                             <h1>Documents medicaux</h1>
-//                             <div className="ddp-history-filters">
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'date' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('date')}>Par date</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'condition' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('condition')}>Par condition</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'type' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('type')}>Par type</button>
-//                             </div>
-//                         </header>
-//                         <section className="ddp-doc-section" aria-label="Grille des documents">
-//                             <div className="ddp-doc-section-head">
-//                                 {/* <h3>Documents medicaux</h3> */}
-//                                 {/* <a href="#">Bibliotheque Med Archive</a> */}
-//                             </div>
-//                             <div className="ddp-doc-grid">
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Compte rendu cardiologie</h4>
-//                                     <p>PDF · 1.2 Mo · 19/03/2026</p>
-//                                 </article>
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Bilan biologique trimestriel</h4>
-//                                     <p>PDF · 0.8 Mo · 18/03/2026</p>
-//                                 </article>
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Ordonnance scannee</h4>
-//                                     <p>JPEG · 0.6 Mo · 12/03/2026</p>
-//                                 </article>
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Echo cardiaque</h4>
-//                                     <p>PNG · 2.4 Mo · 10/03/2026</p>
-//                                 </article>
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Fiche de suivi diabetologique</h4>
-//                                     <p>PDF · 0.5 Mo · 02/03/2026</p>
-//                                 </article>
-//                                 <article className="ddp-doc-card">
-//                                     <h4>Consentement numerise</h4>
-//                                     <p>PDF · 0.3 Mo · 27/02/2026</p>
-//                                 </article>
-//                             </div>
-//                         </section>
-//                     </section>
-//                 )}
-
-//                 {activeTab === 'hospitalisation' && (
-//                     <section className="ddp-history-shell ddp-hosp-shell" aria-label="Hospitalisations">
-//                         <header className="ddp-history-toolbar ddp-analyses-toolbar">
-//                             <h1>Hospitalisations</h1>
-//                             <div className="ddp-history-filters">
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'date' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('date')}>Par date</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'condition' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('condition')}>Par condition</button>
-//                                 <button className={`ddp-filter-chip ${activeFilter === 'type' ? 'active' : ''}`} type="button" onClick={() => setActiveFilter('type')}>Par type</button>
-//                             </div>
-//                         </header>
-//                         <div className="ddp-timeline">
-//                             <article className="ddp-history-event">
-//                                 <h4>Hospitalisation cardiologie</h4>
-//                                 <p className="ddp-history-meta">Hopital Saint-Antoine - 08/04/2026 - 12 jours</p>
-//                             </article>
-//                             <article className="ddp-history-event">
-//                                 <h4>Hospitalisation diabetologie</h4>
-//                                 <p className="ddp-history-meta">Clinique du Marais - 22/02/2026 - 5 jours</p>
-//                             </article>
-//                         </div>
-//                     </section>
-//                 )}
-//             </section>
-//         </main>
-//     );
-// };
-
-// export default DossierVoirMedecin;
-import React from 'react';
-
-const DossierVoirMedecin = () => {
   return (
     <main className="content page-tight" style={{ maxWidth: '1400px', margin: '0 auto' }}>
       <section className="patient-dossier">
         {/* Carte de profil */}
         <article className="profile-card">
           <div className="profile-head">
-            <img
-              className="profile-avatar"
-              src="https://i.pravatar.cc/140?img=12"
-              alt="Photo patient"
-            />
+            {/* Avatar dynamique */}
+            {patient?.avatar ? (
+              <img
+                className="profile-avatar"
+                src={patient.avatar}
+                alt={patientName(patient)}
+              />
+            ) : (
+              <AvatarInitials
+                name={patientName(patient)}
+                size={100}
+                bgColor="#13c3b8"
+                className="profile-avatar"
+              />
+            )}
             <div className="profile-main">
-              <h1>Jean A.</h1>
+              <h1>{patientName(patient)}</h1>
               <div className="profile-tags">
                 <span className="tag tag-neutral">Patient suivi</span>
-                <span className="tag tag-vip">Dossier prioritaire</span>
+                {permissions.can_write === false && (
+                  <span className="tag tag-vip">Lecture seule</span>
+                )}
               </div>
-              <p>Zogbo, Benin Rue 123</p>
+              <p>{patient?.user?.adresse || "Adresse non renseignée"}</p>
             </div>
             <div className="profile-actions">
               <button className="profile-icon" type="button" title="Appeler">
@@ -450,20 +170,20 @@ const DossierVoirMedecin = () => {
           </div>
           <div className="profile-meta">
             <div className="meta-item">
-              <strong>45 ans</strong>
+              <strong>{age} ans</strong>
               <span>Âge</span>
             </div>
             <div className="meta-item">
-              <strong>A+</strong>
+              <strong>{patient?.groupe_sanguin || "-"}</strong>
               <span>Groupe sanguin</span>
             </div>
             <div className="meta-item">
-              <strong>78 kg</strong>
+              <strong>{displayValue(patientWeight, patientWeight ? " kg" : "")}</strong>
               <span>Poids</span>
             </div>
             <div className="meta-highlight">
-              <strong>Prochain RDV: 9:30 AM</strong>
-              <span>Aujourd'hui</span>
+              <strong>N° dossier: {dossier?.numero_dossier || "-"}</strong>
+              {/* <span>N° dossier</span> */}
             </div>
           </div>
         </article>
@@ -473,28 +193,28 @@ const DossierVoirMedecin = () => {
           <article className="metric-card metric-a">
             <i className="fa-regular fa-heart"></i>
             <div>
-              <strong>80</strong>
+              <strong>{metrics.bpm}</strong>
               <span>bpm</span>
             </div>
           </article>
           <article className="metric-card metric-b">
             <i className="fa-solid fa-gauge-high"></i>
             <div>
-              <strong>118/76</strong>
+              <strong>{metrics.tension}</strong>
               <span>mmHg Tension</span>
             </div>
           </article>
           <article className="metric-card metric-c">
             <i className="fa-solid fa-lungs"></i>
             <div>
-              <strong>14</strong>
+              <strong>{metrics.respiration}</strong>
               <span>Resp./min</span>
             </div>
           </article>
           <article className="metric-card metric-d">
             <i className="fa-solid fa-cubes"></i>
             <div>
-              <strong>65</strong>
+              <strong>{metrics.glucose}</strong>
               <span>mg/dl Glucose</span>
             </div>
           </article>
@@ -508,15 +228,15 @@ const DossierVoirMedecin = () => {
               <h3>1. Informations générales</h3>
               <p className="panel-sub">Informations du patient.</p>
               <div className="info-grid">
-                <div className="info-item"><span>Nom et prénom</span><strong>Jean A.</strong></div>
-                <div className="info-item"><span>Sexe</span><strong>Masculin</strong></div>
-                <div className="info-item"><span>Date de naissance</span><strong>18/06/1981</strong></div>
-                <div className="info-item"><span>Âge</span><strong>45 ans</strong></div>
-                <div className="info-item"><span>Adresse</span><strong>Zogbo, Benin Rue 123</strong></div>
-                <div className="info-item"><span>Téléphone</span><strong>+229 00 00 00 00</strong></div>
-                <div className="info-item"><span>Email</span><strong>jean.a@email.com</strong></div>
-                <div className="info-item"><span>Groupe sanguin</span><strong>A+</strong></div>
-                <div className="info-item"><span>Urgence</span><strong>Marie A. +229 00 00 00 00</strong></div>
+                <div className="info-item"><span>Nom et prénom</span><strong>{patientName(patient)}</strong></div>
+                <div className="info-item"><span>Sexe</span><strong>{patient?.user?.sexe || "-"}</strong></div>
+                <div className="info-item"><span>Date de naissance</span><strong>{formatDate(patient?.user?.date_naissance)}</strong></div>
+                <div className="info-item"><span>Âge</span><strong>{age} ans</strong></div>
+                <div className="info-item"><span>Adresse</span><strong>{patient?.user?.adresse || "-"}</strong></div>
+                <div className="info-item"><span>Téléphone</span><strong>{patient?.user?.telephone || "-"}</strong></div>
+                <div className="info-item"><span>Email</span><strong>{patient?.user?.email || "-"}</strong></div>
+                <div className="info-item"><span>Groupe sanguin</span><strong>{patient?.groupe_sanguin || "-"}</strong></div>
+                <div className="info-item"><span>Urgence</span><strong>{patient?.telephone_contact || "-"}</strong></div>
               </div>
             </article>
 
@@ -526,22 +246,33 @@ const DossierVoirMedecin = () => {
               <p className="panel-sub">Informations critiques pour la prise en charge médicale.</p>
               <strong className="subsection-title">Allergies</strong>
               <div className="pill-list">
-                <span className="pill pill-danger">Pénicilline</span>
-                <span className="pill pill-danger">Arachides</span>
-                <span className="pill pill-danger">Poussière</span>
+                {(patient?.allergies || dossier?.allergies_importantes) ? (
+                  (patient?.allergies || dossier?.allergies_importantes).split(',').map((allergie, idx) => (
+                    <span key={idx} className="pill pill-danger">{allergie.trim()}</span>
+                  ))
+                ) : (
+                  <span className="pill">Aucune allergie renseignée</span>
+                )}
               </div>
               <strong className="subsection-title">Antécédents médicaux</strong>
               <div className="pill-list">
-                <span className="pill">Diabète</span>
-                <span className="pill">Hypertension</span>
-                <span className="pill">Asthme</span>
-                <span className="pill">Chirurgie passée</span>
-                <span className="pill">Maladie chronique</span>
+                {(patient?.antecedents_medicaux || dossier?.diagnostics_principaux) ? (
+                  (patient?.antecedents_medicaux || dossier?.diagnostics_principaux).split(',').map((ante, idx) => (
+                    <span key={idx} className="pill">{ante.trim()}</span>
+                  ))
+                ) : (
+                  <span className="pill">Aucun antécédent renseigné</span>
+                )}
               </div>
               <strong className="subsection-title">Vaccinations</strong>
               <div className="pill-list">
-                <span className="pill pill-success">Tétanos</span>
-                <span className="pill pill-success">Hépatite B</span>
+                {dossier?.vaccinations ? (
+                  dossier.vaccinations.split(',').map((vaccin, idx) => (
+                    <span key={idx} className="pill pill-success">{vaccin.trim()}</span>
+                  ))
+                ) : (
+                  <span className="pill">Aucune vaccination renseignée</span>
+                )}
               </div>
             </article>
 
@@ -560,20 +291,19 @@ const DossierVoirMedecin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>12/03/2026</td>
-                      <td>Dr Alice</td>
-                      <td>Fièvre</td>
-                      <td>Infection virale</td>
-                      <td><a className="action-link" href="#"><i className="fa-regular fa-eye"></i> Voir détails</a></td>
-                    </tr>
-                    <tr>
-                      <td>03/03/2026</td>
-                      <td>Dr Martin</td>
-                      <td>Suivi</td>
-                      <td>Évolution favorable</td>
-                      <td><a className="action-link" href="#"><i className="fa-regular fa-eye"></i> Voir détails</a></td>
-                    </tr>
+                    {consultations.length === 0 ? (
+                      <tr><td colSpan="5">Aucune consultation .</td></tr>
+                    ) : (
+                      consultations.map((consultation) => (
+                        <tr key={consultation.id}>
+                          <td>{formatDate(consultation.date_consultation)}</td>
+                          <td>{consultation.medecin?.user?.name || "-"}</td>
+                          <td>{consultation.motif || "-"}</td>
+                          <td>{consultation.diagnostic || "-"}</td>
+                          <td><a className="action-link" href="#"><i className="fa-regular fa-eye"></i> Voir détails</a></td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -593,18 +323,18 @@ const DossierVoirMedecin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>10/03/2026</td>
-                      <td>Analyse sanguine</td>
-                      <td><span className="pill pill-warning">Normal</span></td>
-                      <td><a className="action-link" href="#"><i className="fa-solid fa-download"></i> Télécharger</a></td>
-                    </tr>
-                    <tr>
-                      <td>01/03/2026</td>
-                      <td>CRP</td>
-                      <td><span className="pill">Légère inflammation</span></td>
-                      <td><a className="action-link" href="#"><i className="fa-solid fa-download"></i> Télécharger</a></td>
-                    </tr>
+                    {analyses.length === 0 ? (
+                      <tr><td colSpan="4">Aucune analyse visible.</td></tr>
+                    ) : (
+                      analyses.map((analyse) => (
+                        <tr key={analyse.id}>
+                          <td>{formatDate(analyse.date_prelevement || analyse.created_at)}</td>
+                          <td>{analyse.type_analyse || "-"}</td>
+                          <td><span className="pill pill-warning">{analyse.statut || "-"}</span></td>
+                          <td><a className="action-link" href="#"><i className="fa-solid fa-download"></i> Télécharger</a></td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -624,53 +354,22 @@ const DossierVoirMedecin = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>12/03/2026</td>
-                      <td>Dr Alice</td>
-                      <td>Paracétamol</td>
-                      <td><a className="action-link" href="#"><i className="fa-regular fa-file-pdf"></i> PDF</a></td>
-                    </tr>
-                    <tr>
-                      <td>05/03/2026</td>
-                      <td>Dr Martin</td>
-                      <td>Vitamine C</td>
-                      <td><a className="action-link" href="#"><i className="fa-regular fa-file-pdf"></i> PDF</a></td>
-                    </tr>
+                    {ordonnances.length === 0 ? (
+                      <tr><td colSpan="4">Aucune ordonnance visible.</td></tr>
+                    ) : (
+                      ordonnances.map((ordonnance) => (
+                        <tr key={ordonnance.id}>
+                          <td>{formatDate(ordonnance.created_at)}</td>
+                          <td>{ordonnance.consultation?.medecin?.user?.name || "-"}</td>
+                          <td>{Array.isArray(ordonnance.medicaments) ? ordonnance.medicaments.join(", ") : ordonnance.medicaments || "-"}</td>
+                          <td><a className="action-link" href="#"><i className="fa-regular fa-file-pdf"></i> PDF</a></td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </article>
-
-            {/* Hospitalisations */}
-            {/* <article className="dossier-panel">
-              <h3>7. Hospitalisations</h3>
-              <div className="table-wrap">
-                <table className="table-clean">
-                  <thead>
-                    <tr>
-                      <th>Date entrée</th>
-                      <th>Date sortie</th>
-                      <th>Service</th>
-                      <th>Diagnostic</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>10/01/2025</td>
-                      <td>15/01/2025</td>
-                      <td>Cardiologie</td>
-                      <td>Hypertension</td>
-                    </tr>
-                    <tr>
-                      <td>03/10/2024</td>
-                      <td>06/10/2024</td>
-                      <td>Pneumologie</td>
-                      <td>Infection respiratoire</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </article> */}
           </div>
 
           {/* Colonne droite : Documents médicaux */}
@@ -679,33 +378,41 @@ const DossierVoirMedecin = () => {
               <h3>6. Documents médicaux</h3>
               <p className="panel-sub">Formats supportés: PDF, JPEG, PNG, MP4</p>
               <div className="doc-grid">
-                <article className="doc-item">
-                  <strong>Radiographie thorax</strong>
-                  <span>JPEG - 2.4 Mo</span>
-                  <button className="patient-compact-btn">Ouvrir</button>
-                </article>
-                <article className="doc-item">
-                  <strong>Scanner cérébral</strong>
-                  <span>PNG - 5.8 Mo</span>
-                  <button className="patient-compact-btn">Ouvrir</button>
-                </article>
-                <article className="doc-item">
-                  <strong>Compte rendu</strong>
-                  <span>PDF - 0.9 Mo</span>
-                  <button className="patient-compact-btn">Ouvrir</button>
-                </article>
+                {documents.length === 0 ? (
+                  <p>Aucun document visible.</p>
+                ) : (
+                  documents.map((doc) => (
+                    <article key={doc.id} className="doc-item">
+                      <strong>{doc.titre || doc.nom || `Document #${doc.id}`}</strong>
+                      <span>{doc.type_document?.nom || doc.type || "Document"} - {formatDate(doc.created_at)}</span>
+                      <button className="patient-compact-btn">Ouvrir</button>
+                    </article>
+                  ))
+                )}
               </div>
               <div className="img-grid">
-                <div className="img-placeholder"><i className="fa-regular fa-image"></i><span>Radiographie</span></div>
-                <div className="img-placeholder"><i className="fa-solid fa-file-waveform"></i><span>IRM</span></div>
-                <div className="img-placeholder"><i className="fa-solid fa-file-medical"></i><span>Compte rendu</span></div>
-                <div className="img-placeholder"><i className="fa-solid fa-video"></i><span>Séquence MP4</span></div>
+                {/* Placeholders d'aperçu (vous pouvez les lier aux documents réels si vous le souhaitez) */}
+                {documents.slice(0, 4).map((doc, idx) => (
+                  <div key={idx} className="img-placeholder">
+                    <i className="fa-regular fa-image"></i>
+                    <span>{doc.titre || `Doc #${doc.id}`}</span>
+                  </div>
+                ))}
+                {documents.length === 0 && (
+                  <>
+                    <div className="img-placeholder"><i className="fa-regular fa-image"></i><span>Aucun document</span></div>
+                    <div className="img-placeholder"><i className="fa-solid fa-file-waveform"></i><span>-</span></div>
+                    <div className="img-placeholder"><i className="fa-solid fa-file-medical"></i><span>-</span></div>
+                    <div className="img-placeholder"><i className="fa-solid fa-video"></i><span>-</span></div>
+                  </>
+                )}
               </div>
             </article>
           </div>
         </section>
       </section>
 
+      {/* Styles CSS (inchangés) */}
       <style>{`
         /* ========== CONTENEUR PRINCIPAL AÉRÉ ========== */
         .patient-dossier {
@@ -1124,6 +831,4 @@ const DossierVoirMedecin = () => {
       `}</style>
     </main>
   );
-};
-
-export default DossierVoirMedecin;
+}

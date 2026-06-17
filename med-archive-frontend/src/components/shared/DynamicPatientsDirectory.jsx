@@ -224,9 +224,11 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
               <i className="fa-solid fa-list"></i>
             </button>
           </div>
-          <button className="btn transfer-add-btn" onClick={() => setShowAddModal(true)}>
-            <i ></i> Ajouter un patient
-          </button>
+          {source !== 'doctor' && (
+            <button className="btn transfer-add-btn" onClick={() => setShowAddModal(true)}>
+              <i ></i> Ajouter un patient
+            </button>
+          )}
         </div>
       </section>
 
@@ -347,7 +349,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
           </form>
         </div>
       )}
-      {showAddModal && (
+      {source !== 'doctor' && showAddModal && (
         <div className="custom-modal-overlay" onClick={() => setShowAddModal(false)}>
           <form className="custom-modal custom-modal-wide" onSubmit={handleCreatePatient} onClick={(e) => e.stopPropagation()}>
             <div className="custom-modal-header">

@@ -189,7 +189,7 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
                 <tr>
                   <th>Nom</th>
                   <th>Specialite</th>
-                  <th>Service</th>
+                  {/* <th>Service</th> */}
                   <th>Telephone</th>
                   <th>Experience</th>
                   <th>Patients</th>
@@ -203,7 +203,7 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
                   <tr key={doctor.id}>
                     <td className="table-title-cell"><strong>{doctor.name}</strong><br /><span className="table-meta">{doctor.email}</span></td>
                     <td>{doctor.specialite}</td>
-                    <td>{doctor.service}</td>
+                    {/* <td>{doctor.service}</td> */}
                     <td className="table-nowrap">{doctor.phone}</td>
                     <td className="table-nowrap">{doctor.experience} an(s)</td>
                     <td className="table-nowrap">{doctor.patients}</td>

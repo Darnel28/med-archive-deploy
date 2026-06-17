@@ -4,9 +4,7 @@ import {
   createTransfertDossier,
   getCurrentUser,
   getMesPatientsEtablissement,
-  getServices,
   getUsers,
-  listMedecins,
 } from "../../api";
 import "../../assets/css/TransfertHopitalForm.css";
 
@@ -17,14 +15,19 @@ function rowsFromPaginated(response) {
 
 function patientFromHospitalRow(row) {
   const patient = row.patient ?? row;
+  const dossier = patient.dossier ?? {};
   return {
     id: patient.id,
     name: row.name || patient.user?.name || "-",
-    dossierId: patient.dossier?.id,
-    numeroDossier: patient.dossier?.numero_dossier || patient.dossier?.imu || "-",
+    dossierId: dossier.id,
+    numeroDossier: dossier.numero_dossier || dossier.imu || "-",
     birthDate: row.date_naissance || patient.user?.date_naissance || "",
     phone: row.telephone || patient.user?.telephone || "",
     sex: row.sexe || patient.user?.sexe || "",
+    serviceId: patient.service_id || patient.service?.id || dossier.service_proprietaire_id || dossier.service_proprietaire?.id || "",
+    serviceName: patient.service?.nom || dossier.service_proprietaire?.nom || "",
+    medecinId: dossier.medecin_referent_id || dossier.medecin_referent?.id || "",
+    medecinName: dossier.medecin_referent?.user?.name || dossier.medecin_traitant || "",
   };
 }
 
@@ -33,18 +36,13 @@ const NouvelleDemandeTransfert = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [patients, setPatients] = useState([]);
   const [hopitaux, setHopitaux] = useState([]);
-  const [sourceServices, setSourceServices] = useState([]);
-  const [destinationServices, setDestinationServices] = useState([]);
-  const [medecins, setMedecins] = useState([]);
   const [form, setForm] = useState({
     patient_id: "",
     service_source_id: "",
     etablissement_destination_id: "",
-    service_destination_id: "",
     medecin_traitant_id: "",
     motif: "",
     observations: "",
-    date_souhaitee: "",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -67,23 +65,18 @@ const NouvelleDemandeTransfert = () => {
         const user = meResponse?.data?.user ?? meResponse?.user ?? meResponse;
         const etablissementId = user?.id;
 
-        const [patientsResponse, servicesResponse, usersResponse, medecinsResponse] = await Promise.all([
+        const [patientsResponse, usersResponse] = await Promise.all([
           getMesPatientsEtablissement({ per_page: 100 }),
-          getServices({ per_page: 100 }),
           getUsers({ role: "Responsable Etablissement", statut: "actif", per_page: 100 }),
-          listMedecins(etablissementId ? { etablissement_id: etablissementId, per_page: 100 } : { per_page: 100 }),
         ]);
 
         if (ignore) return;
 
-        const hospitalRows = rowsFromPaginated(usersResponse).filter((item) => item.id !== etablissementId);
         setCurrentUser(user);
         setPatients(rowsFromPaginated(patientsResponse).map(patientFromHospitalRow).filter((patient) => patient.dossierId));
-        setSourceServices(rowsFromPaginated(servicesResponse));
-        setHopitaux(hospitalRows);
-        setMedecins(rowsFromPaginated(medecinsResponse));
+        setHopitaux(rowsFromPaginated(usersResponse).filter((item) => item.id !== etablissementId));
       } catch (err) {
-        if (!ignore) setError(err.response?.data?.message || "Impossible de charger les données du formulaire.");
+        if (!ignore) setError(err.response?.data?.message || "Impossible de charger les donnees du formulaire.");
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -96,42 +89,16 @@ const NouvelleDemandeTransfert = () => {
   }, []);
 
   useEffect(() => {
-    let ignore = false;
-
-    async function loadDestinationServices() {
-      if (!form.etablissement_destination_id) {
-        setDestinationServices([]);
-        setForm((state) => ({ ...state, service_destination_id: "" }));
-        return;
-      }
-
-      try {
-        const response = await getServices({
-          etablissement_id: form.etablissement_destination_id,
-          per_page: 100,
-        });
-        if (!ignore) setDestinationServices(rowsFromPaginated(response));
-      } catch (err) {
-        if (!ignore) {
-          setDestinationServices([]);
-          setError(err.response?.data?.message || "Impossible de charger les services de l’hôpital d’accueil.");
-        }
-      }
-    }
-
-    loadDestinationServices();
-    return () => {
-      ignore = true;
-    };
-  }, [form.etablissement_destination_id]);
+    setForm((state) => ({
+      ...state,
+      service_source_id: selectedPatient?.serviceId || "",
+      medecin_traitant_id: selectedPatient?.medecinId || "",
+    }));
+  }, [selectedPatient]);
 
   function updateField(event) {
     const { name, value } = event.target;
-    setForm((state) => ({
-      ...state,
-      [name]: value,
-      ...(name === "etablissement_destination_id" ? { service_destination_id: "" } : {}),
-    }));
+    setForm((state) => ({ ...state, [name]: value }));
   }
 
   async function handleSubmit(event) {
@@ -141,22 +108,22 @@ const NouvelleDemandeTransfert = () => {
     setSuccess("");
 
     try {
+      if (!selectedPatient?.dossierId) throw new Error("Dossier patient introuvable.");
+      if (!form.service_source_id) throw new Error("Le service de depart du patient est introuvable.");
+
       await createTransfertDossier({
         dossier_id: selectedPatient.dossierId,
         service_source_id: form.service_source_id,
-        service_destination_id: form.service_destination_id,
         etablissement_source_id: currentUser.id,
         etablissement_destination_id: form.etablissement_destination_id,
         medecin_traitant_id: form.medecin_traitant_id || null,
         motif: form.motif,
-        observations: [form.observations, form.date_souhaitee ? `Date souhaitée: ${form.date_souhaitee}` : ""]
-          .filter(Boolean)
-          .join("\n"),
+        observations: form.observations,
       });
-      setSuccess("Demande de transfert envoyée.");
+      setSuccess("Demande de transfert envoyee.");
       setTimeout(() => navigate("/espacehopital/transfert"), 700);
     } catch (err) {
-      setError(err.response?.data?.message || "Impossible d’envoyer la demande de transfert.");
+      setError(err.response?.data?.message || err.message || "Impossible d'envoyer la demande de transfert.");
     } finally {
       setSaving(false);
     }
@@ -168,7 +135,7 @@ const NouvelleDemandeTransfert = () => {
         <div className="hopital-transfer-form-hero-copy">
           <span className="hopital-transfer-form-kicker">Bon de transfert</span>
           <h1>Demande de transfert / admission</h1>
-          <p>Renseignez le dossier patient, le médecin traitant et le service d’accueil demandé.</p>
+          <p>Renseignez le dossier patient, l'hopital destinataire et les informations medicales utiles.</p>
         </div>
       </section>
 
@@ -185,9 +152,7 @@ const NouvelleDemandeTransfert = () => {
               <select name="patient_id" value={form.patient_id} onChange={updateField} required>
                 <option value="">Choisir un patient</option>
                 {patients.map((patient) => (
-                  <option key={patient.id} value={patient.id}>
-                    {patient.name} - {patient.numeroDossier}
-                  </option>
+                  <option key={patient.id} value={patient.id}>{patient.name}</option>
                 ))}
               </select>
             </label>
@@ -196,7 +161,7 @@ const NouvelleDemandeTransfert = () => {
               <input type="date" value={selectedPatient?.birthDate?.slice(0, 10) || ""} readOnly />
             </label>
             <label className="hopital-transfer-form-field">
-              <span>Téléphone</span>
+              <span>Telephone</span>
               <input type="tel" value={selectedPatient?.phone || ""} readOnly />
             </label>
             <label className="hopital-transfer-form-field">
@@ -204,45 +169,33 @@ const NouvelleDemandeTransfert = () => {
               <input type="text" value={selectedPatient?.sex || ""} readOnly />
             </label>
             <label className="hopital-transfer-form-field">
-              <span>Numéro de dossier</span>
+              <span>Numero de dossier</span>
               <input type="text" value={selectedPatient?.numeroDossier || ""} readOnly />
             </label>
           </div>
         </section>
 
         <section className="hopital-transfer-form-section">
-          <h2>II. Informations médicales</h2>
+          <h2>II. Informations medicales</h2>
           <div className="hopital-transfer-form-grid">
             <label className="hopital-transfer-form-field">
-              <span>Hôpital d'origine</span>
+              <span>Hopital d'origine</span>
               <input type="text" value={currentUser?.name || ""} readOnly />
             </label>
             <label className="hopital-transfer-form-field">
-              <span>Service de départ</span>
-              <select name="service_source_id" value={form.service_source_id} onChange={updateField} required>
-                <option value="">Choisir le service</option>
-                {sourceServices.map((service) => (
-                  <option key={service.id} value={service.id}>{service.nom}</option>
-                ))}
-              </select>
+              <span>Service de depart</span>
+              <input type="text" value={selectedPatient?.serviceName || ""} readOnly required />
             </label>
             <label className="hopital-transfer-form-field">
-              <span>Médecin traitant</span>
-              <select name="medecin_traitant_id" value={form.medecin_traitant_id} onChange={updateField} required>
-                <option value="">Choisir un médecin</option>
-                {medecins.map((medecin) => (
-                  <option key={medecin.id} value={medecin.id}>
-                    {medecin.user?.name || medecin.nom || `Médecin #${medecin.id}`}
-                  </option>
-                ))}
-              </select>
+              <span>Medecin traitant</span>
+              <input type="text" value={selectedPatient?.medecinName || ""} readOnly />
             </label>
             <label className="hopital-transfer-form-field hopital-transfer-form-field-wide">
               <span>Motif du transfert</span>
               <textarea name="motif" rows="4" value={form.motif} onChange={updateField} required />
             </label>
             <label className="hopital-transfer-form-field hopital-transfer-form-field-wide">
-              <span>Résumé de l'état actuel et soins prodigués</span>
+              <span>Resume de l'etat actuel et soins prodigues</span>
               <textarea name="observations" rows="4" value={form.observations} onChange={updateField} />
             </label>
           </div>
@@ -252,26 +205,13 @@ const NouvelleDemandeTransfert = () => {
           <h2>III. Demande de transfert</h2>
           <div className="hopital-transfer-form-grid">
             <label className="hopital-transfer-form-field">
-              <span>Hôpital d'accueil souhaité</span>
+              <span>Hopital destinataire</span>
               <select name="etablissement_destination_id" value={form.etablissement_destination_id} onChange={updateField} required>
-                <option value="">Choisir l'hôpital</option>
+                <option value="">Choisir l'hopital</option>
                 {hopitaux.map((hopital) => (
                   <option key={hopital.id} value={hopital.id}>{hopital.name}</option>
                 ))}
               </select>
-            </label>
-            <label className="hopital-transfer-form-field">
-              <span>Service d'accueil souhaité</span>
-              <select name="service_destination_id" value={form.service_destination_id} onChange={updateField} required disabled={!form.etablissement_destination_id}>
-                <option value="">Choisir le service</option>
-                {destinationServices.map((service) => (
-                  <option key={service.id} value={service.id}>{service.nom}</option>
-                ))}
-              </select>
-            </label>
-            <label className="hopital-transfer-form-field">
-              <span>Date souhaitée</span>
-              <input type="date" name="date_souhaitee" value={form.date_souhaitee} onChange={updateField} />
             </label>
           </div>
         </section>

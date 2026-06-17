@@ -40,7 +40,7 @@ export default function ExamensMedecin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-   const [showAddModal, setShowAddModal] = useState(false);
+  const showAddModal = false;
 
   useEffect(() => {
     let active = true;
@@ -76,9 +76,6 @@ export default function ExamensMedecin() {
           <i className="fa-solid fa-magnifying-glass"></i>
           <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Rechercher un patient ou un examen..." />
         </label>
-        <button className="btn transfer-add-btn" onClick={() => setShowAddModal(true)}>
-            <i ></i> Ajouter une demande 
-          </button>
       </section>
       {error && <div className="alert alert-danger">{error}</div>}
       <section className="rdv-section"><article className="rdv-card">

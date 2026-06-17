@@ -43,7 +43,7 @@ function mapTransfer(item) {
     id: item.id,
     patient: patientUser?.name || dossier?.numero_dossier || "-",
     serviceActuel: item.service_source?.nom || item.serviceSource?.nom || "-",
-    serviceDemande: item.service_destination?.nom || item.serviceDestination?.nom || "-",
+    serviceDemande: item.service_destination?.nom || item.serviceDestination?.nom || "A affecter par l'hopital receveur",
     statut: statusLabels[item.statut] || item.statut || "-",
     medecinReferent: demandeurUser?.name || "-",
     motif: item.motif || "-",

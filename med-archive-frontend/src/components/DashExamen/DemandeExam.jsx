@@ -133,7 +133,7 @@ const DemandeExamLabo = () => {
                       <td>{analysis.prescripteur?.user?.name || '-'}</td>
                       <td>{analysis.laboratoire?.nom_laboratoire || analysis.laboratoire?.user?.name || '-'}</td>
                       <td className="table-nowrap">{formatDate(analysis.date_prelevement)}</td>
-                      <td><span className={`rdv-status ${isPaid ? 'done' : 'pending'}`}>{isPaid ? 'Paye' : 'A payer'}</span></td>
+                      <td><span className={`rdv-status ${isPaid ? 'done' : 'pending'}`}>{isPaid ? 'Paye' : 'En attente de paiement'}</span></td>
                       <td><span className="rdv-status upcoming">{analysis.statut}</span></td>
                       <td className="rdv-actions table-actions-compact">
                         <button className="icon-action" title="Prelever" onClick={() => changeStatus(analysis, 'preleve')} disabled={!isPaid || analysis.statut === 'termine'}>

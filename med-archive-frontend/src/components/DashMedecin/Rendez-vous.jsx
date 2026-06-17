@@ -176,6 +176,11 @@ setAppointments(
   };
 
   const startConsultation = async (appointment) => {
+    if (appointment.statut_paiement !== 'payee' && !appointment.est_urgence) {
+      setError('Le paiement doit etre valide avant de demarrer cette consultation.');
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/consultations/${appointment.id}`, {
         method: 'PUT',
@@ -200,7 +205,11 @@ setAppointments(
     await loadPlanning(medecinId);
   };
 
-  const getStatusInfo = (statut) => {
+  const getStatusInfo = (statut, statutPaiement) => {
+    if (statutPaiement === 'non_payee') {
+      return { text: 'En attente de paiement', className: 'rdv-status pending' };
+    }
+
     switch (statut) {
       case 'en_attente':
       case 'pending':
@@ -254,22 +263,24 @@ setAppointments(
               </div>
             ) : (
               <table className="rdv-table">
-                <thead><tr><th>Heure</th><th>Patient</th><th>Motif</th><th>Statut</th><th>Action</th></tr></thead>
+                <thead><tr><th>Heure</th><th>Patient</th><th>Motif</th><th>Paiement</th><th>Statut</th><th>Action</th></tr></thead>
                 <tbody>
-                  {loading && <tr><td colSpan="5">Chargement...</td></tr>}
+                  {loading && <tr><td colSpan="6">Chargement...</td></tr>}
                   {!loading && paginatedAppointments.rows.map((app) => {
-                    const { text, className } = getStatusInfo(app.statut);
+                    const isPaid = app.statut_paiement === 'payee' || app.est_urgence;
+                    const { text, className } = getStatusInfo(app.statut, app.statut_paiement);
                     return (
                       <tr key={app.id}>
                         <td>{app.heure}</td>
                         <td>{app.patient}</td>
                         <td>{app.motif}</td>
+                        <td><span className={`rdv-status ${isPaid ? 'done' : 'pending'}`}>{isPaid ? 'Payee' : 'En attente'}</span></td>
                         <td><span className={className}>{text}</span></td>
                         <td>
                           {app.statut === 'en_cours' ? (
                             <button className="btn btn-outline btn-sm" type="button" onClick={() => finishConsultation(app)}>Terminer</button>
                           ) : (
-                            <button className="btn btn-outline btn-sm" type="button" onClick={() => startConsultation(app)}>Commencer</button>
+                            <button className="btn btn-outline btn-sm" type="button" onClick={() => startConsultation(app)} disabled={!isPaid}>Commencer</button>
                           )}
                         </td>
                       </tr>
