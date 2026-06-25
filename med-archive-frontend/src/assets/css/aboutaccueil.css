@@ -1,0 +1,1093 @@
+/*==================================================
+            MEDARCHIVE - ABOUT PAGE
+===================================================*/
+
+.about-v2{
+
+    background:#DFF5F4;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+
+/* Décorations */
+
+.about-v2::before{
+    content:"";
+    position:absolute;
+    width:550px;
+    height:550px;
+    border-radius:50%;
+    background:#d9ecff;
+    top:-250px;
+    right:-220px;
+    opacity:.45;
+}
+
+.about-v2::after{
+    content:"";
+    position:absolute;
+    width:450px;
+    height:450px;
+    border-radius:50%;
+    background:#edf6ff;
+    bottom:-180px;
+    left:-180px;
+}
+
+/************************************/
+
+.container{
+    position:relative;
+    z-index:10;
+}
+
+/************************************/
+
+.about-title{
+
+    text-align:center;
+
+    max-width:900px;
+
+    margin:auto;
+
+    margin-bottom:90px;
+
+}
+
+.about-badge{
+
+    display:inline-block;
+
+    background:#eaf4ff;
+
+    color:#1976d2;
+
+    font-weight:600;
+
+    padding:12px 28px;
+
+    border-radius:40px;
+
+    margin-bottom:25px;
+
+    font-size:15px;
+
+    letter-spacing:.5px;
+
+}
+
+.about-title h2{
+
+    font-size:58px;
+
+    color:#16324f;
+
+    font-weight:700;
+
+    line-height:1.2;
+
+    margin-bottom:25px;
+
+}
+
+.about-title p{
+
+    color:#6b7280;
+
+    font-size:19px;
+
+    line-height:1.9;
+
+}
+
+/********************************************/
+
+.about-block{
+
+    padding:120px 0;
+
+}
+
+.about-block .row{
+
+    align-items:center;
+
+}
+
+.about-image{
+
+    position:relative;
+
+}
+
+.about-image img{
+
+    width:100%;
+
+    border-radius:32px;
+
+    display:block;
+
+    transition:.45s;
+
+    box-shadow:
+
+    0 30px 70px rgba(0,0,0,.12);
+
+}
+
+.about-image:hover img{
+
+    transform:scale(1.03);
+
+}
+
+/********************************************/
+
+.floating-card{
+
+    position:absolute;
+
+    background:white;
+
+    border-radius:22px;
+
+    padding:20px 25px;
+
+    min-width:180px;
+
+    box-shadow:
+
+    0 20px 50px rgba(0,0,0,.12);
+
+    transition:.35s;
+
+}
+
+.floating-card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.card-one{
+
+    left:-25px;
+
+    top:40px;
+
+}
+
+.card-two{
+
+    right:-20px;
+
+    bottom:45px;
+
+}
+
+.card-three{
+
+    left:-20px;
+
+    bottom:35px;
+
+}
+
+.card-four{
+
+    top:40px;
+
+    right:-25px;
+
+}
+
+.floating-card h5{
+
+    color:#1976d2;
+
+    font-size:32px;
+
+    margin-bottom:8px;
+
+}
+
+.floating-card span{
+
+    font-size:15px;
+
+    color:#777;
+
+}
+
+/********************************************/
+
+.about-content{
+
+    padding-left:60px;
+
+}
+
+.about-content .number{
+
+    display:inline-block;
+
+    color:#1976d2;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    margin-bottom:15px;
+
+}
+
+.about-content h3{
+
+    font-size:46px;
+
+    color:#16324f;
+
+    margin-bottom:25px;
+
+    line-height:1.25;
+
+}
+
+.about-content p{
+
+    font-size:18px;
+
+    color:#6b7280;
+
+    line-height:1.9;
+
+    margin-bottom:30px;
+
+}
+
+.about-content ul{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:0 0 35px;
+
+}
+
+.about-content li{
+
+    margin-bottom:15px;
+
+    color:#374151;
+
+    font-size:17px;
+
+    transition:.3s;
+
+}
+
+.about-content li:hover{
+
+    color:#1976d2;
+
+    transform:translateX(6px);
+
+}
+
+.about-btn-modern{
+
+    display:inline-block;
+
+    background:#1976d2;
+
+    color:white;
+
+    padding:16px 38px;
+
+    border-radius:50px;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.35s;
+
+    box-shadow:
+
+    0 15px 35px rgba(25,118,210,.25);
+
+}
+
+.about-btn-modern:hover{
+
+    background:#0f5ab4;
+
+    color:white;
+
+    transform:translateY(-5px);
+
+}
+/*==================================================
+            MEDARCHIVE - ABOUT PAGE
+===================================================*/
+
+.about-v2{
+    position:relative;
+    padding:120px 0;
+    background:#f7fbff;
+    overflow:hidden;
+}
+
+/* Décorations */
+
+.about-v2::before{
+    content:"";
+    position:absolute;
+    width:550px;
+    height:550px;
+    border-radius:50%;
+    background:#d9ecff;
+    top:-250px;
+    right:-220px;
+    opacity:.45;
+}
+
+.about-v2::after{
+    content:"";
+    position:absolute;
+    width:450px;
+    height:450px;
+    border-radius:50%;
+    background:#edf6ff;
+    bottom:-180px;
+    left:-180px;
+}
+
+/************************************/
+
+.container{
+    position:relative;
+    z-index:10;
+}
+
+/************************************/
+
+.about-title{
+
+    text-align:center;
+
+    max-width:900px;
+
+    margin:auto;
+
+    margin-bottom:90px;
+
+}
+
+.about-badge{
+
+    display:inline-block;
+
+    background:#eaf4ff;
+
+    color:#1976d2;
+
+    font-weight:600;
+
+    padding:12px 28px;
+
+    border-radius:40px;
+
+    margin-bottom:25px;
+
+    font-size:15px;
+
+    letter-spacing:.5px;
+
+}
+
+.about-title h2{
+
+    font-size:58px;
+
+    color:#16324f;
+
+    font-weight:700;
+
+    line-height:1.2;
+
+    margin-bottom:25px;
+
+}
+
+.about-title p{
+
+    color:#6b7280;
+
+    font-size:19px;
+
+    line-height:1.9;
+
+}
+
+/********************************************/
+
+.about-block{
+
+    padding:120px 0;
+
+}
+
+.about-block .row{
+
+    align-items:center;
+
+}
+
+.about-image{
+
+    position:relative;
+
+}
+
+.about-image img{
+
+    width:100%;
+
+    border-radius:32px;
+
+    display:block;
+
+    transition:.45s;
+
+    box-shadow:
+
+    0 30px 70px rgba(0,0,0,.12);
+
+}
+
+.about-image:hover img{
+
+    transform:scale(1.03);
+
+}
+
+/********************************************/
+
+.floating-card{
+
+    position:absolute;
+
+    background:white;
+
+    border-radius:22px;
+
+    padding:20px 25px;
+
+    min-width:180px;
+
+    box-shadow:
+
+    0 20px 50px rgba(0,0,0,.12);
+
+    transition:.35s;
+
+}
+
+.floating-card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.card-one{
+
+    left:-25px;
+
+    top:40px;
+
+}
+
+.card-two{
+
+    right:-20px;
+
+    bottom:45px;
+
+}
+
+.card-three{
+
+    left:-20px;
+
+    bottom:35px;
+
+}
+
+.card-four{
+
+    top:40px;
+
+    right:-25px;
+
+}
+
+.floating-card h5{
+
+    color:#1976d2;
+
+    font-size:32px;
+
+    margin-bottom:8px;
+
+}
+
+.floating-card span{
+
+    font-size:15px;
+
+    color:#777;
+
+}
+
+/********************************************/
+
+.about-content{
+
+    padding-left:60px;
+
+}
+
+.about-content .number{
+
+    display:inline-block;
+
+    color:#1976d2;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    margin-bottom:15px;
+
+}
+
+.about-content h3{
+
+    font-size:46px;
+
+    color:#16324f;
+
+    margin-bottom:25px;
+
+    line-height:1.25;
+
+}
+
+.about-content p{
+
+    font-size:18px;
+
+    color:#6b7280;
+
+    line-height:1.9;
+
+    margin-bottom:30px;
+
+}
+
+.about-content ul{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:0 0 35px;
+
+}
+
+.about-content li{
+
+    margin-bottom:15px;
+
+    color:#374151;
+
+    font-size:17px;
+
+    transition:.3s;
+
+}
+
+.about-content li:hover{
+
+    color:#1976d2;
+
+    transform:translateX(6px);
+
+}
+
+.about-btn-modern{
+
+    display:inline-block;
+
+    background:#1976d2;
+
+    color:white;
+
+    padding:16px 38px;
+
+    border-radius:50px;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.35s;
+
+    box-shadow:
+
+    0 15px 35px rgba(25,118,210,.25);
+
+}
+
+.about-btn-modern:hover{
+
+    background:#0f5ab4;
+
+    color:white;
+
+    transform:translateY(-5px);
+
+}
+/*====================================================
+            DECORATIONS PREMIUM
+====================================================*/
+
+.about-block{
+    position:relative;
+}
+
+.about-block::before{
+    content:"";
+    position:absolute;
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:#dceeff;
+    opacity:.45;
+    top:60px;
+    right:-60px;
+}
+
+.about-block::after{
+    content:"";
+    position:absolute;
+    width:80px;
+    height:80px;
+    background:#e8f4ff;
+    border-radius:24px;
+    transform:rotate(35deg);
+    left:-40px;
+    bottom:50px;
+}
+
+/*====================================
+            HOVER IMAGE
+====================================*/
+
+.about-image{
+    overflow:hidden;
+    border-radius:35px;
+}
+
+.about-image img{
+    transition:transform .6s ease;
+}
+
+.about-image:hover img{
+    transform:scale(1.08);
+}
+
+/*====================================
+            HOVER BOUTONS
+====================================*/
+
+.about-btn-modern{
+    position:relative;
+    overflow:hidden;
+}
+
+.about-btn-modern::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:-120%;
+
+    top:0;
+
+    width:120%;
+
+    height:100%;
+
+    background:rgba(255,255,255,.25);
+
+    transform:skewX(-25deg);
+
+    transition:.6s;
+
+}
+
+.about-btn-modern:hover::before{
+
+    left:130%;
+
+}
+
+/*====================================
+        TITRES
+====================================*/
+
+.about-title h2,
+.about-content h3,
+.why-content h2,
+.network-section h2{
+
+    letter-spacing:-1px;
+
+}
+
+.about-content h3{
+
+    position:relative;
+
+}
+
+.about-content h3::after{
+
+    content:"";
+
+    width:80px;
+
+    height:4px;
+
+    background:#1976d2;
+
+    display:block;
+
+    margin-top:18px;
+
+    border-radius:30px;
+
+}
+
+/*====================================
+        OMBRES
+====================================*/
+
+.about-image img,
+.network-card,
+.feature-item,
+.stat-card{
+
+    background:#ffffff;
+
+    border-radius:24px;
+
+    border:1px solid #E6EEF5;
+
+    box-shadow:
+    0 12px 30px rgba(17,43,60,.08);
+
+}
+
+/*====================================
+        ANIMATIONS
+====================================*/
+
+@keyframes float{
+
+0%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-10px);
+}
+
+100%{
+transform:translateY(0);
+}
+
+}
+
+.floating-card{
+
+    animation:float 4s ease-in-out infinite;
+
+}
+
+/*====================================
+        SCROLLBAR
+====================================*/
+
+::-webkit-scrollbar{
+
+width:9px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#eef5fb;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:#1976d2;
+
+border-radius:30px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+background:#145bb0;
+
+}
+
+/*====================================
+        RESPONSIVE
+====================================*/
+
+@media(max-width:1200px){
+
+.about-content{
+
+padding-left:35px;
+
+}
+
+.about-title h2{
+
+font-size:50px;
+
+}
+
+.about-content h3{
+
+font-size:40px;
+
+}
+
+}
+
+@media(max-width:992px){
+
+.about-block{
+
+padding:70px 0;
+
+}
+
+.about-content{
+
+padding-left:0;
+
+padding-top:40px;
+
+}
+
+.why-content{
+
+padding-left:0;
+
+margin-top:50px;
+
+}
+
+.floating-card{
+
+display:none;
+
+}
+
+.about-title{
+
+margin-bottom:60px;
+
+}
+
+.about-title h2{
+
+font-size:40px;
+
+}
+
+.about-content h3{
+
+font-size:34px;
+
+}
+
+.network-section h2{
+
+font-size:38px;
+
+}
+
+.why-content h2{
+
+font-size:36px;
+
+}
+
+.stat-card{
+
+margin-bottom:25px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.about-v2{
+
+padding:80px 0;
+
+}
+
+.about-title h2{
+
+font-size:32px;
+
+}
+
+.about-title p{
+
+font-size:16px;
+
+}
+
+.about-content h3{
+
+font-size:28px;
+
+}
+
+.about-content p{
+
+font-size:16px;
+
+}
+
+.about-content li{
+
+font-size:15px;
+
+}
+
+.about-btn-modern{
+
+width:100%;
+
+text-align:center;
+
+}
+
+.network-section{
+
+padding:70px 0;
+
+}
+
+.feature-item{
+
+flex-direction:column;
+
+text-align:center;
+
+}
+
+.feature-item .icon{
+
+margin:auto;
+
+}
+
+}
+
+@media(max-width:576px){
+
+.about-title h2{
+
+font-size:28px;
+
+}
+
+.about-content h3{
+
+font-size:25px;
+
+}
+
+.network-section h2{
+
+font-size:30px;
+
+}
+
+.why-content h2{
+
+font-size:30px;
+
+}
+
+.stat-card h2{
+
+font-size:38px;
+
+}
+
+}
+.why-medarchive{
+    padding:120px 0;
+}
+
+.why-content{
+    padding-right:60px;
+    padding-left:0;
+}
+
+.why-image{
+    text-align:right;
+}
+
+.why-image img{
+    width:100%;
+    max-width:520px;
+    border-radius:30px;
+    display:inline-block;
+}
+
+@media (max-width:991px){
+
+    .why-content{
+        padding-right:0;
+        margin-bottom:40px;
+    }
+
+    .why-image{
+        text-align:center;
+    }
+
+}

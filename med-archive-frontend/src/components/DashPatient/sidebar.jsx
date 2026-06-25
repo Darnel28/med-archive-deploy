@@ -149,16 +149,6 @@ const Sidebar = () => {
         </NavLink>
 
         <NavLink
-          to="/espacepatient/traitements"
-          className={({ isActive }) =>
-            `menu-item ${isActive ? 'active' : ''}`
-          }
-        >
-          <i className="fa-solid fa-pills"></i>
-          <span>Mes traitements</span>
-        </NavLink>
-
-        <NavLink
           to="/espacepatient/acces-donnees"
           className={({ isActive }) =>
             `menu-item ${isActive ? 'active' : ''}`

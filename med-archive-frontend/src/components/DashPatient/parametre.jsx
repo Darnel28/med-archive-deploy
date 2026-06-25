@@ -1,195 +1,234 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { getCurrentUser } from '../../api/authApi';
+import { getAuthUser, setAuthSession } from '../../api/client';
+import { updatePatient } from '../../api/patientApi';
+import { patientFromUser, unwrapUser } from './patientDashboardData';
+
+const emptyForm = {
+  name: '',
+  email: '',
+  telephone: '',
+  sexe: '',
+  date_naissance: '',
+  adresse: '',
+  ville: '',
+  groupe_sanguin: '',
+  allergies: '',
+  antecedents_medicaux: '',
+  personne_contact: '',
+  telephone_contact: '',
+};
+
+const avatarFor = (name) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Patient')}&background=0f766e&color=fff`;
+
+const formFromUser = (user) => {
+  const patient = patientFromUser(user) || {};
+  return {
+    name: user?.name || '',
+    email: user?.email || '',
+    telephone: user?.telephone || '',
+    sexe: user?.sexe || '',
+    date_naissance: user?.date_naissance ? String(user.date_naissance).slice(0, 10) : '',
+    adresse: user?.adresse || '',
+    ville: user?.ville || '',
+    groupe_sanguin: patient.groupe_sanguin || '',
+    allergies: patient.allergies || '',
+    antecedents_medicaux: patient.antecedents_medicaux || '',
+    personne_contact: patient.personne_contact || '',
+    telephone_contact: patient.telephone_contact || '',
+  };
+};
 
 const Parametres = () => {
-  // État local pour le formulaire
-  const [formData, setFormData] = useState({
-    prenom: 'John',
-    nom: 'Doe',
-    email: 'john.doe@email.com',
-    telephone: '+229 00 00 00 00',
-    sexe: 'homme',
-    dateNaissance: '1994-07-23',
-    adresse: 'Zogbo, Cotonou Rue 123'
-  });
+  const [user, setUser] = useState(null);
+  const [patientId, setPatientId] = useState(null);
+  const [formData, setFormData] = useState(emptyForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === 'radio') {
-      setFormData(prev => ({ ...prev, sexe: value }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    let active = true;
+
+    async function loadProfile() {
+      setLoading(true);
+      setMessage('');
+      try {
+        const cached = getAuthUser();
+        const current = unwrapUser(await getCurrentUser()) || cached;
+        const patient = patientFromUser(current);
+        if (active) {
+          setUser(current);
+          setPatientId(patient?.id || null);
+          setFormData(formFromUser(current));
+        }
+      } catch (error) {
+        if (active) setMessage(error?.response?.data?.message || 'Impossible de charger vos parametres.');
+      } finally {
+        if (active) setLoading(false);
+      }
     }
+
+    loadProfile();
+    return () => { active = false; };
+  }, []);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Données enregistrées :', formData);
-    // Ici, appelez votre API pour sauvegarder les modifications
-    alert('Modifications enregistrées avec succès !');
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleUploadPhoto = () => {
-    // Implémenter la logique de téléversement
-    alert('Fonctionnalité de téléversement à implémenter');
-  };
+    if (!patientId) {
+      setMessage('Profil patient introuvable.');
+      return;
+    }
 
-  const handleDeleteAvatar = () => {
-    alert('Supprimer la photo de profil');
+    setSaving(true);
+    setMessage('');
+    try {
+      const response = await updatePatient(patientId, {
+        name: formData.name,
+        telephone: formData.telephone,
+        adresse: formData.adresse,
+        groupe_sanguin: formData.groupe_sanguin || null,
+        allergies: formData.allergies || null,
+        antecedents_medicaux: formData.antecedents_medicaux || null,
+        personne_contact: formData.personne_contact || null,
+        telephone_contact: formData.telephone_contact || null,
+      });
+
+      const refreshedUser = unwrapUser(await getCurrentUser()) || {
+        ...user,
+        name: formData.name,
+        telephone: formData.telephone,
+        adresse: formData.adresse,
+        patient: response?.data || patientFromUser(user),
+      };
+
+      setAuthSession({ user: refreshedUser });
+      setUser(refreshedUser);
+      setFormData(formFromUser(refreshedUser));
+      setMessage('Modifications enregistrees avec succes.');
+    } catch (error) {
+      setMessage(error?.response?.data?.message || "Erreur lors de l'enregistrement.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <main className="content page-tight">
       <section className="page-title-card">
-        <h1>Paramètres du compte</h1>
+        <h1>Parametres du compte</h1>
       </section>
 
+      {message && <p className="form-message">{message}</p>}
+
       <div className="settings-shell">
-        {/* Menu latéral des paramètres */}
         <aside className="settings-nav-card">
           <h2>Configuration</h2>
-          <a className="settings-nav-item" href="/espacepatient/profil">
+          <Link className="settings-nav-item" to="/espacepatient/profil">
             <i className="fa-regular fa-user"></i><span>Profil</span>
-          </a>
-          <a className="settings-nav-item active" href="/espacepatient/parametres">
-            <i className="fa-regular fa-user"></i><span>Paramètres du profil</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/securite-compte">
-            <i className="fa-solid fa-lock"></i><span>Sécurité du compte</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/preferences-notifications">
+          </Link>
+          <Link className="settings-nav-item active" to="/espacepatient/parametres">
+            <i className="fa-regular fa-user"></i><span>Parametres du profil</span>
+          </Link>
+          <Link className="settings-nav-item" to="/espacepatient/securite-compte">
+            <i className="fa-solid fa-lock"></i><span>Securite du compte</span>
+          </Link>
+          <Link className="settings-nav-item" to="/espacepatient/preferences-notifications">
             <i className="fa-regular fa-bell"></i><span>Notifications</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/contacts-medicaux">
-            <i className="fa-regular fa-circle-check"></i><span>Contacts médicaux</span>
-          </a>
+          </Link>
         </aside>
 
-        {/* Carte principale du formulaire */}
         <article className="settings-main-card">
           <div className="settings-profile-head">
             <div className="settings-avatar-wrap">
-              <img
-                src="https://i.pravatar.cc/300?img=12"
-                alt="Avatar"
-                className="settings-avatar"
-              />
-              <button
-                className="settings-avatar-camera"
-                type="button"
-                title="Modifier la photo"
-                onClick={handleUploadPhoto}
-              >
-                <i className="fa-solid fa-camera"></i>
-              </button>
+              <img src={avatarFor(formData.name)} alt="Avatar" className="settings-avatar" />
             </div>
             <div className="settings-avatar-actions">
-              <button className="btn btn-solid settings-btn-compact" type="button" onClick={handleUploadPhoto}>
-                Téléverser une photo
-              </button>
-              <button className="btn btn-outline settings-btn-compact" type="button" onClick={handleDeleteAvatar}>
-                Supprimer avatar
-              </button>
+              <strong>{formData.name || 'Patient'}</strong>
+              {/* <span>{formData.email || '-'}</span> */}
             </div>
           </div>
 
-          <form className="settings-form-grid" onSubmit={handleSubmit}>
-            <label className="settings-field">
-              <span>Prénom</span>
-              <input
-                type="text"
-                name="prenom"
-                value={formData.prenom}
-                onChange={handleChange}
-                placeholder="Prénom"
-              />
-            </label>
-            <label className="settings-field">
-              <span>Nom</span>
-              <input
-                type="text"
-                name="nom"
-                value={formData.nom}
-                onChange={handleChange}
-                placeholder="Nom"
-              />
-            </label>
+          {loading ? (
+            <p>Chargement...</p>
+          ) : (
+            <form className="settings-form-grid" onSubmit={handleSubmit}>
+              <label className="settings-field">
+                <span>Nom complet</span>
+                <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Nom complet" />
+              </label>
 
-            <label className="settings-field">
-              <span>Email</span>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Email"
-              />
-            </label>
-            <label className="settings-field">
-              <span>Numéro de téléphone</span>
-              <input
-                type="tel"
-                name="telephone"
-                value={formData.telephone}
-                onChange={handleChange}
-                placeholder="Téléphone"
-              />
-            </label>
+              <label className="settings-field">
+                <span>Email</span>
+                <input type="email" name="email" value={formData.email} readOnly placeholder="Email" />
+              </label>
 
-            <label className="settings-field">
-              <span>Sexe</span>
-              <div className="settings-radio-group">
-                <label>
-                  <input
-                    type="radio"
-                    name="sexe"
-                    value="homme"
-                    checked={formData.sexe === 'homme'}
-                    onChange={handleChange}
-                  /> Homme
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="sexe"
-                    value="femme"
-                    checked={formData.sexe === 'femme'}
-                    onChange={handleChange}
-                  /> Femme
-                </label>
+              <label className="settings-field">
+                <span>Numero de telephone</span>
+                <input type="tel" name="telephone" value={formData.telephone} onChange={handleChange} placeholder="Telephone" />
+              </label>
+
+              <label className="settings-field">
+                <span>Sexe</span>
+                <input type="text" name="sexe" value={formData.sexe} readOnly />
+              </label>
+
+              <label className="settings-field">
+                <span>Date de naissance</span>
+                <input type="date" name="date_naissance" value={formData.date_naissance} readOnly />
+              </label>
+
+              <label className="settings-field">
+                <span>Groupe sanguin</span>
+                <select name="groupe_sanguin" value={formData.groupe_sanguin} onChange={handleChange}>
+                  <option value="">Non renseigne</option>
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group) => <option key={group} value={group}>{group}</option>)}
+                </select>
+              </label>
+
+              <label className="settings-field settings-field-full">
+                <span>Adresse</span>
+                <textarea name="adresse" rows="3" value={formData.adresse} onChange={handleChange} placeholder="Saisir votre adresse"></textarea>
+              </label>
+
+              <label className="settings-field settings-field-full">
+                <span>Allergies</span>
+                <textarea name="allergies" rows="3" value={formData.allergies} onChange={handleChange} placeholder="Allergies connues"></textarea>
+              </label>
+
+              <label className="settings-field settings-field-full">
+                <span>Antecedents medicaux</span>
+                <textarea name="antecedents_medicaux" rows="3" value={formData.antecedents_medicaux} onChange={handleChange} placeholder="Antecedents medicaux"></textarea>
+              </label>
+
+              <label className="settings-field">
+                <span>Personne a contacter</span>
+                <input type="text" name="personne_contact" value={formData.personne_contact} onChange={handleChange} placeholder="Nom du contact" />
+              </label>
+
+              <label className="settings-field">
+                <span>Telephone du contact</span>
+                <input type="tel" name="telephone_contact" value={formData.telephone_contact} onChange={handleChange} placeholder="Telephone du contact" />
+              </label>
+
+              <div className="settings-submit-wrap settings-field-full">
+                <button className="btn btn-solid settings-btn-compact" type="submit" disabled={saving}>
+                  {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                </button>
+                <Link className="btn btn-outline settings-btn-compact" to="/espacepatient/profil">
+                  Voir le profil
+                </Link>
               </div>
-            </label>
-            <label className="settings-field">
-              <span>Date de naissance</span>
-              <input
-                type="date"
-                name="dateNaissance"
-                value={formData.dateNaissance}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label className="settings-field settings-field-full">
-              <span>Adresse / Ville</span>
-              <textarea
-                name="adresse"
-                rows="3"
-                value={formData.adresse}
-                onChange={handleChange}
-                placeholder="Saisir votre adresse"
-              ></textarea>
-            </label>
-
-            <div className="settings-submit-wrap settings-field-full">
-              <button className="btn btn-solid settings-btn-compact" type="submit">
-                Enregistrer les modifications
-              </button>
-              <a className="btn btn-outline settings-btn-compact" href="/espacepatient/profil">
-                Voir le profil
-              </a>
-            </div>
-          </form>
+            </form>
+          )}
         </article>
-       
       </div>
     </main>
   );

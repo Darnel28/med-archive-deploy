@@ -64,6 +64,7 @@ import DashboardLabo from "./components/DashExamen/DashExamHome.jsx";
 import DemandeExamLabo from "./components/DashExamen/DemandeExam.jsx";
 import ResultatExamLabo from "./components/DashExamen/ResultatExam.jsx";
 import AlertesExamen from "./components/DashExamen/Alertes.jsx";
+import ParametresExamen from "./components/DashExamen/ParematresExamen.jsx";
 
 // Hopital
 import TransfertHopital from "./components/DashHopital/TransfertHopital.jsx";
@@ -191,6 +192,7 @@ function AllRoutes() {
                 <Route path="resultats" element={<ResultatExamLabo />} />
                 <Route path="alertes" element={<AlertesExamen />} />
                 <Route path="notifications" element={<AlertesExamen />} />
+                <Route path="parametres" element={<ParametresExamen />} />
                 {/* Ajoute ici les autres routes propres au laboratoire */}
             </Route>
             <Route path="/espacehopital" element={protect(<DashHopital />, ["etablissement", "hopital", "hôpital"])} >

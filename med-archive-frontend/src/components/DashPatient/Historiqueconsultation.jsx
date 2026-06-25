@@ -136,6 +136,7 @@ const ConsultationsHistory = () => {
           </div>
         </div>
       )}
+      
     </main>
   );
 };

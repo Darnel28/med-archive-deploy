@@ -189,7 +189,8 @@ setAppointments(
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || 'Impossible de commencer la consultation');
-      sessionStorage.setItem('active_consultation', JSON.stringify({ ...appointment, statut: 'en_cours' }));
+      const started = { ...appointment, ...(data?.data || {}), statut: 'en_cours' };
+      sessionStorage.setItem('active_consultation', JSON.stringify(started));
       navigate('/espacemedecin/consultations');
     } catch (err) {
       setError(err.message);
@@ -243,7 +244,7 @@ setAppointments(
         </label>
         {/* <input type="date" className="form-control" value={date} onChange={(e) => setDate(e.target.value)} /> */}
         <button className="btn transfer-add-btn" type="button" onClick={openModal}>
-          <i ></i> Ajouter un rendez-vous
+          <i className="fa-solid fa-calendar-plus"></i> Ajouter un rendez-vous
         </button>
       </section>
 
@@ -278,9 +279,13 @@ setAppointments(
                         <td><span className={className}>{text}</span></td>
                         <td>
                           {app.statut === 'en_cours' ? (
-                            <button className="btn btn-outline btn-sm" type="button" onClick={() => finishConsultation(app)}>Terminer</button>
+                            <button className="icon-action" type="button" title="Terminer la consultation" onClick={() => finishConsultation(app)}>
+                              <i className="fa-solid fa-check"></i>
+                            </button>
                           ) : (
-                            <button className="btn btn-outline btn-sm" type="button" onClick={() => startConsultation(app)} disabled={!isPaid}>Commencer</button>
+                            <button className="icon-action" type="button" title={isPaid ? 'Commencer la consultation' : 'Paiement requis'} onClick={() => startConsultation(app)} disabled={!isPaid}>
+                              <i className="fa-solid fa-play"></i>
+                            </button>
                           )}
                         </td>
                       </tr>

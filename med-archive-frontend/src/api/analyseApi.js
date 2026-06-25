@@ -14,7 +14,9 @@ export function updateAnalyseStatut(id, payload) {
 }
 
 export function ajouterResultatsAnalyse(id, payload) {
-  return apiClient.post(`/analyses/${id}/resultats`, payload).then((response) => response.data);
+  return apiClient.post(`/analyses/${id}/resultats`, payload, {
+    headers: payload instanceof FormData ? { "Content-Type": "multipart/form-data" } : undefined,
+  }).then((response) => response.data);
 }
 
 export function getAnalysesStatistiques() {

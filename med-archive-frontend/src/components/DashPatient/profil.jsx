@@ -1,6 +1,45 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ageFromDate, formatDate, formatDateTime, latestByDate, loadPatientDashboardData, patientFromUser } from './patientDashboardData';
+
+const avatarFor = (name) => `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Patient')}&background=0f766e&color=fff`;
 
 const Profil = () => {
+  const [state, setState] = useState({ loading: true, error: '', data: null });
+
+  useEffect(() => {
+    let active = true;
+    loadPatientDashboardData()
+      .then((data) => active && setState({ loading: false, error: '', data }))
+      .catch((error) => active && setState({ loading: false, error: error?.response?.data?.message || 'Impossible de charger votre profil.', data: null }));
+    return () => { active = false; };
+  }, []);
+
+  const data = state.data;
+  const user = data?.user || {};
+  const patient = patientFromUser(user) || {};
+  const consultations = data?.consultations || [];
+  const analyses = data?.analyses || [];
+
+  const upcoming = useMemo(() => consultations
+    .filter((consultation) => new Date(consultation.date_consultation) >= new Date())
+    .sort((a, b) => new Date(a.date_consultation) - new Date(b.date_consultation)), [consultations]);
+
+  const past = useMemo(() => consultations
+    .filter((consultation) => new Date(consultation.date_consultation) < new Date())
+    .sort((a, b) => new Date(b.date_consultation) - new Date(a.date_consultation)), [consultations]);
+
+  const files = analyses.filter((analysis) => analysis.fichier_resultat).slice(0, 4);
+  const notes = consultations.filter((consultation) => consultation.observations || consultation.diagnostic).slice(0, 3);
+  const latestConsultation = latestByDate(consultations, 'date_consultation');
+
+  if (state.loading) {
+    return <main className="content page-tight"><section className="page-title-card"><h1>Chargement du profil...</h1></section></main>;
+  }
+
+  if (state.error) {
+    return <main className="content page-tight"><section className="page-title-card"><h1>{state.error}</h1></section></main>;
+  }
+
   return (
     <main className="content page-tight">
       <section className="page-title-card">
@@ -8,116 +47,97 @@ const Profil = () => {
       </section>
 
       <div className="profile-layout">
-        {/* Carte d'identité */}
         <div className="profile-card profile-identity-card">
-          <img src="https://i.pravatar.cc/80?img=12" alt="Photo de profil" className="profile-avatar-large" />
-          <h2>Doe</h2>
-          <h3>John</h3>
-          <a href="tel:+22900000000" className="profile-contact-link">+229 00 00 00 00</a>
-          <a href="mailto:john.doe@email.com" className="profile-contact-sub">john.doe@email.com</a>
+          <img src={avatarFor(user.name)} alt="Photo de profil" className="profile-avatar-large" />
+          <h2>{user.name || 'Patient'}</h2>
+          <h3>{patient.imu || patient.npi || 'Dossier patient'}</h3>
+          <a href={`tel:${user.telephone || ''}`} className="profile-contact-link">{user.telephone || '-'}</a>
+          <a href={`mailto:${user.email || ''}`} className="profile-contact-sub">{user.email || '-'}</a>
         </div>
 
-        {/* Carte Informations de base */}
         <div className="profile-card">
           <div className="profile-card-head">
             <h2>Informations de base du patient</h2>
-            <i className="fa-solid fa-pen"></i>
+            <i className="fa-solid fa-user"></i>
           </div>
           <div className="profile-kv-grid">
-            <div className="profile-kv-row"><span>Nom:</span><span className="profile-kv-value">Doe</span></div>
-            <div className="profile-kv-row"><span>Prénom:</span><span className="profile-kv-value">John</span></div>
-            <div className="profile-kv-row"><span>Date de naissance:</span><span className="profile-kv-value">23/07/1994</span></div>
-            <div className="profile-kv-row"><span>Sexe:</span><span className="profile-kv-value">Masculin</span></div>
-            <div className="profile-kv-row"><span>Téléphone:</span><span className="profile-kv-value">+229 00 00 00 00</span></div>
-            <div className="profile-kv-row"><span>Email:</span><span className="profile-kv-value">john.doe@email.com</span></div>
-            <div className="profile-kv-row"><span>Adresse / Ville:</span><span className="profile-kv-value">Zogbo, Cotonou Rue 123</span></div>
+            <div className="profile-kv-row"><span>Nom complet:</span><span className="profile-kv-value">{user.name || '-'}</span></div>
+            <div className="profile-kv-row"><span>Date de naissance:</span><span className="profile-kv-value">{formatDate(user.date_naissance)} ({ageFromDate(user.date_naissance)})</span></div>
+            <div className="profile-kv-row"><span>Sexe:</span><span className="profile-kv-value">{user.sexe || '-'}</span></div>
+            <div className="profile-kv-row"><span>Telephone:</span><span className="profile-kv-value">{user.telephone || '-'}</span></div>
+            <div className="profile-kv-row"><span>Email:</span><span className="profile-kv-value">{user.email || '-'}</span></div>
+            <div className="profile-kv-row"><span>Adresse / Ville:</span><span className="profile-kv-value">{[user.adresse, user.ville].filter(Boolean).join(', ') || '-'}</span></div>
+            <div className="profile-kv-row"><span>IMU:</span><span className="profile-kv-value">{patient.imu || '-'}</span></div>
+            <div className="profile-kv-row"><span>NPI:</span><span className="profile-kv-value">{patient.npi || '-'}</span></div>
           </div>
         </div>
 
-        {/* Carte Informations importantes */}
         <div className="profile-card">
           <div className="profile-card-head">
             <h2>Informations importantes</h2>
             <i className="fa-solid fa-stethoscope"></i>
           </div>
           <div className="profile-kv-grid">
-            <div className="profile-kv-row"><span>Groupe sanguin:</span><span className="profile-kv-value">A+</span></div>
-            <div className="profile-kv-row"><span>Allergies:</span><span className="profile-kv-value">Noix, pollen</span></div>
-            <div className="profile-kv-row"><span>Maladies chroniques:</span><span className="profile-kv-value">Asthme</span></div>
-            <div className="profile-kv-row"><span>Antécédents médicaux:</span><span className="profile-kv-value">COVID-19 (2022), fracture radius (2018)</span></div>
+            <div className="profile-kv-row"><span>Groupe sanguin:</span><span className="profile-kv-value">{patient.groupe_sanguin || '-'}</span></div>
+            <div className="profile-kv-row"><span>Allergies:</span><span className="profile-kv-value">{patient.allergies || 'Aucune renseignee'}</span></div>
+            <div className="profile-kv-row"><span>Antecedents medicaux:</span><span className="profile-kv-value">{patient.antecedents_medicaux || '-'}</span></div>
+            <div className="profile-kv-row"><span>Derniere consultation:</span><span className="profile-kv-value">{formatDateTime(latestConsultation?.date_consultation)}</span></div>
           </div>
         </div>
 
-        {/* Carte Visites (futures & passées) */}
         <div className="profile-card profile-visits-card">
           <div className="profile-visits-tabs">
-            <button className="active" type="button">Visites futures (2)</button>
-            <button type="button">Visites passées (15)</button>
-            <button type="button">Traitements prévus</button>
+            <button className="active" type="button">Visites futures ({upcoming.length})</button>
+            <button type="button">Visites passees ({past.length})</button>
+            <button type="button">Analyses ({analyses.length})</button>
           </div>
 
-          <div className="profile-visit-row purple">
-            <div className="profile-visit-time">
-              <span>11:00-12:30</span>
-              <span className="profile-visit-value">26 Fév 2023</span>
+          {(upcoming.length ? upcoming : past).slice(0, 3).map((consultation, index) => (
+            <div className={`profile-visit-row ${index % 2 === 0 ? 'purple' : 'cyan'}`} key={consultation.id}>
+              <div className="profile-visit-time">
+                <span>{formatDateTime(consultation.date_consultation)}</span>
+                <span className="profile-visit-value">{consultation.statut_paiement === 'payee' ? 'Paye' : 'A payer'}</span>
+              </div>
+              <div className="profile-visit-col">
+                <span>Service:</span>
+                <span className="profile-visit-value">{consultation.service?.nom || consultation.medecin?.specialite?.nom || consultation.motif || '-'}</span>
+              </div>
+              <div className="profile-visit-col">
+                <span>Medecin:</span>
+                <span className="profile-visit-value">{consultation.medecin?.user?.name || '-'}</span>
+              </div>
+              <div className="profile-visit-status">
+                <span>Statut:</span>
+                <em>{consultation.statut || 'programme'}</em>
+              </div>
             </div>
-            <div className="profile-visit-col">
-              <span>Service:</span>
-              <span className="profile-visit-value">Traitement et nettoyage des canaux</span>
-            </div>
-            <div className="profile-visit-col">
-              <span>Médecin:</span>
-              <span className="profile-visit-value">Oksana Maxime</span>
-            </div>
-            <div className="profile-visit-status">
-              <span>Statut:</span>
-              <em>Programmé</em>
-            </div>
-          </div>
+          ))}
 
-          <div className="profile-visit-row cyan">
-            <div className="profile-visit-time">
-              <span>11:00-12:30</span>
-              <span className="profile-visit-value">27 Fév 2023</span>
-            </div>
-            <div className="profile-visit-col">
-              <span>Service:</span>
-              <span className="profile-visit-value">Blanchiment des dents</span>
-            </div>
-            <div className="profile-visit-col">
-              <span>Médecin:</span>
-              <span className="profile-visit-value">Max Oched</span>
-            </div>
-            <div className="profile-visit-status">
-              <span>Statut:</span>
-              <em>Programmé</em>
-            </div>
-          </div>
+          {consultations.length === 0 && <p>Aucune visite enregistree.</p>}
         </div>
 
-        {/* Bloc latéral : Fichiers + Notes (stack de cartes) */}
         <div className="profile-side-stack">
           <div className="profile-card profile-file-card">
             <div className="profile-card-head profile-mini-head">
               <h2>Fichiers</h2>
-              <button className="btn btn-outline btn-sm">Télécharger</button>
             </div>
             <ul className="profile-mini-list">
-              <li><i className="fa-regular fa-file-lines"></i><span>Bilan de contrôle.pdf</span><span className="profile-file-size">123kb</span></li>
-              <li><i className="fa-regular fa-file-lines"></i><span>Compte rendu de visite.pdf</span><span className="profile-file-size">123kb</span></li>
-              <li><i className="fa-regular fa-file-lines"></i><span>Ordonnance médicale.pdf</span><span className="profile-file-size">123kb</span></li>
-              <li><i className="fa-regular fa-file-lines"></i><span>Résultat laboratoire.pdf</span><span className="profile-file-size">123kb</span></li>
+              {files.map((analysis) => (
+                <li key={analysis.id}><i className="fa-regular fa-file-lines"></i><span>{analysis.type_analyse}</span><span className="profile-file-size">Resultat</span></li>
+              ))}
+              {files.length === 0 && <li><i className="fa-regular fa-file-lines"></i><span>Aucun fichier joint</span></li>}
             </ul>
           </div>
 
           <div className="profile-card profile-file-card">
             <div className="profile-card-head profile-mini-head">
               <h2>Notes</h2>
-              <button className="btn btn-outline btn-sm">Télécharger</button>
             </div>
             <ul className="profile-mini-list">
-              <li><i className="fa-regular fa-note-sticky"></i><span>Note 31.06.23.pdf</span><span className="profile-file-size">123kb</span></li>
-              <li><i className="fa-regular fa-note-sticky"></i><span>Note 23.06.23.pdf</span><span className="profile-file-size">123kb</span></li>
+              {notes.map((consultation) => (
+                <li key={consultation.id}><i className="fa-regular fa-note-sticky"></i><span>{consultation.diagnostic || consultation.observations}</span><span className="profile-file-size">{formatDate(consultation.date_consultation)}</span></li>
+              ))}
+              {notes.length === 0 && <li><i className="fa-regular fa-note-sticky"></i><span>Aucune note medicale</span></li>}
             </ul>
           </div>
         </div>

@@ -16,6 +16,7 @@ const DemandeExamLabo = () => {
   const [message, setMessage] = useState('');
   const [resultModal, setResultModal] = useState(null);
   const [resultForm, setResultForm] = useState({ valeur: '', unite: '', normale: true, commentaire: '' });
+  const [resultFile, setResultFile] = useState(null);
 
   const loadAnalyses = async () => {
     setLoading(true);
@@ -64,6 +65,7 @@ const DemandeExamLabo = () => {
     }
     setResultModal(analysis);
     setResultForm({ valeur: '', unite: '', normale: true, commentaire: '' });
+    setResultFile(null);
   };
 
   const submitResult = async (event) => {
@@ -71,15 +73,22 @@ const DemandeExamLabo = () => {
     if (!resultModal) return;
     setMessage('');
     try {
-      await ajouterResultatsAnalyse(resultModal.id, {
-        resultats: {
-          valeur: Number(resultForm.valeur),
-          unite: resultForm.unite,
-          normale: Boolean(resultForm.normale),
-          commentaire: resultForm.commentaire,
-        },
-      });
+      const payload = new FormData();
+      if (resultForm.valeur !== '') {
+        payload.append('resultats[valeur]', Number(resultForm.valeur));
+      }
+      if (resultForm.unite.trim() !== '') {
+        payload.append('resultats[unite]', resultForm.unite);
+      }
+      payload.append('resultats[normale]', resultForm.normale ? '1' : '0');
+      payload.append('resultats[commentaire]', resultForm.commentaire);
+      if (resultFile) {
+        payload.append('fichier_resultat', resultFile);
+      }
+
+      await ajouterResultatsAnalyse(resultModal.id, payload);
       setResultModal(null);
+      setResultFile(null);
       await loadAnalyses();
     } catch (error) {
       setMessage(error?.response?.data?.message || 'Impossible d enregistrer le resultat.');
@@ -158,24 +167,262 @@ const DemandeExamLabo = () => {
         </article>
       </section>
 
-      {resultModal && (
-        <div className="modal-backdrop">
-          <form className="modal-card" onSubmit={submitResult}>
-            <h2>Ajouter un resultat</h2>
-            <input type="number" step="0.01" placeholder="Valeur" value={resultForm.valeur} onChange={(event) => setResultForm((prev) => ({ ...prev, valeur: event.target.value }))} required />
-            <input type="text" placeholder="Unite" value={resultForm.unite} onChange={(event) => setResultForm((prev) => ({ ...prev, unite: event.target.value }))} required />
-            <label className="form-check">
-              <input type="checkbox" checked={resultForm.normale} onChange={(event) => setResultForm((prev) => ({ ...prev, normale: event.target.checked }))} />
-              Valeur normale
-            </label>
-            <textarea placeholder="Commentaire / conclusion" value={resultForm.commentaire} onChange={(event) => setResultForm((prev) => ({ ...prev, commentaire: event.target.value }))} />
-            <div className="modal-actions">
-              <button type="button" className="btn btn-outline" onClick={() => setResultModal(null)}>Annuler</button>
-              <button type="submit" className="btn btn-solid">Enregistrer</button>
+     {resultModal && (
+    <div className="modal-backdrop">
+        <form className="modal-card modal-result" onSubmit={submitResult}>
+
+            {/* <div className="modal-icon">
+                <i className="fa-solid fa-flask-vial"></i>
+            </div> */}
+
+            <h2>Résultat d'analyse</h2>
+
+            <p className="modal-description">
+                Saisissez les informations concernant le résultat de
+                <strong> {resultModal.type_analyse}</strong>.
+            </p>
+
+            <div className="modal-form">
+
+                <div className="form-group">
+                    <label>Valeur</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Ex : 12.5"
+                        value={resultForm.valeur}
+                        onChange={(e) =>
+                            setResultForm((prev) => ({
+                                ...prev,
+                                valeur: e.target.value,
+                            }))
+                        }
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Unité</label>
+                    <input
+                        type="text"
+                        placeholder="Ex : g/L"
+                        value={resultForm.unite}
+                        onChange={(e) =>
+                            setResultForm((prev) => ({
+                                ...prev,
+                                unite: e.target.value,
+                            }))
+                        }
+                    />
+                </div>
+
+                <div className="form-group">
+                    <label>Commentaire</label>
+                    <textarea
+                        rows="4"
+                        placeholder="Conclusion ou observations..."
+                        value={resultForm.commentaire}
+                        onChange={(e) =>
+                            setResultForm((prev) => ({
+                                ...prev,
+                                commentaire: e.target.value,
+                            }))
+                        }
+                    />
+                </div>
+                <div className="form-group">
+    <label>Résultat (Image ou PDF)</label>
+
+    <input
+        type="file"
+        accept="image/*,.pdf"
+        onChange={(e) => setResultFile(e.target.files[0])}
+    />
+</div>
+
+                <label className="result-checkbox">
+                    <input
+                        type="checkbox"
+                        checked={resultForm.normale}
+                        onChange={(e) =>
+                            setResultForm((prev) => ({
+                                ...prev,
+                                normale: e.target.checked,
+                            }))
+                        }
+                    />
+
+                    <span>Résultat dans les valeurs normales</span>
+                </label>
+
             </div>
-          </form>
-        </div>
-      )}
+
+            <div className="modal-actions">
+
+                <button
+                    type="button"
+                    className="btn-outline"
+                    onClick={() => {
+                      setResultModal(null);
+                      setResultFile(null);
+                    }}
+                >
+                    Annuler
+                </button>
+
+                <button
+                    type="submit"
+                    className="btn-solid"
+                >
+                    <i className="fa-solid fa-floppy-disk"></i>
+                    &nbsp; Enregistrer
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+)}
+
+  <style>
+        {
+          `
+         .modal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.modal-card{
+    background:#fff;
+    width:95%;
+    max-width:650px;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+    animation:popup .25s;
+}
+
+@keyframes popup{
+    from{
+        opacity:0;
+        transform:scale(.9);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+
+.modal-card h2{
+    text-align:center;
+    margin-bottom:10px;
+    color:#0f172a;
+}
+
+.modal-description{
+    text-align:center;
+    color:#64748b;
+    margin-bottom:25px;
+}
+
+.modal-form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    margin-bottom:8px;
+    font-weight:600;
+    color:#334155;
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:14px;
+    border:1px solid #d1d5db;
+    border-radius:12px;
+    font-size:15px;
+    box-sizing:border-box;
+}
+
+.form-group textarea{
+    min-height:120px;
+}
+
+.result-checkbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#f8fafc;
+    padding:15px;
+    border-radius:12px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:15px;
+    margin-top:25px;
+}
+
+.btn-outline{
+    background:#f1f5f9;
+    border:none;
+    border-radius:10px;
+    padding:12px 20px;
+    cursor:pointer;
+}
+
+.btn-solid{
+    background:#0ea5e9;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:12px 20px;
+    cursor:pointer;
+}
+    /* Chrome, Edge, Opera */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+}
+
+/* Firefox */
+input[type=number]{
+    appearance:textfield;
+    -moz-appearance:textfield;
+}
+
+
+.form-group input[type=file]{
+    border:2px dashed #0ea5e9;
+    border-radius:12px;
+    padding:18px;
+    cursor:pointer;
+    background:#f8fbff;
+    transition:.25s;
+}
+
+.form-group input[type=file]:hover{
+    background:#eef8ff;
+}
+          `
+
+        }
+      </style>
+  
     </main>
   );
 };

@@ -36,14 +36,37 @@ function About() {
                         </div>
                     </div>
                     <div className="col-lg-6 col-md-12">
+                        <div className="diamond-gallery">
 
-                        <div className="about-img ">
-                            <div className="about-font-img d-none d-lg-block">
-                                <img src={about2} alt="About 2" />
+                            <div className="diamond">
+                                <img src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=800" alt="" />
                             </div>
-                            <div className="about-back-img ">
-                                <img src={about1} alt="About 1" />
+
+                            <div className="diamond">
+                                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800" alt="" />
                             </div>
+
+                            <div className="diamond">
+                                <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800" alt="" />
+                            </div>
+
+                                                <div className="diamond badge">
+                                <span>
+                                    +5000
+                                    <small>Dossiers<br />Médicaux</small>
+                                </span>
+                            </div>
+
+                            <div className="diamond">
+                                <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800" alt="" />
+                            </div>
+
+                            <div className="diamond">
+                                <img src="https://images.unsplash.com/photo-1494526585095-c41746248156?w=800" alt="" />
+                            </div>
+
+       
+
                         </div>
                     </div>
                 </div>

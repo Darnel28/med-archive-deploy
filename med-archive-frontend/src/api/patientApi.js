@@ -29,6 +29,10 @@ export function getMesAnalyses(params) {
   return apiClient.get("/patients/me/analyses", { params }).then((response) => response.data);
 }
 
+export function getAnalyseResultatFichier(id) {
+  return apiClient.get(`/analyses/${id}/resultat-fichier`, { responseType: "blob" });
+}
+
 export function getMesFactures(params) {
   return apiClient.get("/patients/me/factures", { params }).then((response) => response.data);
 }

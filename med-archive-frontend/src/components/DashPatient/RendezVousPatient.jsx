@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getMesConsultations } from '../../api/patientApi';
-import { creerPaiementFedapay } from '../../api/factureApi';
+import { payerFacture } from '../../api/factureApi';
 import { updateConsultation } from '../../api/consultationApi';
 import { apiClient } from '../../api/client';
 
@@ -23,6 +23,8 @@ const RendezVousPatient = () => {
   const [editing, setEditing] = useState(null);
   const [freeSlots, setFreeSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState('');
+  const [paymentRdv, setPaymentRdv] = useState(null);
+  const [paying, setPaying] = useState(false);
   const itemsPerPage = 5;
 
   const loadAppointments = async () => {
@@ -68,31 +70,45 @@ const RendezVousPatient = () => {
     setCurrentPage(1);
   };
 
-const handlePay = async (rdv) => {
-  try {
+  const handlePay = (rdv) => {
     const facture = rdv?.facture;
 
     if (!facture) {
-      setMessage("Aucune facture associée à ce rendez-vous.");
+      setMessage("Aucune facture associee a ce rendez-vous.");
       return;
     }
 
-    const response = await creerPaiementFedapay(facture.id);
+    setPaymentRdv(rdv);
+  };
 
-    console.log("REPONSE FEDAPAY =", response);
+  const confirmTestPayment = async () => {
+    const facture = paymentRdv?.facture;
+    if (!facture) return;
 
-    if (response?.url) {
-      window.location.href = response.url;
-      return;
+    setPaying(true);
+    setMessage('');
+    try {
+      /*
+      Paiement reel desactive pour l'environnement de test.
+      const response = await creerPaiementFedapay(facture.id);
+      if (response?.url) window.location.href = response.url;
+      */
+      await payerFacture(facture.id, {
+        montant: facture.montant_restant,
+        methode: 'mobile_money',
+        reference: `TEST-RDV-${Date.now()}`,
+      });
+      setMessage('Paiement du rendez-vous valide avec succes.');
+      setPaymentRdv(null);
+      await loadAppointments();
+    } catch (error) {
+      console.error(error);
+      setMessage("Impossible de valider le paiement test.");
+    } finally {
+      setPaying(false);
     }
+  };
 
-    console.error("URL de paiement introuvable", response);
-
-  } catch (error) {
-    console.error(error);
-    setMessage("Impossible d'initialiser le paiement.");
-  }
-};
   const openReschedule = async (rdv) => {
     setEditing(rdv);
     setSelectedSlot('');
@@ -222,6 +238,176 @@ const handlePay = async (rdv) => {
           </div>
         </div>
       )}
+
+    {paymentRdv && (
+    <div className="modal-backdrop">
+        <div className="modal-card">
+
+            <div className="modal-icon">
+                <i className="fa-solid fa-credit-card"></i>
+            </div>
+
+            <h2>Paiement du rendez-vous</h2>
+
+            <p>
+                Vous êtes sur le point de régler la somme de
+                <br /><br />
+                <strong style={{fontSize:'22px', color:'#0ea5e9'}}>
+                    {formatMoney(paymentRdv.facture?.montant_restant ?? paymentRdv.montant_consultation)}
+                </strong>
+            </p>
+
+            <div className="modal-actions">
+                <button
+                    className="btn-outline"
+                    onClick={() => setPaymentRdv(null)}
+                    disabled={paying}
+                >
+                    Annuler
+                </button>
+
+                <button
+                    className="btn-solid"
+                    onClick={confirmTestPayment}
+                    disabled={paying}
+                >
+                    {paying ? (
+                        <>
+                            <i className="fa fa-spinner fa-spin"></i>
+                            &nbsp; Validation...
+                        </>
+                    ) : (
+                        <>
+                            <i className="fa-solid fa-check"></i>
+                            &nbsp; Confirmer
+                        </>
+                    )}
+                </button>
+            </div>
+
+        </div>
+    </div>
+)}
+      <style>
+        {
+          `
+          /* Fond sombre */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn .25s ease;
+}
+
+/* Boîte du modal */
+.modal-card {
+    width: 95%;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 18px 45px rgba(0,0,0,.18);
+    animation: zoomIn .25s ease;
+}
+
+/* Icône */
+.modal-icon{
+    width:70px;
+    height:70px;
+    margin:auto;
+    border-radius:50%;
+    background:#e8f7ff;
+    color:#0099cc;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    margin-bottom:18px;
+}
+
+/* Titre */
+.modal-card h2{
+    margin:0;
+    text-align:center;
+    font-size:24px;
+    font-weight:700;
+    color:#14324a;
+}
+
+/* Texte */
+.modal-card p{
+    margin:18px 0 25px;
+    text-align:center;
+    line-height:1.7;
+    color:#666;
+    font-size:15px;
+}
+
+/* Boutons */
+.modal-actions{
+    display:flex;
+    gap:15px;
+}
+
+.modal-actions button{
+    flex:1;
+    border:none;
+    border-radius:12px;
+    padding:13px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.25s;
+}
+
+.btn-outline{
+    background:#f4f5f7;
+    color:#555;
+}
+
+.btn-outline:hover{
+    background:#e5e7eb;
+}
+
+.btn-solid{
+    background:#0ea5e9;
+    color:#fff;
+}
+
+.btn-solid:hover{
+    background:#0284c7;
+}
+
+.btn-solid:disabled,
+.btn-outline:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
+@keyframes fadeIn{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+@keyframes zoomIn{
+    from{
+        opacity:0;
+        transform:scale(.8);
+    }
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+}
+          `
+
+        }
+      </style>
     </main>
   );
 };

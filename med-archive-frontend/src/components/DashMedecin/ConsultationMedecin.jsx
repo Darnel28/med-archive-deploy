@@ -215,7 +215,7 @@ export default function ConsultationMedecin() {
         laboratoire_id: laboratoires[0]?.id,
         type_analyse: examenLabels[key],
         date_prelevement: new Date().toISOString().slice(0, 10),
-        commentaires: `Demande creee depuis la consultation #${consultationId}`,
+        commentaires: `Demande creee depuis la consultation `,
       }));
 
     if (selectedExamens.length > 0 && !laboratoires[0]?.id) {
