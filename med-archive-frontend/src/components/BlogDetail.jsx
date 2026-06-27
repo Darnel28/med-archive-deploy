@@ -1,6 +1,7 @@
 import single_blog_1 from "../assets/img/blog/single_blog_1.png";
 import preview_img from "../assets/img/post/preview.png";
 
+import telecharger12 from "../assets/img/telecharger12.jpeg";
 function navigate(path) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -29,7 +30,7 @@ function BlogDetail() {
                         <div className="col-lg-8 posts-list">
                             <div className="single-post">
                                 <div className="feature-img">
-                                    <img className="img-fluid" src={single_blog_1} alt="Blog Image" />
+                                    <img className="img-fluid" src={telecharger12} alt="Blog Image" />
                                 </div>
                                 <div className="blog_details">
                                     <h2 style={{ color: "#2d2d2d" }}>

@@ -54,7 +54,7 @@ function Services() {
                                     <a className="nav-link" id="Neuroanatomy-tab" data-toggle="tab" href="#carnet"
                                         role="tab" aria-controls="contact" aria-selected="false">
                                         <i className="flaticon-verified"></i>
-                                        <h4>Carnet Vaccinal</h4>
+                                        <h4>Consultations</h4>
                                     </a>
                                 </li>
                                 <li className="nav-item">

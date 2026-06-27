@@ -3842,9 +3842,7 @@ body.dark-mode .settings-extra p {
 .medarchive-logo .archive {
     color: #000;
 }
-/* ===========================
-   Diamond Gallery
-=========================== */
+
 
 .diamond-gallery{
     display:grid;
@@ -3862,13 +3860,10 @@ body.dark-mode .settings-extra p {
 .diamond{
     width:230px;
     height:230px;
+    position:relative;
     overflow:hidden;
-
     transform:rotate(45deg);
-
     border-radius:28px;
-    background:#fff;
-
     box-shadow:0 12px 30px rgba(0,0,0,.12);
 }
 
@@ -3955,5 +3950,413 @@ body.dark-mode .settings-extra p {
     .diamond:nth-child(6){
         margin:0;
     }
+
+}
+/*==================================================
+        MEDARCHIVE NETWORK SECTION
+==================================================*/
+
+
+
+.network-subtitle{
+    display:inline-block;
+    color:#12b6aa;
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:15px;
+}
+
+.network-title{
+    font-size:48px;
+    font-weight:700;
+    color:#102040;
+    line-height:1.2;
+    margin-bottom:25px;
+}
+
+.network-text{
+    color:#6d7b8a;
+    line-height:1.9;
+    margin-bottom:45px;
+}
+
+
+/*======================
+        Cards
+=======================*/
+
+.network-card{
+
+    display:flex;
+    align-items:flex-start;
+
+    gap:20px;
+
+    background:#fff;
+
+    padding:22px;
+
+    border-radius:18px;
+
+    margin-bottom:22px;
+
+    box-shadow:0 12px 35px rgba(0,0,0,.08);
+
+    transition:.35s;
+
+}
+
+.network-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 40px rgba(0,0,0,.12);
+
+}
+
+.network-icon{
+
+    width:62px;
+
+    height:62px;
+
+    min-width:62px;
+
+    border-radius:16px;
+
+    background:#11b5a7;
+
+    color:#fff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:24px;
+
+}
+
+.network-card h4{
+
+    margin-bottom:8px;
+
+    color:#102040;
+
+    font-size:21px;
+
+    font-weight:700;
+
+}
+
+.network-card p{
+
+    margin:0;
+
+    color:#758394;
+
+    line-height:1.7;
+
+}
+
+
+/*======================
+      MAP AREA
+=======================*/
+
+.network-map{
+
+    position:relative;
+
+    height:720px;
+
+}
+
+.benin-map{
+
+    width:78%;
+
+    display:block;
+
+    margin:auto;
+
+    margin-top:40px;
+
+    filter:drop-shadow(0 20px 35px rgba(0,0,0,.12));
+
+}
+
+
+/*======================
+      DOTS
+=======================*/
+
+.map-dot{
+
+    position:absolute;
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    background:#14b8ac;
+
+    border:4px solid #fff;
+
+    box-shadow:0 0 0 8px rgba(20,184,172,.18);
+
+    animation:pulse 2s infinite;
+
+}
+
+
+/*======================
+      DOT POSITIONS
+=======================*/
+
+.dot1{
+
+    top:18%;
+
+    left:53%;
+
+}
+
+.dot2{
+
+    top:31%;
+
+    left:48%;
+
+}
+
+.dot3{
+
+    top:42%;
+
+    left:58%;
+
+}
+
+.dot4{
+
+    top:54%;
+
+    left:44%;
+
+}
+
+.dot5{
+
+    top:63%;
+
+    left:56%;
+
+}
+
+.dot6{
+
+    top:72%;
+
+    left:47%;
+
+}
+
+.dot7{
+
+    top:82%;
+
+    left:52%;
+
+}
+
+.dot8{
+
+    top:90%;
+
+    left:50%;
+
+}
+
+
+/*======================
+        AVATARS
+=======================*/
+
+.avatar{
+
+    position:absolute;
+
+    width:90px;
+
+    height:90px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    padding:5px;
+
+    box-shadow:0 12px 30px rgba(0,0,0,.15);
+
+    animation:float 5s ease-in-out infinite;
+
+}
+
+.avatar img{
+
+    width:100%;
+
+    height:100%;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+}
+
+
+
+
+.avatar1{
+
+    top:8%;
+
+    right:5%;
+
+}
+
+.avatar2{
+
+    top:30%;
+
+    left:3%;
+
+}
+
+.avatar3{
+
+    bottom:20%;
+
+    right:0;
+
+}
+
+.avatar4{
+
+    bottom:3%;
+
+    left:12%;
+
+}
+
+
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(.9);
+
+    }
+
+    50%{
+
+        transform:scale(1.2);
+
+    }
+
+    100%{
+
+        transform:scale(.9);
+
+    }
+
+}
+
+@keyframes float{
+
+    0%{
+
+        transform:translateY(0);
+
+    }
+
+    50%{
+
+        transform:translateY(-12px);
+
+    }
+
+    100%{
+
+        transform:translateY(0);
+
+    }
+
+}
+
+
+
+@media(max-width:992px){
+
+.network-title{
+
+    font-size:34px;
+
+}
+
+.network-map{
+
+    margin-top:70px;
+
+    height:560px;
+
+}
+
+.benin-map{
+
+    width:90%;
+
+}
+
+.avatar{
+
+    width:70px;
+
+    height:70px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.network-section{
+
+    padding:80px 0;
+
+}
+
+.network-map{
+
+    height:430px;
+
+}
+
+.avatar{
+
+    display:none;
+
+}
+
+.network-card{
+
+    padding:18px;
+
+}
 
 }

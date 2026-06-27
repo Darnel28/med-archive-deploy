@@ -7,7 +7,7 @@ function APropos() {
     return (
         <>
 
-            {/* HERO */}
+       
             <div className="slider-area2 about-cover">
                 <div className="slider-height2 d-flex align-items-center">
                     <div className="container">
@@ -23,11 +23,11 @@ function APropos() {
             </div>
 
 
-            <section className="about-v2">
+            <section >
 
                 <div className="container">
 
-                    {/* INTRO */}
+                 
 
                     <div className="about-title">
 
@@ -55,9 +55,7 @@ function APropos() {
 
 
 
-                    {/* ========================== */}
-
-                    {/* SECTION 01 */}
+                 
 
                     <div className="about-block">
 
@@ -146,12 +144,12 @@ function APropos() {
 
                                     </ul>
 
-                                    <a
+                                    {/* <a
                                         href="#"
                                         className="about-btn-modern"
                                     >
                                         Découvrir
-                                    </a>
+                                    </a> */}
 
                                 </div>
 
@@ -162,12 +160,6 @@ function APropos() {
                     </div>
 
 
-
-
-
-                    {/* ========================== */}
-
-                    {/* SECTION 02 */}
 
                     <div className="about-block reverse">
 
@@ -244,12 +236,12 @@ function APropos() {
 
                                     </ul>
 
-                                    <a
+                                    {/* <a
                                         href="#"
                                         className="about-btn-modern"
                                     >
                                         En savoir plus
-                                    </a>
+                                    </a> */}
 
                                 </div>
 
@@ -258,8 +250,7 @@ function APropos() {
                         </div>
 
                     </div>
-                    {/* ========================== */}
-                    {/* SECTION 03 */}
+                  
 
                     <div className="about-block">
 
@@ -319,19 +310,19 @@ function APropos() {
                                         <li>✔ Scanner & IRM</li>
 
                                         <li>✔ Radiologie</li>
-
-                                        <li>✔ Vaccinations</li>
+{/* 
+                                        <li>✔ Vaccinations</li> */}
 
                                         <li>✔ Ordonnances</li>
 
                                     </ul>
 
-                                    <a
+                                    {/* <a
                                         href="#"
                                         className="about-btn-modern"
                                     >
                                         Découvrir
-                                    </a>
+                                    </a> */}
 
                                 </div>
 
@@ -345,8 +336,7 @@ function APropos() {
 
 
 
-                    {/* ========================== */}
-                    {/* STATISTIQUES */}
+                 
 
                     <section className="stats-section">
 
@@ -416,115 +406,100 @@ function APropos() {
 
 
 
-                    {/* ========================== */}
-                    {/* POURQUOI MEDARCHIVE */}
+                  
 
                    <section className="why-medarchive">
+                    
 
-    <div className="row align-items-center">
+    <div className="about-block reverse">
 
-        {/* TEXTE A GAUCHE */}
-        <div className="col-lg-6">
+                        <div className="row align-items-center">
 
-            <div className="why-content">
+                            <div className="col-lg-6 order-lg-2">
 
-                <span className="about-badge">
-                    Pourquoi MedArchive ?
-                </span>
+                                <div className="about-image">
 
-                <h2>
-                    Une solution conçue
-                    pour les patients,
-                    les médecins
-                    et les hôpitaux.
-                </h2>
+                                    <img
+                                        src={about4}
+                                        alt=""
+                                    />
 
-                <p>
-                    MedArchive simplifie
-                    la gestion du parcours
-                    médical grâce
-                    à une plateforme
-                    intuitive, sécurisée
-                    et accessible partout.
-                </p>
+                                    <div className="floating-card card-three">
 
-                <div className="feature-list">
+                                        🔒
+                                        <br />
+                                        Données
+                                        sécurisées
 
-                    <div className="feature-item">
+                                    </div>
 
-                        <div className="icon">
-                            🔒
-                        </div>
+                                </div>
 
-                        <div>
+                            </div>
 
-                            <h5>Sécurité maximale</h5>
 
-                            <p>
-                                Vos données sont chiffrées et protégées.
-                            </p>
+
+                            <div className="col-lg-6 order-lg-1">
+
+                                <div className="about-content">
+
+                                    <span className="number">
+                                        / 04
+                                    </span>
+
+                                    <h3>
+
+                                        Partage sécurisé
+                                        entre établissements
+                                        de santé
+
+                                    </h3>
+
+                                    <p>
+
+                                        Lorsqu'un patient est transféré,
+                                        ses informations médicales
+                                        sont accessibles uniquement
+                                        aux professionnels autorisés,
+                                        garantissant confidentialité
+                                        et continuité des soins.
+
+                                    </p>
+
+                                    <ul>
+
+                                        <li>
+                                            ✔ Contrôle des accès
+                                        </li>
+
+                                        <li>
+                                            ✔ Autorisations du patient
+                                        </li>
+
+                                        <li>
+                                            ✔ Traçabilité complète
+                                        </li>
+
+                                        <li>
+                                            ✔ Chiffrement des données
+                                        </li>
+
+                                    </ul>
+
+                                    {/* <a
+                                        href="#"
+                                        className="about-btn-modern"
+                                    >
+                                        En savoir plus
+                                    </a> */}
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
-
-                    <div className="feature-item">
-
-                        <div className="icon">
-                            ⚡
-                        </div>
-
-                        <div>
-
-                            <h5>Rapidité</h5>
-
-                            <p>
-                                Accédez à vos informations instantanément.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <div className="feature-item">
-
-                        <div className="icon">
-                            🏥
-                        </div>
-
-                        <div>
-
-                            <h5>Collaboration</h5>
-
-                            <p>
-                                Tous les établissements travaillent sur les mêmes données.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        {/* IMAGE A DROITE */}
-        <div className="col-lg-6">
-
-            <div className="why-image">
-
-                <img
-                    src={about4}
-                    alt="Pourquoi MedArchive"
-                />
-
-            </div>
-
-        </div>
-
-    </div>
 
 </section>
 
@@ -533,110 +508,9 @@ function APropos() {
 
 
 
-                    {/* ========================== */}
-                    {/* RESEAU */}
+                 
 
-                    <section className="network-section">
-
-                        <div className="text-center mb-5">
-
-                            <span className="about-badge">
-
-                                Notre réseau
-
-                            </span>
-
-                            <h2>
-
-                                Un écosystème national
-                                connecté
-
-                            </h2>
-
-                            <p>
-
-                                Patients,
-                                médecins,
-                                laboratoires
-                                et hôpitaux
-                                collaborent
-                                autour
-                                d'un même
-                                dossier médical.
-
-                            </p>
-
-                        </div>
-
-                        <div className="row">
-
-                            <div className="col-lg-3">
-
-                                <div className="network-card">
-
-                                    <h4>
-                                        CNHU
-                                    </h4>
-
-                                    <span>
-                                        3200 patients
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                            <div className="col-lg-3">
-
-                                <div className="network-card">
-
-                                    <h4>
-                                        CHUZ
-                                    </h4>
-
-                                    <span>
-                                        2400 patients
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                            <div className="col-lg-3">
-
-                                <div className="network-card">
-
-                                    <h4>
-                                        Clinique Saint Luc
-                                    </h4>
-
-                                    <span>
-                                        950 patients
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                            <div className="col-lg-3">
-
-                                <div className="network-card">
-
-                                    <h4>
-                                        Hôpital de Zone
-                                    </h4>
-
-                                    <span>
-                                        1700 patients
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </section>
+                    
 
                 </div>
 
