@@ -9,7 +9,7 @@ import document from "../assets/img/document.jpg";
 import about4 from "../assets/img/about4.png";
 function About() {
     return (
-        <section className="about-area section-padding2">
+        <section className="about-area section-padding2 about-area-compact">
 
             <div className="container">
                 <div className="row">
@@ -59,7 +59,7 @@ function About() {
                                 <img src={labo} alt="" />
                             </div>
 
-                                                <div className="diamond badge">
+                            <div className="diamond badge">
                                 <span>
                                     +5000
                                     <small>Dossiers<br />Médicaux</small>
@@ -76,7 +76,7 @@ function About() {
                                 <img src={phone} alt="" />
                             </div>
 
-       
+
 
                         </div>
                     </div>

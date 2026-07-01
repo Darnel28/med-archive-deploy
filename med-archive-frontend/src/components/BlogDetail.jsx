@@ -1,22 +1,31 @@
-import single_blog_1 from "../assets/img/blog/single_blog_1.png";
+import { useEffect } from "react";
 import preview_img from "../assets/img/post/preview.png";
-
-import telecharger12 from "../assets/img/telecharger12.jpeg";
+import { getBlogPostBySlug, getBlogRelatedPosts } from "../data/blogPosts.js";
+import { useLocation } from "react-router-dom";
 function navigate(path) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
 function BlogDetail() {
+    const location = useLocation();
+    const slug = new URLSearchParams(location.search).get("slug");
+    const article = getBlogPostBySlug(slug);
+    const relatedPosts = getBlogRelatedPosts(article.slug, 3);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname, location.search]);
+
     return (
         <>
-          <div className="slider-area2 about-cover">
+            <div className="slider-area2 about-cover">
                 <div className="slider-height2 d-flex align-items-center">
                     <div className="container">
                         <div className="row">
                             <div className="col-xl-12">
                                 <div className="hero-cap hero-cap2 text-center">
-                                    <h2>Blog Details</h2>
+                                    <h2>Blog Detail</h2>
                                 </div>
                             </div>
                         </div>
@@ -30,32 +39,32 @@ function BlogDetail() {
                         <div className="col-lg-8 posts-list">
                             <div className="single-post">
                                 <div className="feature-img">
-                                    <img className="img-fluid" src={telecharger12} alt="Blog Image" />
+                                    <img className="img-fluid blog-detail-image" src={article.image} alt={article.title} />
                                 </div>
                                 <div className="blog_details">
                                     <h2 style={{ color: "#2d2d2d" }}>
-                                        Le Mag de la Santé Numérique : conseils utiles pour mieux suivre vos soins
+                                        {article.title}
                                     </h2>
                                     <ul className="blog-info-link mt-3 mb-4">
-                                        <li><a href="#"><i className="fa fa-user"></i> Santé numérique</a></li>
-                                        <li><a href="#"><i className="fa fa-comments"></i> 03 Comments</a></li>
+                                        <li><a href="#"><i className="fa fa-user"></i> {article.category}</a></li>
+                                        <li><a href="#"><i className="fa fa-comments"></i> {article.date}</a></li>
                                     </ul>
                                     <p className="excert">
-                                        Centraliser ses informations médicales permet de gagner du temps, d’éviter les pertes de documents
-                                        et de faciliter les échanges avec les soignants.
+                                        {article.intro}
                                     </p>
                                     <p>
-                                        Ce dossier détaille les bonnes pratiques pour conserver ses ordonnances, comprendre ses analyses et
-                                        préparer sereinement les rendez-vous médicaux.
+                                        {article.paragraphs[0]}
                                     </p>
                                     <div className="quote-wrapper">
                                         <div className="quotes">
-                                            Un bon suivi commence par des informations accessibles, fiables et partagées au bon moment.
+                                            {article.quote}
                                         </div>
                                     </div>
                                     <p>
-                                        La santé numérique n’est utile que si elle reste simple à utiliser. C’est pourquoi MedArchive privilégie
-                                        une interface claire, sécurisée et adaptée à tous les profils.
+                                        {article.paragraphs[1]}
+                                    </p>
+                                    <p>
+                                        {article.conclusion}
                                     </p>
                                 </div>
                             </div>
@@ -78,13 +87,21 @@ function BlogDetail() {
                                         </div>
                                         <div className="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
                                             <div className="detials">
-                                                <p>Prochain article</p>
-                                                <button type="button" className="blog-link-button" onClick={() => navigate("/blog")}>
-                                                    Santé cardiaque
+                                                <p>Article suivant</p>
+                                                <button
+                                                    type="button"
+                                                    className="blog-link-button"
+                                                    onClick={() => navigate(`/blog-detail?slug=${relatedPosts[0]?.slug ?? article.slug}`)}
+                                                >
+                                                    {relatedPosts[0]?.title ?? "Retour au blog"}
                                                 </button>
                                             </div>
                                             <div className="arrow">
-                                                <button type="button" className="blog-link-button" onClick={() => navigate("/blog")}>
+                                                <button
+                                                    type="button"
+                                                    className="blog-link-button"
+                                                    onClick={() => navigate(`/blog-detail?slug=${relatedPosts[0]?.slug ?? article.slug}`)}
+                                                >
                                                     →
                                                 </button>
                                             </div>
@@ -142,12 +159,31 @@ function BlogDetail() {
                                 <aside className="single_sidebar_widget post_category_widget">
                                     <h4 className="widget_title" style={{ color: "#2d2d2d" }}>Category</h4>
                                     <ul className="list cat-list">
-                                        <li><a href="#" className="d-flex"><p>Santé numérique</p><p>(37)</p></a></li>
-                                        <li><a href="#" className="d-flex"><p>Prévention</p><p>(10)</p></a></li>
-                                        <li><a href="#" className="d-flex"><p>Suivi médical</p><p>(03)</p></a></li>
-                                        <li><a href="#" className="d-flex"><p>Innovation</p><p>(11)</p></a></li>
+                                        <li><a href="#" className="d-flex"><p>{article.category}</p><p>(1)</p></a></li>
+                                        <li><a href="#" className="d-flex"><p>Prévention</p><p>(3)</p></a></li>
+                                        <li><a href="#" className="d-flex"><p>Suivi médical</p><p>(4)</p></a></li>
+                                        <li><a href="#" className="d-flex"><p>Innovation</p><p>(2)</p></a></li>
                                     </ul>
                                 </aside>
+
+                                {/* <aside className="single_sidebar_widget popular_post_widget">
+                                    <h3 className="widget_title" style={{ color: "#2d2d2d" }}>Articles liés</h3>
+                                    {relatedPosts.map((relatedPost) => (
+                                        <div className="media post_item" key={relatedPost.slug}>
+                                            <img src={relatedPost.image} alt={relatedPost.title} />
+                                            <div className="media-body">
+                                                <button
+                                                    type="button"
+                                                    className="blog-link-button"
+                                                    onClick={() => navigate(`/blog-detail?slug=${relatedPost.slug}`)}
+                                                >
+                                                    <h3 style={{ color: "#2d2d2d" }}>{relatedPost.title}</h3>
+                                                </button>
+                                                <p>{relatedPost.date}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </aside> */}
                             </div>
                         </div>
                     </div>

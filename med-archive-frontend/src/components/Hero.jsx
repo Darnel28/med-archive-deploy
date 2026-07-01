@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 function Hero() {
-    const words = ["santé", "dossier", "avenir"];
+    const words = ["dossier", "santé", "avenir"];
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
@@ -44,8 +44,7 @@ function Hero() {
                                 >
                                     Nous <br />
                                     protégeons <br />
-                                    votre{" "}
-                                    <strong style={{ color: "#113468" }}>
+                                    votre <strong style={{ color: "#113468" }}>
                                         {words[index]}
                                     </strong>
                                 </h1>

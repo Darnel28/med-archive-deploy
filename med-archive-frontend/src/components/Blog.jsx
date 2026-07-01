@@ -1,6 +1,4 @@
-import blogvacinnation from "../assets/img/blogvacinnation.jpg";
-import télécharger10 from "../assets/img/télécharger (10).jpg";
-import télécharger11 from "../assets/img/télécharger (11).jpg";
+import { getBlogPreviewPosts } from "../data/blogPosts.js";
 
 function navigate(path) {
     window.history.pushState({}, "", path);
@@ -8,6 +6,8 @@ function navigate(path) {
 }
 
 function Blog() {
+    const featuredPosts = getBlogPreviewPosts();
+
     return (
         <>
             <div className="gallery-area fix">
@@ -76,69 +76,37 @@ function Blog() {
                         </div>
                     </div>
                     <div className="row">
-                        <div className="col-xl-4 col-lg-4 col-md-6">
-                            <div className="single-blogs mb-30">
-                                <div className="blog-img">
-                                    <img src={blogvacinnation} alt="Blog Image" />
-                                </div>
-                                <div className="blogs-cap">
-                                    <div className="date-info">
-                                        <span>Santé</span>
-                                        <p>Nov 30, 2026</p>
+                        {featuredPosts.map((article) => (
+                            <div className="col-xl-4 col-lg-4 col-md-6" key={article.slug}>
+                                <div className="single-blogs mb-30">
+                                    <div className="blog-img">
+                                        <img src={article.image} alt={article.title} />
                                     </div>
-                                    <h4>
-                                        <button type="button" className="blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                            Rappel des vaccins sur votre carnet numérique
+                                    <div className="blogs-cap">
+                                        <div className="date-info">
+                                            <span>{article.category}</span>
+                                            <p>{article.date}</p>
+                                        </div>
+                                        <h4>
+                                            <button
+                                                type="button"
+                                                className="blog-link-button"
+                                                onClick={() => navigate(`/blog-detail?slug=${article.slug}`)}
+                                            >
+                                                {article.title}
+                                            </button>
+                                        </h4>
+                                        <button
+                                            type="button"
+                                            className="read-more1 blog-link-button"
+                                            onClick={() => navigate(`/blog-detail?slug=${article.slug}`)}
+                                        >
+                                            Lire Plus
                                         </button>
-                                    </h4>
-                                    <button type="button" className="read-more1 blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                        Lire Plus
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-xl-4 col-lg-4 col-md-6">
-                            <div className="single-blogs mb-30">
-                                <div className="blog-img">
-                                    <img src={télécharger10} alt="Blog Image" />
-                                </div>
-                                <div className="blogs-cap">
-                                    <div className="date-info">
-                                        <span>Bilan </span>
-                                        <p>Nov 30, 2026</p>
-                                    </div>
-                                    <h4>
-                                        <button type="button" className="blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                            Archivage immédiat de vos constantes vitales
-                                        </button>
-                                    </h4>
-                                    <button type="button" className="read-more1 blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                        Lire Plus
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-xl-4 col-lg-4 col-md-6">
-                            <div className="single-blogs mb-30">
-                                <div className="blog-img">
-                                    <img src={télécharger11} alt="Blog Image" />
-                                </div>
-                                <div className="blogs-cap">
-                                    <div className="date-info">
-                                        <span>Opération</span>
-                                        <p>Nov 30, 2026</p>
-                                    </div>
-                                    <h4>
-                                        <button type="button" className="blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                            Prise en Charge
-                                        </button>
-                                    </h4>
-                                    <button type="button" className="read-more1 blog-link-button" onClick={() => navigate("/blog-detail")}>
-                                        Lire Plus
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>

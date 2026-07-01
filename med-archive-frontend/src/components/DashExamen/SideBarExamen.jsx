@@ -1,8 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { getAuthUser } from '../../api/client';
+import { getCurrentUser } from '../../api/authApi';
+import AvatarInitials from '../AvatarInitials.jsx';
+
+function normalizeUser(value) {
+    return value?.data?.data?.user || value?.data?.user || value?.user || value?.data || value || {};
+}
 
 const SidebarExamen = () => {
     const [userPanelOpen, setUserPanelOpen] = useState(false);
+    const [user, setUser] = useState(() => normalizeUser(getAuthUser()));
+
+    useEffect(() => {
+        let mounted = true;
+
+        getCurrentUser()
+            .then((response) => {
+                if (mounted) {
+                    setUser(normalizeUser(response));
+                }
+            })
+            .catch(() => { });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const profile = useMemo(() => {
+        const info = user?.user || user;
+        const institution = info?.laboratoire || info?.etablissement || info?.service || {};
+
+        return {
+            name: info?.name || info?.nom || 'Utilisateur examen',
+            service:
+                institution?.nom ||
+                info?.role?.nom ||
+                info?.role ||
+                'Service examen',
+            avatar: info?.avatar || null,
+        };
+    }, [user]);
 
     const toggleUserPanel = () => setUserPanelOpen(prev => !prev);
 
@@ -20,9 +59,13 @@ const SidebarExamen = () => {
             </div>
 
             <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
-                <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice" />
-                <strong>BAH Konie</strong>
-                <span>Service: Medecine generale</span>
+                {profile.avatar ? (
+                    <img src={profile.avatar} alt={profile.name} />
+                ) : (
+                    <AvatarInitials name={profile.name} size={56} bgColor="#13c3b8" />
+                )}
+                <strong>{profile.name}</strong>
+                <span>Service: {profile.service}</span>
             </div>
 
             <div className="menu-block">
@@ -54,15 +97,20 @@ const SidebarExamen = () => {
                     <NavLink to="/espaceexamen/alertes" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
                         <i className="fa-regular fa-bell "></i><span>Alertes</span>
                     </NavLink>
-                    <NavLink to="/espaceexamen/profil" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
+                    {/* <NavLink to="/espaceexamen/profil" className={({ isActive }) => `menu-item${isActive ? ' active' : ''}`}>
                         <i className="fa-regular fa-user"></i><span>Profil</span>
-                    </NavLink>
+                    </NavLink> */}
                 </div>
 
                 <div className="sidebar-profile">
-                    <img src="https://i.pravatar.cc/80?img=32" alt="CC" />
+                    {profile.avatar ? (
+                        <img src={profile.avatar} alt={profile.name} />
+                    ) : (
+                        <AvatarInitials name={profile.name} size={45} bgColor="#13c3b8" />
+                    )}
                     <div>
-                        <strong>Centre d'Analyse Bio-Sante Cotonou</strong>
+                        <strong>{profile.name}</strong>
+                        <span>{profile.service}</span>
                         {/* <span>ID: MED-24-007</span> */}
                     </div>
                     <a className="settings-link" href="/espacemedecin/parametres">

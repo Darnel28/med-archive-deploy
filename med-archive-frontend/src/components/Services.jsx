@@ -3,12 +3,12 @@ import dossiermedical from "../assets/img/dossiermedical.jpeg";
 import department_man from "../assets/img/gallery/department_man.png";
 
 function Services() {
-  const [activeTab, setActiveTab] = useState("dossier");
+    const [activeTab, setActiveTab] = useState("dossier");
 
-  return (
-     <div className="department_area section-padding2">
+    return (
+        <div className="department_area section-padding2 department_area-compact">
             <div className="container">
-              
+
                 <div className="row">
                     <div className="col-lg-12">
                         <div className="section-tittle text-center mb-100">
@@ -20,7 +20,7 @@ function Services() {
                 <div className="row">
                     <div className="col-lg-12">
                         <div className="depart_ment_tab mb-30">
-                          
+
                             <ul className="nav" id="myTab" role="tablist">
                                 <li className="nav-item">
                                     <a className="nav-link active" id="home-tab" data-toggle="tab" href="#Dossier"
@@ -71,7 +71,7 @@ function Services() {
                 <div className="dept_main_info white-bg">
                     <div className="tab-content" id="myTabContent">
                         <div className="tab-pane fade show active" id="Dossier" role="tabpanel" aria-labelledby="home-tab">
-                           
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -85,14 +85,14 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={dossiermedical} alt="Dossier Medical"/>
+                                        <img src={dossiermedical} alt="Dossier Medical" />
                                     </div>
                                 </div>
                             </div>
-                           
+
                         </div>
                         <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                        
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -106,14 +106,14 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={department_man} alt="Department Man"/>
+                                        <img src={department_man} alt="Department Man" />
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </div>
                         <div className="tab-pane fade" id="Resultats" role="tabpanel" aria-labelledby="contact-tab">
-                            
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -127,14 +127,14 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={department_man} alt="Department Man"/>
+                                        <img src={department_man} alt="Department Man" />
                                     </div>
                                 </div>
                             </div>
-                           
+
                         </div>
                         <div className="tab-pane fade" id="Gestion" role="tabpanel" aria-labelledby="Gestion-tab">
-                      
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -148,14 +148,14 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={department_man} alt="Department Man"/>
+                                        <img src={department_man} alt="Department Man" />
                                     </div>
                                 </div>
                             </div>
-                           
+
                         </div>
                         <div className="tab-pane fade" id="carnet" role="tabpanel" aria-labelledby="Neuroanatomy-tab">
-                        
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -169,14 +169,14 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={department_man} alt="Department Man"/>
+                                        <img src={department_man} alt="Department Man" />
                                     </div>
                                 </div>
                             </div>
-                           
+
                         </div>
                         <div className="tab-pane fade" id="ordance" role="tabpanel" aria-labelledby="Blood-tab">
-                            
+
                             <div className="row align-items-center no-gutters">
                                 <div className="col-lg-7">
                                     <div className="dept_info">
@@ -190,11 +190,11 @@ function Services() {
                                 </div>
                                 <div className="col-lg-5">
                                     <div className="dept_thumb">
-                                        <img src={department_man} alt="Department Man"/>
+                                        <img src={department_man} alt="Department Man" />
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -202,8 +202,8 @@ function Services() {
             </div>
         </div>
 
-       
-  );
+
+    );
 }
 
 export default Services;
