@@ -7,6 +7,7 @@ import {
   getUsers,
 } from "../../api";
 import "../../assets/css/TransfertHopitalForm.css";
+import useAutoDismissMessage from "../../hooks/useAutoDismissMessage";
 
 function rowsFromPaginated(response) {
   const payload = response?.data ?? response;
@@ -48,6 +49,8 @@ const NouvelleDemandeTransfert = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useAutoDismissMessage(success, setSuccess);
 
   const selectedPatient = useMemo(
     () => patients.find((patient) => String(patient.id) === String(form.patient_id)),

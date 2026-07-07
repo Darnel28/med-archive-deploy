@@ -6,6 +6,7 @@ import {
   getMesPatientsService,
   getServices,
 } from "../../api";
+import useAutoDismissMessage from "../../hooks/useAutoDismissMessage";
 
 function rowsFromPaginated(response) {
   const payload = response?.data ?? response;
@@ -46,6 +47,8 @@ const TransfertPatientServiceForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  useAutoDismissMessage(success, setSuccess);
 
   const currentService = currentUser?.service;
   const etablissementId = currentService?.etablissement_id || currentUser?.etablissement_id;

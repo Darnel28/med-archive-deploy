@@ -16,6 +16,16 @@ export function getCurrentLaboratoire() {
   });
 }
 
+export async function updateCurrentLaboratoire(payload) {
+  const laboratoire = await getCurrentLaboratoire();
+
+  if (!laboratoire?.id) {
+    throw new Error("Laboratoire connecte introuvable.");
+  }
+
+  return updateLaboratoire(laboratoire.id, payload);
+}
+
 export function getAnalysesEnAttenteLaboratoire(id) {
   return apiClient.get(`/laboratoires/${id}/analyses-en-attente`).then((response) => response.data);
 }

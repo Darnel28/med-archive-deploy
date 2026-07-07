@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { FiBell, FiCheckCircle, FiChrome, FiLock, FiMonitor, FiSettings, FiSmartphone, FiTablet, FiUser, FiX } from 'react-icons/fi';
 import { apiClient, getAuthUser } from '../../api/client';
+import useAutoDismissMessage from '../../hooks/useAutoDismissMessage';
 
 const detectDevice = () => {
   const ua = navigator.userAgent || '';
@@ -32,6 +33,8 @@ const SecuriteCompte = () => {
   const [passwordForm, setPasswordForm] = useState({ current_password: '', password: '', password_confirmation: '' });
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+
+  useAutoDismissMessage(passwordMessage, setPasswordMessage);
   const [sessions, setSessions] = useState(() => {
     const current = detectDevice();
     const user = getAuthUser();

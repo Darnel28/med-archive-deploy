@@ -113,7 +113,7 @@ const SidebarExamen = () => {
                         <span>{profile.service}</span>
                         {/* <span>ID: MED-24-007</span> */}
                     </div>
-                    <a className="settings-link" href="/espacemedecin/parametres">
+                    <a className="settings-link" href="/espaceexamen/parametres">
                         <i className="fa-solid fa-gear"></i>
                     </a>
                     <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">

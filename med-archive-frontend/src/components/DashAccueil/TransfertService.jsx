@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { deleteTransfertDossier, getCurrentUser, getTransfertDossiers, updateTransfertDossier } from "../../api";
 import { NavLink } from "react-router-dom";
+import useAutoDismissMessage from "../../hooks/useAutoDismissMessage";
 
 const statusTabs = ["Tous", "En cours", "Validé", "Refusé"];
 const statusLabels = {
@@ -73,6 +74,8 @@ const TransfertService = () => {
   const [mode, setMode] = useState("");
   const [editForm, setEditForm] = useState({ motif: "", observations: "" });
   const itemsPerPage = 8;
+
+  useAutoDismissMessage(success, setSuccess);
 
   useEffect(() => {
     document.title = "Transfert de Service";
@@ -245,7 +248,7 @@ const TransfertService = () => {
                     <th>Service actuel</th>
                     <th>Service demandé</th>
                     <th>Statut</th>
-                    <th>Demandeur</th>
+                    {/* <th>Demandeur</th> */}
                     <th>Motif</th>
                     <th>Date demande</th>
                     <th>Actions</th>
@@ -282,7 +285,7 @@ const TransfertService = () => {
                           </td>
                           <td>{item.medecinReferent}</td>
                           <td>{item.motif}</td>
-                          <td className="table-nowrap">{item.dateDemande}</td>
+                          {/* <td className="table-nowrap">{item.dateDemande}</td> */}
                           <td className="transfer-actions table-actions-compact">
                             <button className="action-icon" title="Voir" type="button" onClick={() => openView(item)}>
                               <i className="fa-solid fa-eye"></i>
@@ -347,13 +350,13 @@ const TransfertService = () => {
               <p><strong>Patient</strong><br />{selectedTransfer.patient}</p>
               <p><strong>Type</strong><br />{selectedTransfer.direction === "sent" ? "Demande envoyee" : "Demande recue"}</p>
               <p><strong>Service source</strong><br />{selectedTransfer.serviceActuel}</p>
-              <p><strong>Service destination</strong><br />{selectedTransfer.serviceDemande}</p>
+              {/* <p><strong>Service destination</strong><br />{selectedTransfer.serviceDemande}</p> */}
               <p><strong>Statut</strong><br />{selectedTransfer.statut}</p>
               <p><strong>Date</strong><br />{selectedTransfer.dateDemande}</p>
               {mode === "edit" ? (
                 <>
-                  <label className="form-group form-group-full"><span>Motif</span><textarea name="motif" rows="4" value={editForm.motif} onChange={(event) => setEditForm((form) => ({ ...form, motif: event.target.value }))} /></label>
-                  <label className="form-group form-group-full"><span>Observations</span><textarea name="observations" rows="5" value={editForm.observations} onChange={(event) => setEditForm((form) => ({ ...form, observations: event.target.value }))} /></label>
+                  <label className="form-group form-group-full"><span>Motif</span><textarea name="motif" rows="2" value={editForm.motif} onChange={(event) => setEditForm((form) => ({ ...form, motif: event.target.value }))} /></label>
+                  <label className="form-group form-group-full"><span>Observations</span><textarea name="observations" rows="2" value={editForm.observations} onChange={(event) => setEditForm((form) => ({ ...form, observations: event.target.value }))} /></label>
                 </>
               ) : (
                 <>

@@ -217,6 +217,23 @@ setAppointments(
     await loadPlanning(medecinId);
   };
 
+  const deleteAppointment = async (appointment) => {
+    if (!window.confirm('Supprimer ce rendez-vous ?')) return;
+
+    try {
+      setError(null);
+      const response = await fetch(`${API_URL}/consultations/${appointment.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Impossible de supprimer le rendez-vous');
+      await loadPlanning(medecinId);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const getStatusInfo = (statut, statutPaiement) => {
     if (statutPaiement === 'non_payee') {
       return { text: 'En attente de paiement', className: 'rdv-status pending' };
@@ -295,15 +312,20 @@ setAppointments(
                         <td><span className={`rdv-status ${isPaid ? 'done' : 'pending'}`}>{isPaid ? 'Payee' : 'En attente'}</span></td>
                         <td><span className={className}>{text}</span></td>
                         <td>
-                          {app.statut === 'en_cours' ? (
-                            <button className="icon-action" type="button" title="Terminer la consultation" onClick={() => finishConsultation(app)}>
-                              <i className="fa-solid fa-check"></i>
+                          <div className="rdv-actions">
+                            {app.statut === 'en_cours' ? (
+                              <button className="icon-action" type="button" title="Terminer la consultation" onClick={() => finishConsultation(app)}>
+                                <i className="fa-solid fa-check"></i>
+                              </button>
+                            ) : (
+                              <button className="icon-action" type="button" title={isPaid ? 'Commencer la consultation' : 'Paiement requis'} onClick={() => startConsultation(app)} disabled={!isPaid}>
+                                <i className="fa-solid fa-play"></i>
+                              </button>
+                            )}
+                            <button className="icon-action danger" type="button" title="Supprimer le rendez-vous" onClick={() => deleteAppointment(app)}>
+                              <i className="fa-solid fa-trash"></i>
                             </button>
-                          ) : (
-                            <button className="icon-action" type="button" title={isPaid ? 'Commencer la consultation' : 'Paiement requis'} onClick={() => startConsultation(app)} disabled={!isPaid}>
-                              <i className="fa-solid fa-play"></i>
-                            </button>
-                          )}
+                          </div>
                         </td>
                       </tr>
                     );

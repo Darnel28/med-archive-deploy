@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getMesDonneesEtablissement, updateEtablissementInfo } from '../../api/etablissementApi';
+import useAutoDismissMessage from '../../hooks/useAutoDismissMessage';
 
 const emptyForm = {
   name: '',
@@ -12,6 +13,8 @@ export default function ParametresHopital() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  useAutoDismissMessage(success, setSuccess);
 
   useEffect(() => {
     let ignore = false;

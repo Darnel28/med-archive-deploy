@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getCurrentUser } from '../../api/authApi';
 import { getAuthUser, setAuthSession } from '../../api/client';
 import { updatePatient } from '../../api/patientApi';
+import useAutoDismissMessage from '../../hooks/useAutoDismissMessage';
 import { patientFromUser, unwrapUser } from './patientDashboardData';
 
 const emptyForm = {
@@ -47,6 +48,8 @@ const Parametres = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+
+  useAutoDismissMessage(message, setMessage);
 
   useEffect(() => {
     let active = true;
