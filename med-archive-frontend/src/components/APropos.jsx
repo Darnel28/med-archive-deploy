@@ -174,14 +174,14 @@ function APropos() {
                                         alt=""
                                     />
 
-                                    <div className="floating-card card-three">
+                                    {/* <div className="floating-card card-three">
 
                                         🔒
                                         <br />
                                         Données
                                         sécurisées
 
-                                    </div>
+                                    </div> */}
 
                                 </div>
 

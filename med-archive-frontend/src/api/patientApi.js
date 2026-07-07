@@ -13,6 +13,10 @@ export function getPatientDossierComplet(id) {
   return apiClient.get(`/patients/${id}/dossier-complet`).then((response) => response.data);
 }
 
+export function getMonDossierComplet() {
+  return apiClient.get("/patients/me/dossier-complet").then((response) => response.data);
+}
+
 export function getPatientByImu(imu) {
   return apiClient.get(`/patients/imu/${imu}`).then((response) => response.data);
 }

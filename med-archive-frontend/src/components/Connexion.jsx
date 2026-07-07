@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaFacebookF, FaGooglePlusG, FaLinkedinIn } from "react-icons/fa";
 import { FiLock, FiMail } from "react-icons/fi";
 import "../assets/css/Connexion.css";
-import { getDashboardPathForUser, login } from "../api";
+import { forgotPassword, getDashboardPathForUser, login } from "../api";
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -11,10 +11,13 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
 
     const handleLogin = async (event) => {
         event.preventDefault();
         setErrorMessage("");
+        setSuccessMessage("");
         setIsLoading(true);
 
         try {
@@ -27,6 +30,32 @@ export default function LoginPage() {
                 : null;
 
             setErrorMessage(validationMessage || apiMessage || "Email ou mot de passe incorrect.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async (event) => {
+        event.preventDefault();
+        setErrorMessage("");
+        setSuccessMessage("");
+
+        if (!email) {
+            setErrorMessage("Veuillez saisir votre email pour recevoir un nouveau mot de passe temporaire.");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const data = await forgotPassword({ email });
+            setSuccessMessage(data?.message || "Un nouveau mot de passe temporaire a ete envoye par email.");
+            setShowForgotPassword(false);
+            setPassword("");
+        } catch (error) {
+            const validationMessage = error.response?.data?.errors
+                ? Object.values(error.response.data.errors).flat().join(" ")
+                : null;
+            setErrorMessage(validationMessage || error.response?.data?.message || "Impossible d envoyer le nouveau mot de passe.");
         } finally {
             setIsLoading(false);
         }
@@ -80,7 +109,7 @@ export default function LoginPage() {
                                 ou utilisez votre E-mail pour vous connecter :
                             </p>
 
-                            <form onSubmit={handleLogin} className="connexion-form">
+                            <form onSubmit={showForgotPassword ? handleForgotPassword : handleLogin} className="connexion-form">
                                 <div className="connexion-field">
                                     <span className="connexion-field-icon"><FiMail /></span>
                                     <input
@@ -94,29 +123,47 @@ export default function LoginPage() {
                                     />
                                 </div>
 
-                                <div className="connexion-field">
-                                    <span className="connexion-field-icon"><FiLock /></span>
-                                    <input
-                                        type="password"
-                                        placeholder="Mot de passe"
-                                        className="connexion-input"
-                                        value={password}
-                                        onChange={(event) => setPassword(event.target.value)}
-                                        autoComplete="current-password"
-                                        required
-                                    />
-                                </div>
+                                {!showForgotPassword ? (
+                                    <div className="connexion-field">
+                                        <span className="connexion-field-icon"><FiLock /></span>
+                                        <input
+                                            type="password"
+                                            placeholder="Mot de passe"
+                                            className="connexion-input"
+                                            value={password}
+                                            onChange={(event) => setPassword(event.target.value)}
+                                            autoComplete="current-password"
+                                            required
+                                        />
+                                    </div>
+                                ) : null}
 
                                 {errorMessage ? (
                                     <p className="connexion-error">{errorMessage}</p>
                                 ) : null}
 
+                                {successMessage ? (
+                                    <p className="connexion-success">{successMessage}</p>
+                                ) : null}
+
                                 <div className="connexion-options-row">
-                                    <label className="connexion-remember">
-                                        <input type="checkbox" />
-                                        <span>Se souvenir de moi</span>
-                                    </label>
-                                    <a href="#" className="connexion-forgot-link">Mot de passe oublie ?</a>
+                                    {!showForgotPassword ? (
+                                        <label className="connexion-remember">
+                                            <input type="checkbox" />
+                                            <span>Se souvenir de moi</span>
+                                        </label>
+                                    ) : <span />}
+                                    <button
+                                        type="button"
+                                        className="connexion-forgot-link"
+                                        onClick={() => {
+                                            setShowForgotPassword((value) => !value);
+                                            setErrorMessage("");
+                                            setSuccessMessage("");
+                                        }}
+                                    >
+                                        {showForgotPassword ? "Retour connexion" : "Mot de passe oublie ?"}
+                                    </button>
                                 </div>
 
                                 <div className="connexion-submit-wrap">
@@ -125,7 +172,7 @@ export default function LoginPage() {
                                         className="connexion-submit"
                                         disabled={isLoading}
                                     >
-                                        {isLoading ? "Connexion..." : "Se connecter"}
+                                        {isLoading ? (showForgotPassword ? "Envoi..." : "Connexion...") : (showForgotPassword ? "Envoyer" : "Se connecter")}
                                     </button>
                                 </div>
                             </form>

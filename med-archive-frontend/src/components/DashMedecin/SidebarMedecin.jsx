@@ -86,7 +86,7 @@ const SidebarMedecin = () => {
               )}
               <div>
                 <strong>{name}</strong>
-                <span>IMU: {idDisplay}</span>
+                {/* <span>IMU: {idDisplay}</span> */}
               </div>
               <NavLink className="settings-link" to="/espacemedecin/parametres">
                 <i className="fa-solid fa-gear"></i>

@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { jsPDF } from 'jspdf';
 import { getMesConsultations } from '../../api/patientApi';
 import { payerFacture } from '../../api/factureApi';
 import { updateConsultation } from '../../api/consultationApi';
-import { apiClient } from '../../api/client';
+import { apiClient, getAuthUser } from '../../api/client';
 
 const unwrapRows = (payload) => {
   if (Array.isArray(payload?.data?.data)) return payload.data.data;
@@ -13,6 +14,276 @@ const unwrapRows = (payload) => {
 const formatDate = (value) => value ? new Date(value).toLocaleDateString('fr-FR') : '-';
 const formatHour = (value) => value ? new Date(value).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '-';
 const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} FCFA`;
+
+const safeText = (value, fallback = '-') => {
+  if (value === null || value === undefined || value === '') return fallback;
+  return String(value);
+};
+
+const getHospitalName = (rdv) => (
+  rdv?.medecin?.user?.etablissement?.name
+  || rdv?.medecin?.etablissement?.name
+  || rdv?.etablissement?.name
+  || rdv?.etablissement_nom
+  || 'Centre Hospitalier Universitaire'
+);
+
+const getHospitalAddress = (rdv) => (
+  rdv?.medecin?.user?.etablissement?.adresse
+  || rdv?.medecin?.etablissement?.adresse
+  || rdv?.etablissement?.adresse
+  || 'Cotonou - Bénin'
+);
+
+const getConnectedPatientName = () => {
+  const auth = getAuthUser() || {};
+  return auth?.name || auth?.user?.name || auth?.patient?.user?.name || auth?.patient?.name || '';
+};
+
+const getPatientName = (rdv) => (
+  getConnectedPatientName()
+  || rdv?.dossier?.patient?.user?.name
+  || rdv?.patient?.user?.name
+  || rdv?.patient?.name
+  || rdv?.patient_name
+  || 'Patient'
+);
+
+const getPatientNumber = (rdv) => (
+  rdv?.dossier?.patient?.numero_patient
+  || rdv?.dossier?.patient?.code_patient
+  || rdv?.patient?.numero_patient
+  || rdv?.patient?.code_patient
+  || `PAT-${String(rdv?.dossier?.patient_id || rdv?.patient_id || rdv?.id || '').padStart(6, '0')}`
+);
+
+const getReceiptNumber = (rdv) => (
+  rdv?.facture?.numero_quittance
+  || rdv?.facture?.reference
+  || rdv?.facture?.numero_facture
+  || `QT-${new Date(rdv?.updated_at || rdv?.created_at || rdv?.date_consultation || Date.now()).getFullYear()}-${String(rdv?.facture?.id || rdv?.id || Date.now()).padStart(6, '0')}`
+);
+
+const getPaymentDate = (rdv) => (
+  rdv?.facture?.paid_at
+  || rdv?.facture?.date_paiement
+  || rdv?.facture?.updated_at
+  || rdv?.updated_at
+  || new Date().toISOString()
+);
+
+const getPaymentMethod = (rdv) => (
+  rdv?.facture?.methode_paiement
+  || rdv?.facture?.methode
+  || rdv?.methode_paiement
+  || rdv?.mode_paiement
+  || 'Mobile Money'
+);
+
+const getPaymentReference = (rdv) => (
+  rdv?.facture?.reference_paiement
+  || rdv?.facture?.reference
+  || rdv?.facture?.transaction_reference
+  || '—'
+);
+
+const getPaidAmount = (rdv) => (
+  rdv?.facture?.montant_paye
+  || rdv?.facture?.montant_regle
+  || rdv?.facture?.montant_total
+  || rdv?.montant_consultation
+  || rdv?.facture?.montant_restant
+  || 0
+);
+
+const buildReceiptPdf = (rdv) => {
+  const pdf = new jsPDF();
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const margin = 18;
+  const maxWidth = pageWidth - margin * 2;
+
+  // Couleurs
+  const primaryColor = [0, 102, 204];
+  const redColor = [204, 0, 0];
+  const lightGray = [240, 242, 245];
+  const darkGray = [50, 50, 50];
+  const borderColor = [210, 218, 230];
+
+  // Fonction pour un rectangle arrondi
+  const roundedRect = (x, y, w, h, r) => {
+    pdf.setDrawColor(...borderColor);
+    pdf.setFillColor(...lightGray);
+    pdf.roundedRect(x, y, w, h, r, r, 'FD');
+  };
+
+  // --- Données ---
+  const hospitalName = getHospitalName(rdv);
+  const hospitalAddress = getHospitalAddress(rdv);
+  const receiptNumber = getReceiptNumber(rdv);
+  const receiptDate = new Date(getPaymentDate(rdv)).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  const patientName = getPatientName(rdv);
+  const patientNumber = getPatientNumber(rdv);
+  const doctorName = rdv?.medecin?.user?.name || 'Médecin';
+  const serviceName = rdv?.service?.nom || rdv?.medecin?.specialite?.nom || '-';
+  const consultationLabel = rdv?.motif || 'Consultation médicale';
+
+  // Formatage des montants sans slash
+  const formatMoneyNoSlash = (value) => {
+    const num = Number(value || 0);
+    const parts = num.toFixed(0).split(/(?=(?:\d{3})+(?!\d))/g);
+    const formatted = parts.join('\u00A0'); // espace insécable
+    return `${formatted} FCFA`;
+  };
+
+  const consultationAmount = formatMoneyNoSlash(rdv?.montant_consultation || rdv?.facture?.montant_total || 0);
+  const paidAmount = formatMoneyNoSlash(getPaidAmount(rdv));
+  const paymentMethod = getPaymentMethod(rdv);
+  const paymentReference = getPaymentReference(rdv);
+
+  // --- En-tête ---
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(18);
+  pdf.setTextColor(...primaryColor);
+  pdf.text(hospitalName, pageWidth / 2, 22, { align: 'center' });
+
+  pdf.setFont('helvetica', 'italic');
+  pdf.setFontSize(11);
+  pdf.setTextColor(...darkGray);
+  pdf.text(hospitalAddress, pageWidth / 2, 30, { align: 'center' });
+
+  pdf.setDrawColor(...borderColor);
+  pdf.line(margin, 36, pageWidth - margin, 36);
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(16);
+  pdf.setTextColor(...primaryColor);
+  pdf.text('QUITTANCE DE PAIEMENT', pageWidth / 2, 48, { align: 'center' });
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.setTextColor(...darkGray);
+  pdf.text(`N° Quittance : ${receiptNumber}`, pageWidth - margin, 48, { align: 'right' });
+  pdf.text(`Date : ${receiptDate}`, pageWidth - margin, 54, { align: 'right' });
+
+  // --- Informations patient (encadré gris) ---
+  let y = 62;
+  roundedRect(margin, y, maxWidth, 72, 4);
+  pdf.setTextColor(...darkGray);
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(12);
+  pdf.text('Informations du patient', margin + 6, y + 8);
+  pdf.setDrawColor(...borderColor);
+  pdf.line(margin + 6, y + 14, pageWidth - margin - 6, y + 14);
+
+  const rowHeight = 9;
+  let rowY = y + 20;
+  const labelX = margin + 10;
+  const valueX = margin + 100;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+
+  const pairs = [
+    ['Nom du patient', patientName],
+    ['Numéro patient', patientNumber],
+    ['Médecin traitant', doctorName],
+    ['Service / Spécialité', serviceName],
+    ['Motif de la consultation', consultationLabel]
+  ];
+
+  pairs.forEach(([label, value]) => {
+    pdf.text(label, labelX, rowY);
+    pdf.text(value, valueX, rowY);
+    rowY += rowHeight;
+  });
+
+  y = rowY + 16;  // PLUS D'ESPACE AVANT LE TRAIT
+
+  // --- Détails du paiement (sans fond, sur page blanche) ---
+  pdf.setDrawColor(...borderColor);
+  pdf.line(margin, y, pageWidth - margin, y);
+  y += 10;
+
+  // Titre centré en rouge
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(14);
+  pdf.setTextColor(...redColor);
+  pdf.text('Détails du paiement', pageWidth / 2, y, { align: 'center' });
+  y += 12;
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
+  pdf.setTextColor(...darkGray);
+
+  // Lignes : libellés en noir, montants en rouge gras
+  const details = [
+    { label: 'Montant consultation :', value: consultationAmount, isAmount: true },
+    { label: 'Montant payé :', value: paidAmount, isAmount: true },
+    { label: 'Mode de paiement :', value: paymentMethod, isAmount: false },
+    { label: 'Référence de paiement :', value: paymentReference, isAmount: false }
+  ];
+
+  details.forEach((item) => {
+    // Libellé toujours en noir
+    pdf.setTextColor(...darkGray);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(item.label, margin, y);
+
+    // Valeur : si c'est un montant => rouge gras, sinon noir normal
+    if (item.isAmount) {
+      pdf.setTextColor(...redColor);
+      pdf.setFont('helvetica', 'bold');
+    } else {
+      pdf.setTextColor(...darkGray);
+      pdf.setFont('helvetica', 'normal');
+    }
+    pdf.text(item.value, pageWidth - margin, y, { align: 'right' });
+    y += 10;
+  });
+
+  // Remise à zéro de la police
+  pdf.setFont('helvetica', 'normal');
+  pdf.setTextColor(...darkGray);
+
+  y += 6;
+  pdf.setDrawColor(...borderColor);
+  pdf.line(margin, y, pageWidth - margin, y);
+  y += 10;
+
+  // --- Mention légale ---
+  pdf.setFont('helvetica', 'italic');
+  pdf.setFontSize(9);
+  pdf.setTextColor(...darkGray);
+  pdf.text('Cette quittance atteste que le paiement a bien été reçu.', pageWidth / 2, y, { align: 'center' });
+  y += 5;
+  pdf.text('Merci pour votre confiance.', pageWidth / 2, y, { align: 'center' });
+
+  // --- Signature électronique ---
+  y += 12;
+  const sigX = margin + 20;
+  const sigW = maxWidth - 40;
+  pdf.setDrawColor(...borderColor);
+  pdf.setFillColor(250, 250, 252);
+  pdf.roundedRect(sigX, y, sigW, 30, 4, 4, 'FD');
+
+  pdf.setFont('helvetica', 'bold');
+  pdf.setFontSize(10);
+  pdf.setTextColor(...primaryColor);
+  pdf.text('Signature électronique', pageWidth / 2, y + 10, { align: 'center' });
+
+  pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(9);
+  pdf.setTextColor(...darkGray);
+  pdf.text('Centre Hospitalier', pageWidth / 2, y + 18, { align: 'center' });
+  pdf.text('------------------------------------------------------------', pageWidth / 2, y + 24, { align: 'center' });
+
+  pdf.save(`quittance-${String(receiptNumber).replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`);
+};
 
 const RendezVousPatient = () => {
   const [appointments, setAppointments] = useState([]);
@@ -79,6 +350,15 @@ const RendezVousPatient = () => {
     }
 
     setPaymentRdv(rdv);
+  };
+
+  const handleDownloadReceipt = (rdv) => {
+    if (rdv?.statut_paiement !== 'payee') {
+      setMessage('La quittance est disponible après paiement.');
+      return;
+    }
+
+    buildReceiptPdf(rdv);
   };
 
   const confirmTestPayment = async () => {
@@ -190,9 +470,17 @@ const RendezVousPatient = () => {
                       <button className="icon-action" title="Payer" onClick={() => handlePay(rdv)} disabled={rdv.statut_paiement === 'payee'}>
                         <i className="fa-solid fa-credit-card"></i>
                       </button>
-                      <button className="icon-action" title="Modifier" onClick={() => openReschedule(rdv)}>
-                        <i className="fa-regular fa-pen-to-square"></i>
+                      <button
+                        className="icon-action download"
+                        title="Télécharger la quittance"
+                        onClick={() => handleDownloadReceipt(rdv)}
+                        disabled={rdv.statut_paiement !== 'payee'}
+                      >
+                        <i className="fa-solid fa-download"></i>
                       </button>
+                      {/* <button className="icon-action" title="Modifier" onClick={() => openReschedule(rdv)}>
+                        <i className="fa-regular fa-pen-to-square"></i>
+                      </button> */}
                     </td>
                   </tr>
                 ))}
@@ -239,55 +527,55 @@ const RendezVousPatient = () => {
         </div>
       )}
 
-    {paymentRdv && (
-    <div className="modal-backdrop">
-        <div className="modal-card">
+      {paymentRdv && (
+        <div className="modal-backdrop">
+          <div className="modal-card">
 
             <div className="modal-icon">
-                <i className="fa-solid fa-credit-card"></i>
+              <i className="fa-solid fa-credit-card"></i>
             </div>
 
             <h2>Paiement du rendez-vous</h2>
 
             <p>
-                Vous êtes sur le point de régler la somme de
-                <br /><br />
-                <strong style={{fontSize:'22px', color:'#0ea5e9'}}>
-                    {formatMoney(paymentRdv.facture?.montant_restant ?? paymentRdv.montant_consultation)}
-                </strong>
+              Vous êtes sur le point de régler la somme de
+              <br /><br />
+              <strong style={{ fontSize: '22px', color: '#0ea5e9' }}>
+                {formatMoney(paymentRdv.facture?.montant_restant ?? paymentRdv.montant_consultation)}
+              </strong>
             </p>
 
             <div className="modal-actions">
-                <button
-                    className="btn-outline"
-                    onClick={() => setPaymentRdv(null)}
-                    disabled={paying}
-                >
-                    Annuler
-                </button>
+              <button
+                className="btn-outline"
+                onClick={() => setPaymentRdv(null)}
+                disabled={paying}
+              >
+                Annuler
+              </button>
 
-                <button
-                    className="btn-solid"
-                    onClick={confirmTestPayment}
-                    disabled={paying}
-                >
-                    {paying ? (
-                        <>
-                            <i className="fa fa-spinner fa-spin"></i>
-                            &nbsp; Validation...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-solid fa-check"></i>
-                            &nbsp; Confirmer
-                        </>
-                    )}
-                </button>
+              <button
+                className="btn-solid"
+                onClick={confirmTestPayment}
+                disabled={paying}
+              >
+                {paying ? (
+                  <>
+                    <i className="fa fa-spinner fa-spin"></i>
+                    &nbsp; Validation...
+                  </>
+                ) : (
+                  <>
+                    <i className="fa-solid fa-check"></i>
+                    &nbsp; Confirmer
+                  </>
+                )}
+              </button>
             </div>
 
+          </div>
         </div>
-    </div>
-)}
+      )}
       <style>
         {
           `
@@ -403,6 +691,24 @@ const RendezVousPatient = () => {
         opacity:1;
         transform:scale(1);
     }
+        .icon-action.download{
+    background:#e8f5ff;
+    color:#0d6efd;
+}
+
+.icon-action.download:hover{
+    background:#0d6efd;
+    color:white;
+}
+
+.icon-action.download:disabled{
+  background:#eef2f7;
+  color:#94a3b8;
+}
+
+.rdv-actions .icon-action + .icon-action{
+  margin-left:8px;
+}
 }
           `
 

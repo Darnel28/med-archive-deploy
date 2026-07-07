@@ -14,8 +14,8 @@ const emptyForm = {
   consultHeure: '',
 
   consultMedecin: getAuthUser()?.user?.name ||
-                   getAuthUser()?.name ||
-                   '',
+    getAuthUser()?.name ||
+    '',
 
   consultHopital: '',
   consultType: 'Nouvelle consultation',
@@ -36,11 +36,11 @@ const emptyForm = {
   statut: 'en_cours',
 
   examens: {
-  analyseSang: false,
-  radiographie: false,
-  scanner: false,
-  testLabo: false,
-},
+    analyseSang: false,
+    radiographie: false,
+    scanner: false,
+    testLabo: false,
+  },
 
   prescriptions: [
     {
@@ -74,6 +74,71 @@ function textValue(...values) {
 function rowsFromPaginated(response) {
   const payload = response?.data ?? response;
   return Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
+}
+
+function toDateInputValue(value) {
+  if (!value) return '';
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toISOString().slice(0, 10);
+}
+
+function prescriptionRowsFromOrdonnance(ordonnance) {
+  const source = ordonnance || {};
+  const medicaments = Array.isArray(source.medicaments) ? source.medicaments : (source.medicaments ? [source.medicaments] : []);
+  const posologies = Array.isArray(source.posologie) ? source.posologie : (source.posologie ? [source.posologie] : []);
+  const validites = Array.isArray(source.date_validite) ? source.date_validite : (source.date_validite ? [source.date_validite] : []);
+  const instructions = Array.isArray(source.instructions) ? source.instructions : (source.instructions ? [source.instructions] : []);
+
+  const maxLength = Math.max(medicaments.length, posologies.length, validites.length, instructions.length);
+
+  if (maxLength === 0) {
+    return emptyForm.prescriptions;
+  }
+
+  return Array.from({ length: maxLength }, (_, index) => ({
+    medicament: medicaments[index] || '',
+    dosage: posologies[index] || '',
+    duree: toDateInputValue(validites[index]),
+    frequence: instructions[index] || '',
+  }));
+}
+
+function buildOrdonnancePayload(prescriptions) {
+  const ordonnances = prescriptions.reduce((accumulator, row) => {
+    const medicament = String(row.medicament || '').trim();
+    const posologie = String(row.dosage || '').trim();
+    const dateValidite = toDateInputValue(row.duree);
+    const instructions = String(row.frequence || '').trim();
+
+    if (medicament || posologie || dateValidite || instructions) {
+      accumulator.medicaments.push(medicament);
+      if (posologie) accumulator.posologie.push(posologie);
+      if (dateValidite) accumulator.date_validite.push(dateValidite);
+      if (instructions) accumulator.instructions.push(instructions);
+    }
+
+    return accumulator;
+  }, {
+    medicaments: [],
+    posologie: [],
+    date_validite: [],
+    instructions: [],
+  });
+
+  if (ordonnances.medicaments.length === 0) {
+    return null;
+  }
+
+  const dateValidite = ordonnances.date_validite[0] || '';
+
+  return {
+    medicaments: ordonnances.medicaments,
+    posologie: ordonnances.posologie.join(' | '),
+    date_validite: dateValidite,
+    instructions: ordonnances.instructions.join(' | '),
+  };
 }
 
 const examenLabels = {
@@ -116,6 +181,7 @@ function formFromConsultation(item) {
     diagnostic: flat.diagnostic || '',
     notesMedicales: flat.observations || '',
     statut: flat.statut || 'en_cours',
+    prescriptions: prescriptionRowsFromOrdonnance(flat.ordonnance),
   };
 }
 
@@ -126,16 +192,16 @@ export default function ConsultationMedecin() {
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
   const handleExamenCheckbox = (e) => {
-  const { name, checked } = e.target;
+    const { name, checked } = e.target;
 
-  setFormData((current) => ({
-    ...current,
-    examens: {
-      ...current.examens,
-      [name]: checked,
-    },
-  }));
-};
+    setFormData((current) => ({
+      ...current,
+      examens: {
+        ...current.examens,
+        [name]: checked,
+      },
+    }));
+  };
 
   useEffect(() => {
     let active = true;
@@ -189,68 +255,75 @@ export default function ConsultationMedecin() {
     prescriptions: current.prescriptions.map((row, rowIndex) => rowIndex === index ? { ...row, [key]: value } : row),
   }));
   const resetForm = () => {
-  const auth = getAuthUser()?.user || getAuthUser() || {};
+    const auth = getAuthUser()?.user || getAuthUser() || {};
 
-  setFormData({
-    ...emptyForm,
-    consultMedecin: auth?.name || '',
-  });
-
-  setConsultationId(null);
-  sessionStorage.removeItem('active_consultation');
-};
-
-  const save = async (event) => {
-  event.preventDefault();
-
-  if (!consultationId) return;
-
-  setSaving(true);
-  setMessage('');
-
-  try {
-    const selectedExamens = Object.entries(formData.examens)
-      .filter(([, checked]) => checked)
-      .map(([key]) => ({
-        laboratoire_id: laboratoires[0]?.id,
-        type_analyse: examenLabels[key],
-        date_prelevement: new Date().toISOString().slice(0, 10),
-        commentaires: `Demande creee depuis la consultation `,
-      }));
-
-    if (selectedExamens.length > 0 && !laboratoires[0]?.id) {
-      throw new Error("Aucun laboratoire disponible pour creer les demandes d'examens.");
-    }
-
-    await updateConsultation(consultationId, {
-      diagnostic: formData.diagnostic,
-      observations: formData.notesMedicales || formData.autresObs,
-      statut: 'termine',
-      constantes: {
-        tension_arterielle: formData.tension || null,
-        temperature: formData.temperature || null,
-        poids: formData.poids || null,
-        taille: formData.taille || null,
-        frequence_cardiaque: formData.frequenceCardiaque || null,
-        saturation_oxygene: formData.saturationOxygene || null,
-        glycemie: formData.glycemie || null,
-      },
-      analyses: selectedExamens,
+    setFormData({
+      ...emptyForm,
+      consultMedecin: auth?.name || '',
     });
 
-    resetForm();
+    setConsultationId(null);
+    sessionStorage.removeItem('active_consultation');
+  };
 
-    setMessage('Consultation terminée avec succès.');
-  } catch (error) {
-    setMessage(
-      error?.response?.data?.message ||
-      error.message ||
-      "Erreur lors de l'enregistrement."
-    );
-  } finally {
-    setSaving(false);
-  }
-};
+  const save = async (event) => {
+    event.preventDefault();
+
+    if (!consultationId) return;
+
+    setSaving(true);
+    setMessage('');
+
+    try {
+      const selectedExamens = Object.entries(formData.examens)
+        .filter(([, checked]) => checked)
+        .map(([key]) => ({
+          laboratoire_id: laboratoires[0]?.id,
+          type_analyse: examenLabels[key],
+          date_prelevement: new Date().toISOString().slice(0, 10),
+          commentaires: `Demande creee depuis la consultation `,
+        }));
+
+      if (selectedExamens.length > 0 && !laboratoires[0]?.id) {
+        throw new Error("Aucun laboratoire disponible pour creer les demandes d'examens.");
+      }
+
+      const ordonnance = buildOrdonnancePayload(formData.prescriptions);
+      const payload = {
+        diagnostic: formData.diagnostic,
+        observations: formData.notesMedicales || formData.autresObs,
+        statut: 'termine',
+        constantes: {
+          tension_arterielle: formData.tension || null,
+          temperature: formData.temperature || null,
+          poids: formData.poids || null,
+          taille: formData.taille || null,
+          frequence_cardiaque: formData.frequenceCardiaque || null,
+          saturation_oxygene: formData.saturationOxygene || null,
+          glycemie: formData.glycemie || null,
+        },
+        analyses: selectedExamens,
+      };
+
+      if (ordonnance) {
+        payload.ordonnance = ordonnance;
+      }
+
+      await updateConsultation(consultationId, payload);
+
+      resetForm();
+
+      setMessage('Consultation terminée avec succès.');
+    } catch (error) {
+      setMessage(
+        error?.response?.data?.message ||
+        error.message ||
+        "Erreur lors de l'enregistrement."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <main className="content page-tight sheet-wrap">
@@ -303,55 +376,55 @@ export default function ConsultationMedecin() {
           </section>
           <section className="sheet-section">
             <div className="section-title-row"><h3>6. Prescription (ordonnance)</h3><button className="btn-add-row" type="button" onClick={() => change('prescriptions', [...formData.prescriptions, { medicament: '', dosage: '', duree: '', frequence: '' }])}>+</button></div>
-            <div className="rx-table-wrap"><table className="rx-table"><thead><tr><th>Nom du médicament</th><th>Dosage</th><th>Durée du traitement</th><th>Fréquence</th></tr></thead><tbody>
-              {formData.prescriptions.map((row, index) => <tr key={index}>{['medicament', 'dosage', 'duree', 'frequence'].map((key) => <td key={key}><input value={row[key]} onChange={(e) => changePrescription(index, key, e.target.value)} /></td>)}</tr>)}
+            <div className="rx-table-wrap"><table className="rx-table"><thead><tr><th>Nom du médicament</th><th>Posologie</th><th>Date de validité</th><th>Fréquence</th></tr></thead><tbody>
+              {formData.prescriptions.map((row, index) => <tr key={index}>{['medicament', 'dosage', 'duree', 'frequence'].map((key) => <td key={key}><input type={key === 'duree' ? 'date' : 'text'} required={key === 'duree'} value={row[key]} onChange={(e) => changePrescription(index, key, e.target.value)} /></td>)}</tr>)}
             </tbody></table></div>
           </section>
           <section className="sheet-section">
-  <h3>7. Examens demandés (si nécessaire)</h3>
+            <h3>7. Examens demandés (si nécessaire)</h3>
 
-  <div className="check-row">
-    <label>
-      <input
-        type="checkbox"
-        name="analyseSang"
-        checked={formData.examens.analyseSang}
-        onChange={handleExamenCheckbox}
-      />
-      Analyse de sang
-    </label>
+            <div className="check-row">
+              <label>
+                <input
+                  type="checkbox"
+                  name="analyseSang"
+                  checked={formData.examens.analyseSang}
+                  onChange={handleExamenCheckbox}
+                />
+                Analyse de sang
+              </label>
 
-    <label>
-      <input
-        type="checkbox"
-        name="radiographie"
-        checked={formData.examens.radiographie}
-        onChange={handleExamenCheckbox}
-      />
-      Radiographie
-    </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="radiographie"
+                  checked={formData.examens.radiographie}
+                  onChange={handleExamenCheckbox}
+                />
+                Radiographie
+              </label>
 
-    <label>
-      <input
-        type="checkbox"
-        name="scanner"
-        checked={formData.examens.scanner}
-        onChange={handleExamenCheckbox}
-      />
-      Scanner
-    </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="scanner"
+                  checked={formData.examens.scanner}
+                  onChange={handleExamenCheckbox}
+                />
+                Scanner
+              </label>
 
-    <label>
-      <input
-        type="checkbox"
-        name="testLabo"
-        checked={formData.examens.testLabo}
-        onChange={handleExamenCheckbox}
-      />
-      Test laboratoire
-    </label>
-  </div>
-</section>
+              <label>
+                <input
+                  type="checkbox"
+                  name="testLabo"
+                  checked={formData.examens.testLabo}
+                  onChange={handleExamenCheckbox}
+                />
+                Test laboratoire
+              </label>
+            </div>
+          </section>
           <section className="sheet-section">
             <h3>8. Notes médicales</h3>
             <div className="line-field"><label>Commentaires du médecin</label><textarea value={formData.notesMedicales} onChange={(e) => change('notesMedicales', e.target.value)} /></div>

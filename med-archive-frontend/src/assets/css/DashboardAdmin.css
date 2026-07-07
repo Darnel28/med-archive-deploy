@@ -113,6 +113,19 @@
   resize: vertical;
 }
 
+.admin-modal-container .form-static-value {
+  width: 100%;
+  border: 1px solid #d7e3ef;
+  border-radius: 12px;
+  background: #f6faff;
+  color: #15283b;
+  padding: 0.78rem 0.9rem;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+}
+
 .admin-modal-container input:focus,
 .admin-modal-container select:focus,
 .admin-modal-container textarea:focus {

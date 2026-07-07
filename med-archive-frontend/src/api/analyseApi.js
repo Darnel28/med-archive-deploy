@@ -19,6 +19,10 @@ export function ajouterResultatsAnalyse(id, payload) {
   }).then((response) => response.data);
 }
 
+export function getAnalyseResultatFichier(id) {
+  return apiClient.get(`/analyses/${id}/resultat-fichier`, { responseType: "blob" });
+}
+
 export function getAnalysesStatistiques() {
   return apiClient.get("/statistiques/analyses").then((response) => response.data);
 }

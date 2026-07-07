@@ -33,7 +33,7 @@ export function valueAt(row, path, fallback = "-") {
 
 function normalizeInitialForm(fields, row) {
   return fields.reduce((acc, field) => {
-    if (field.readOnlyOnEdit && row) return acc;
+    if (field.readOnlyOnEdit && row && !field.showReadOnlyOnEdit) return acc;
     const value = row ? field.fromRow?.(row) ?? valueAt(row, field.name, "") : field.defaultValue ?? "";
     acc[field.name] = value ?? "";
     return acc;
@@ -62,6 +62,7 @@ export default function AdminCrudPage({
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [modalMode, setModalMode] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [formData, setFormData] = useState({});
@@ -89,6 +90,15 @@ export default function AdminCrudPage({
   useEffect(() => {
     loadRows();
   }, [loadRows]);
+
+  useEffect(() => {
+    if (!error && !success) return undefined;
+    const timer = window.setTimeout(() => {
+      setError("");
+      setSuccess("");
+    }, 4500);
+    return () => window.clearTimeout(timer);
+  }, [error, success]);
 
   const filteredRows = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -159,15 +169,19 @@ export default function AdminCrudPage({
 
     setIsSubmitting(true);
     setError("");
+    setSuccess("");
     try {
       const payload = buildPayload ? buildPayload(formData, selectedRow, modalMode) : formData;
+      let response;
       if (modalMode === "edit") {
-        await api.update(getRowId(selectedRow), payload);
+        response = await api.update(getRowId(selectedRow), payload);
       } else {
-        await api.create(payload);
+        response = await api.create(payload);
       }
       closeModal();
       await loadRows();
+      const warning = response?.data?.warning || response?.warning;
+      setSuccess(warning || response?.message || "Enregistrement effectue avec succes.");
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -179,8 +193,9 @@ export default function AdminCrudPage({
     if (!window.confirm("Supprimer cet élément ?")) return;
     setError("");
     try {
-      await api.remove(getRowId(row));
+      const response = await api.remove(getRowId(row));
       await loadRows();
+      setSuccess(response?.message || "Suppression effectuee avec succes.");
     } catch (err) {
       setError(apiErrorMessage(err));
     }
@@ -209,6 +224,7 @@ export default function AdminCrudPage({
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
+      {success && <div className="alert alert-success">{success}</div>}
 
       <section className="rdv-section">
         <article className="rdv-card">
@@ -297,13 +313,15 @@ export default function AdminCrudPage({
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
                   {fields.map((field) => {
-                    if (field.readOnlyOnEdit && modalMode === "edit") return null;
+                    if (field.readOnlyOnEdit && modalMode === "edit" && !field.showReadOnlyOnEdit) return null;
                     const commonProps = {
                       name: field.name,
                       value: formData[field.name] ?? "",
                       onChange: handleChange,
                       className: formErrors[field.name] ? "error" : "",
                       placeholder: field.placeholder,
+                      min: field.min,
+                      readOnly: field.readOnly || (field.readOnlyOnEdit && modalMode === "edit"),
                     };
 
                     return (
@@ -320,6 +338,8 @@ export default function AdminCrudPage({
                           </select>
                         ) : field.type === "textarea" ? (
                           <textarea {...commonProps} rows={field.rows || 3}></textarea>
+                        ) : field.type === "static" ? (
+                          <div className="form-static-value">{formData[field.name] || field.fallback || "-"}</div>
                         ) : field.type === "checkbox" ? (
                           <label className="table-meta">
                             <input

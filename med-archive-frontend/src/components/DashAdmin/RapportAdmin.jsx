@@ -1,120 +1,120 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { getRapportsAdmin } from '../../api/statistiqueApi';
+import { apiErrorMessage } from './AdminCrudPage.jsx';
 import '../../assets/css/Hopital.css';
 
-const transferAudits = [
-    {
-        id: 'TR-2401',
-        patient: 'Awa Traoré',
-        fromService: 'Médecine générale',
-        toService: 'Cardiologie',
-        transferredBy: 'Infirmier Yao K.',
-        referringDoctor: 'Dr. Jean DOUGLAS',
-        reason: 'Douleurs thoraciques',
-        date: '10/05/2026 09:20',
-        status: 'Validé',
-    },
-    {
-        id: 'TR-2402',
-        patient: 'Moussa Diallo',
-        fromService: 'Urgences',
-        toService: 'ORL',
-        transferredBy: 'Agent de régulation A. Koné',
-        referringDoctor: 'Dr. Alice ZOKA',
-        reason: 'Infections ORL récurrentes',
-        date: '10/05/2026 11:15',
-        status: 'En cours',
-    },
-    {
-        id: 'TR-2403',
-        patient: 'Nadia Koné',
-        fromService: 'Pédiatrie',
-        toService: 'Médecine interne',
-        transferredBy: 'Secrétariat hospitalier',
-        referringDoctor: 'Dr. Amadou SAMBA',
-        reason: 'Avis spécialisé',
-        date: '09/05/2026 16:40',
-        status: 'Refusé',
-    },
-    {
-        id: 'TR-2404',
-        patient: 'Koffi MENSAH',
-        fromService: 'Neurologie',
-        toService: 'Chirurgie',
-        transferredBy: 'Dr. Claire Durand',
-        referringDoctor: 'Dr. Claire Durand',
-        reason: 'Avis chirurgical demandé',
-        date: '08/05/2026 08:50',
-        status: 'Validé',
-    },
-];
+function rows(value) {
+    return Array.isArray(value) ? value : [];
+}
 
-const patientMovements = [
-    {
-        patient: 'Awa Traoré',
-        movement: 'Passage service',
-        detail: 'Consultation générale vers cardiologie',
-        author: 'Infirmier Yao K.',
-        timestamp: '10/05/2026 09:25',
-    },
-    {
-        patient: 'Moussa Diallo',
-        movement: 'Admission',
-        detail: 'Arrivée depuis les urgences',
-        author: 'Agent de régulation A. Koné',
-        timestamp: '10/05/2026 11:10',
-    },
-    {
-        patient: 'Nadia Koné',
-        movement: 'Sortie de circuit',
-        detail: 'Demande non prioritaire',
-        author: 'Secrétariat hospitalier',
-        timestamp: '09/05/2026 16:45',
-    },
-    {
-        patient: 'Koffi MENSAH',
-        movement: 'Réorientation',
-        detail: 'Orientation vers chirurgie',
-        author: 'Dr. Claire Durand',
-        timestamp: '08/05/2026 09:00',
-    },
-];
+function dateTime(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+}
 
-const serviceActivity = [
-    { service: 'Médecine générale', entrants: 18, sortants: 12, mouvements: 30, charge: 72 },
-    { service: 'Cardiologie', entrants: 11, sortants: 9, mouvements: 20, charge: 61 },
-    { service: 'ORL', entrants: 8, sortants: 6, mouvements: 14, charge: 48 },
-    { service: 'Chirurgie', entrants: 6, sortants: 5, mouvements: 11, charge: 54 },
-    { service: 'Médecine interne', entrants: 4, sortants: 3, mouvements: 7, charge: 39 },
-];
+function dateOnly(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleDateString('fr-FR');
+}
 
-const auditHighlights = [
-    { label: 'Transferts effectués', value: '124', trend: '+18 cette semaine', icon: 'fa-arrow-right-arrow-left' },
-    { label: 'Mouvements patients', value: '286', trend: '+9% sur 7 jours', icon: 'fa-person-walking-arrow-right' },
-    { label: 'Services actifs', value: '12', trend: 'Tous suivis', icon: 'fa-hospital' },
-    { label: 'Alertes audit', value: '03', trend: '2 à vérifier', icon: 'fa-triangle-exclamation' },
-];
+function lastActivityLabel(value) {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return `Aujourd'hui ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    if (date.toDateString() === yesterday.toDateString()) {
+        return `Hier ${date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+    }
+    return dateTime(value);
+}
 
 const RapportAdmin = () => {
+    const [report, setReport] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
     useEffect(() => {
-        document.title = 'Audit hospitalier';
+        document.title = 'Rapports administrateur';
     }, []);
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function loadReport() {
+            try {
+                const response = await getRapportsAdmin();
+                if (!mounted) return;
+                setReport(response?.data ?? response);
+                setError('');
+            } catch (err) {
+                if (mounted) setError(apiErrorMessage(err));
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        }
+
+        loadReport();
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    const kpis = report?.kpis ?? {};
+    const auditHighlights = useMemo(() => [
+        {
+            label: 'Utilisateurs créés',
+            value: kpis.utilisateurs_crees ?? 0,
+            trend: `+${kpis.utilisateurs_crees_semaine ?? 0} cette semaine`,
+            icon: 'fa-users',
+        },
+        {
+            label: 'Hôpitaux connectés',
+            value: kpis.hopitaux_connectes ?? 0,
+            trend: 'Etablissements enregistrés',
+            icon: 'fa-hospital',
+        },
+        {
+            label: "Connexions aujourd'hui",
+            value: kpis.connexions_aujourdhui ?? 0,
+            trend: 'Journal système',
+            icon: 'fa-right-to-bracket',
+        },
+        {
+            label: 'Alertes de sécurité',
+            value: String(kpis.alertes_securite ?? 0).padStart(2, '0'),
+            trend: 'A traiter',
+            icon: 'fa-triangle-exclamation',
+        },
+    ], [kpis]);
 
     return (
         <main className="audit-shell">
             <section className="audit-header">
                 <div>
-                    <p className="audit-eyebrow">Rapports d’audit hospitalier</p>
-                    <h1>Transferts, mouvements patients et activité des services</h1>
+                    <p className="audit-eyebrow">Rapports d'audit de la plateforme</p>
+                    <h1>Sécurité, administration et traçabilité du système Med-Archive</h1>
                     <p className="audit-subtitle">
-                        Vue consolidée pour contrôler qui transfère, vers quel service, avec quel médecin référent et quelle
-                        charge opérationnelle.
+                        Vue consolidée des activités administratives, des accès au système et de l'état des établissements connectés.
                     </p>
                 </div>
                 <div className="audit-date-chip">
                     <i className="fa-regular fa-calendar-days"></i>
-                    <span>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                    <span>{new Date(report?.date ?? Date.now()).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 </div>
             </section>
+
+            {error ? <p className="alert alert-danger">{error}</p> : null}
+            {loading ? <p className="table-meta p-4">Chargement...</p> : null}
 
             <section className="audit-kpi-grid">
                 {auditHighlights.map((item) => (
@@ -131,57 +131,80 @@ const RapportAdmin = () => {
                 ))}
             </section>
 
+            <section className="audit-panels audit-panels-bottom">
+                <article className="audit-panel audit-panel-wide">
+                    <div className="audit-panel-head">
+                        <div>
+                            <h2>Activités administratives récentes</h2>
+                            <p>Journal des actions réalisées par les administrateurs de la plateforme.</p>
+                        </div>
+                    </div>
+                    <div className="table-wrapper audit-table-wrapper">
+                        <table className="audit-table">
+                            <thead>
+                                <tr><th>Date</th><th>Administrateur</th><th>Action</th><th>Détails</th></tr>
+                            </thead>
+                            <tbody>
+                                {rows(report?.activites_administratives).map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{dateTime(item.date)}</td>
+                                        <td>{item.administrateur}</td>
+                                        <td>{item.action}</td>
+                                        <td>{item.details}</td>
+                                    </tr>
+                                ))}
+                                {!loading && rows(report?.activites_administratives).length === 0 ? (
+                                    <tr><td colSpan="4">Aucune activité administrative.</td></tr>
+                                ) : null}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
             <section className="audit-panels">
                 <article className="audit-panel">
                     <div className="audit-panel-head">
                         <div>
-                            <h2>Mouvements patients</h2>
-                            <p>Journal des admissions, réorientations et sorties de circuit.</p>
+                            <h2>État des établissements</h2>
+                            <p>Suivi des établissements enregistrés sur la plateforme.</p>
                         </div>
                     </div>
-
-                    <div className="movement-list">
-                        {patientMovements.map((movement) => (
-                            <div className="movement-item" key={`${movement.patient}-${movement.timestamp}`}>
-                                <div className="movement-marker">
-                                    <i className="fa-solid fa-right-left"></i>
-                                </div>
-                                <div className="movement-content">
-                                    <div className="movement-top">
-                                        <strong>{movement.patient}</strong>
-                                        <span>{movement.timestamp}</span>
-                                    </div>
-                                    <p>{movement.movement}</p>
-                                    <small>{movement.detail}</small>
-                                    <span className="movement-author">{movement.author}</span>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="table-wrapper audit-table-wrapper">
+                        <table className="audit-table">
+                            <thead>
+                                <tr><th>Établissement</th><th>Statut</th><th>Utilisateurs</th><th>Dernière activité</th></tr>
+                            </thead>
+                            <tbody>
+                                {rows(report?.etablissements).map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{item.nom}</td>
+                                        <td><span className={`status-badge ${item.statut === 'En ligne' ? 'réalisé' : 'refuse'}`}>{item.statut}</span></td>
+                                        <td>{item.utilisateurs}</td>
+                                        <td>{lastActivityLabel(item.derniere_activite)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </article>
 
                 <article className="audit-panel">
                     <div className="audit-panel-head">
                         <div>
-                            <h2>Activité des services</h2>
-                            <p>Volume des entrants, sortants et charge observée sur la période.</p>
+                            <h2>Activité des utilisateurs</h2>
+                            <p>Répartition des comptes actifs.</p>
                         </div>
                     </div>
-
                     <div className="activity-list">
-                        {serviceActivity.map((service) => (
-                            <div className="activity-row" key={service.service}>
+                        {rows(report?.activite_utilisateurs).map((item) => (
+                            <div className="activity-row" key={item.role}>
                                 <div className="activity-row-top">
-                                    <strong>{service.service}</strong>
-                                    <span>{service.mouvements} mouvements</span>
+                                    <strong>{item.role}</strong>
+                                    <span>{item.total}</span>
                                 </div>
                                 <div className="activity-bar">
-                                    <span style={{ width: `${service.charge}%` }}></span>
-                                </div>
-                                <div className="activity-row-bottom">
-                                    <span>Entrants: {service.entrants}</span>
-                                    <span>Sortants: {service.sortants}</span>
-                                    <span>Charge: {service.charge}%</span>
+                                    <span style={{ width: `${Math.min(100, Math.max(8, item.total))}%` }}></span>
                                 </div>
                             </div>
                         ))}
@@ -193,47 +216,85 @@ const RapportAdmin = () => {
                 <article className="audit-panel audit-panel-wide">
                     <div className="audit-panel-head">
                         <div>
-                            <h2>Transferts effectués entre services</h2>
-                            <p>Historique des demandes, validation et traçabilité complète des mouvements inter-services.</p>
+                            <h2>Journal de sécurité</h2>
+                            <p>Connexions sensibles, incidents système et alertes critiques.</p>
                         </div>
-                        <span className="audit-panel-badge">Exporter</span>
                     </div>
-
                     <div className="table-wrapper audit-table-wrapper">
                         <table className="audit-table">
                             <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Patient</th>
-                                    <th>Du service</th>
-                                    <th>Vers service</th>
-                                    <th>Qui a transféré</th>
-                                    <th>Médecin référent</th>
-                                    <th>Motif</th>
-                                    <th>Date</th>
-                                    <th>Statut</th>
-                                </tr>
+                                <tr><th>Date</th><th>Événement</th><th>Utilisateur</th><th>Résultat</th></tr>
                             </thead>
                             <tbody>
-                                {transferAudits.map((item) => (
+                                {rows(report?.journal_securite).map((item) => (
                                     <tr key={item.id}>
-                                        <td className="audit-id">{item.id}</td>
-                                        <td>{item.patient}</td>
-                                        <td>{item.fromService}</td>
-                                        <td>{item.toService}</td>
-                                        <td>{item.transferredBy}</td>
-                                        <td>{item.referringDoctor}</td>
-                                        <td>{item.reason}</td>
-                                        <td>{item.date}</td>
-                                        <td>
-                                            <span className={`status-badge ${item.status === 'Validé' ? 'réalisé' : item.status === 'En cours' ? 'en-cours' : 'refuse'}`}>
-                                                {item.status}
-                                            </span>
-                                        </td>
+                                        <td>{dateTime(item.date)}</td>
+                                        <td>{item.evenement}</td>
+                                        <td>{item.utilisateur}</td>
+                                        <td>{item.resultat}</td>
+                                    </tr>
+                                ))}
+                                {!loading && rows(report?.journal_securite).length === 0 ? (
+                                    <tr><td colSpan="4">Aucun événement de sécurité.</td></tr>
+                                ) : null}
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </section>
+
+            <section className="audit-panels">
+                <article className="audit-panel">
+                    <div className="audit-panel-head">
+                        <div>
+                            <h2>Gestion des hôpitaux</h2>
+                            <p>Historique des actions réalisées sur les établissements.</p>
+                        </div>
+                    </div>
+                    <div className="table-wrapper audit-table-wrapper">
+                        <table className="audit-table">
+                            <thead>
+                                <tr><th>Date</th><th>Action</th><th>Établissement</th><th>Réalisé par</th></tr>
+                            </thead>
+                            <tbody>
+                                {rows(report?.gestion_hopitaux).map((item) => (
+                                    <tr key={item.id}>
+                                        <td>{dateOnly(item.date)}</td>
+                                        <td>{item.action}</td>
+                                        <td>{item.etablissement}</td>
+                                        <td>{item.realise_par}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </article>
+
+                <article className="audit-panel">
+                    <div className="audit-panel-head">
+                        <div>
+                            <h2>Alertes système</h2>
+                            <p>Alertes critiques visibles par l'administration plateforme.</p>
+                        </div>
+                    </div>
+                    <div className="movement-list">
+                        {rows(report?.alertes_systeme).map((item) => (
+                            <div className="movement-item" key={item.id}>
+                                <div className="movement-marker">
+                                    <i className="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                                <div className="movement-content">
+                                    <div className="movement-top">
+                                        <strong>{item.title}</strong>
+                                        <span>{dateTime(item.created_at)}</span>
+                                    </div>
+                                    <p>{item.body}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {!loading && rows(report?.alertes_systeme).length === 0 ? (
+                            <p className="table-meta p-4">Aucune alerte système active.</p>
+                        ) : null}
                     </div>
                 </article>
             </section>

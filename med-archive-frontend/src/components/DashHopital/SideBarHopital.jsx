@@ -55,7 +55,7 @@ const SidebarHopital = () => {
       <div className={`sidebar-user-panel ${userPanelOpen ? 'open' : ''}`}>
         {profile.avatar ? <img src={profile.avatar} alt={profile.name} /> : <AvatarInitials name={profile.name} size={56} bgColor="#13c3b8" />}
         <strong>{profile.name}</strong>
-        <span>Type: {profile.service}</span>
+        <span> {profile.service}</span>
       </div>
 
       <div className="menu-block">
@@ -78,6 +78,9 @@ const SidebarHopital = () => {
             <strong>{profile.name}</strong>
             {/* <span>ID: {profile.id}</span> */}
           </div>
+          <NavLink className="settings-link" to="/espacehopital/parametres" aria-label="Parametres">
+            <i className="fa-solid fa-gear"></i>
+          </NavLink>
           <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se deconnecter">
             <i className="fa-solid fa-right-from-bracket"></i>
           </NavLink>

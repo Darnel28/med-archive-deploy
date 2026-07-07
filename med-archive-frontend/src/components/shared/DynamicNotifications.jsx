@@ -1,7 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getNotifications, markAllNotificationsRead, markNotificationRead } from '../../api';
 
-const importantTypes = new Set(['transfert_demande', 'transfert_refuse', 'consultation_annulee', 'resultat_examen']);
+const importantTypes = new Set([
+  'transfert_demande',
+  'transfert_refuse',
+  'consultation_annulee',
+  'resultat_examen',
+  'security_alert',
+  'admin_login_failed',
+  'system_critical',
+  'database_unavailable',
+]);
 
 function unwrapRows(response) {
   const payload = response?.data ?? response;
@@ -11,6 +20,8 @@ function unwrapRows(response) {
 
 function iconFor(type) {
   if (type?.startsWith('transfert')) return 'fa-solid fa-right-left';
+  if (type === 'service_created') return 'fa-solid fa-hospital-user';
+  if (type?.includes('security') || type?.includes('login') || type?.includes('critical') || type?.includes('database')) return 'fa-solid fa-shield-halved';
   if (type?.startsWith('consultation')) return 'fa-solid fa-stethoscope';
   if (type?.includes('examen') || type?.includes('analyse')) return 'fa-solid fa-vial';
   return 'fa-regular fa-bell';

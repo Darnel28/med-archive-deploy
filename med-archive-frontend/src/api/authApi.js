@@ -24,6 +24,11 @@ export async function register(payload) {
   return data;
 }
 
+export async function forgotPassword(payload) {
+  const response = await apiClient.post("/forgot-password", payload);
+  return response.data;
+}
+
 export async function logout() {
   try {
     await apiClient.post("/logout");

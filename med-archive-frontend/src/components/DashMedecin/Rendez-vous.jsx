@@ -27,10 +27,20 @@ function patientLabel(row) {
   return row?.name || row?.user?.name || row?.patient?.user?.name || row?.patient?.name || 'Patient';
 }
 
+function formatInputDate(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return offsetDate.toISOString().slice(0, 10);
+}
+
+function formatDisplayDate(value) {
+  return value ? new Date(`${value}T00:00:00`).toLocaleDateString('fr-FR') : 'cette date';
+}
+
 const RendezVousMedecin = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(formatInputDate());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,6 +51,7 @@ const RendezVousMedecin = () => {
   const [loadingPatients, setLoadingPatients] = useState(false);
 const getCurrentTime = () => {
   const now = new Date();
+  now.setMinutes(Math.ceil((now.getMinutes() + 1) / 30) * 30, 0, 0);
   return now.toTimeString().slice(0, 5);
 };
 
@@ -50,7 +61,7 @@ const [formData, setFormData] = useState({
   heure: getCurrentTime(),
   motif: ''
 });
-const today = new Date().toISOString().split('T')[0];
+const today = formatInputDate();
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -242,7 +253,13 @@ setAppointments(
           <i className="fa-solid fa-magnifying-glass"></i>
           <input type="text" placeholder="Chercher un rendez-vous..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </label>
-        {/* <input type="date" className="form-control" value={date} onChange={(e) => setDate(e.target.value)} /> */}
+        <input
+          type="date"
+          className="form-control"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          aria-label="Date des rendez-vous"
+        />
         <button className="btn transfer-add-btn" type="button" onClick={openModal}>
           <i className="fa-solid fa-calendar-plus"></i> Ajouter un rendez-vous
         </button>
@@ -257,7 +274,7 @@ setAppointments(
               <div className="empty-state">
                 <div className="empty-state-search"><i className="fa-solid fa-magnifying-glass"></i></div>
                 <h2>Aucun rendez-vous trouve</h2>
-                <p>Aucun rendez-vous n'est programme pour cette date.</p>
+                <p>Aucun rendez-vous n'est programme le {formatDisplayDate(date)}.</p>
                 <button className="empty-state-btn" type="button" onClick={openModal}>
                   <i className="fa-solid fa-calendar-plus"></i> Programmer un rendez-vous
                 </button>

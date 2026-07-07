@@ -4,7 +4,7 @@ import { getAuthUser } from '../../api/client';
 import { getCurrentUser } from '../../api/authApi';
 import { affecterDossierMedecin, createPatient, getMesPatientsEtablissement, getPatients as getAllPatients, listMedecins } from '../../api';
 import { getPatients as getDoctorPatients } from '../../api/medecinApi';
-import { getMesPatientsService } from '../../api/serviceApi';
+import { getMesPatientsService, getServices } from '../../api/serviceApi';
 import { apiErrorMessage, unwrapList, valueAt } from '../DashAdmin/AdminCrudPage.jsx';
 import AvatarInitials from '../AvatarInitials.jsx';
 import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from './Pagination.jsx';
@@ -70,7 +70,9 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
     profession: '',
     nationalite: 'Beninoise',
     lieu_naissance: '',
+    service_id: '',
   });
+  const [services, setServices] = useState([]);
   const [modalSaving, setModalSaving] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalError, setModalError] = useState('');
@@ -121,6 +123,13 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
     listMedecins({ per_page: 100 })
       .then((response) => setDoctors(unwrapList(response).rows))
       .catch(() => setDoctors([]));
+    if (source === 'etablissement') {
+      getServices({ per_page: 1000 })
+        .then((response) => setServices(unwrapList(response).rows))
+        .catch(() => setServices([]));
+    } else {
+      setServices([]);
+    }
     return () => {
       mounted = false;
     };
@@ -142,6 +151,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
     );
     if (!payload.password) delete payload.password;
     if (!payload.groupe_sanguin) delete payload.groupe_sanguin;
+    if (!payload.service_id) delete payload.service_id;
 
     try {
       const response = await createPatient(payload);
@@ -196,6 +206,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   }, [searchQuery, patients.length, view]);
 
   const paginatedPatients = useMemo(() => paginateRows(filteredPatients, page, DEFAULT_PAGE_SIZE), [filteredPatients, page]);
+  const canAssignDoctor = source !== 'doctor';
 
   const renderAvatar = (patient) => <AvatarInitials name={patient.name} size={72} bgColor="#13c3b8" />;
 
@@ -253,9 +264,11 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                 <Link className="mes-patients-action-btn" to={`${detailPath}?patient_id=${patient.id}`}>
                   <i className="fa-solid fa-folder-open"></i>
                 </Link>
-                <button className="mes-patients-action-btn" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}>
-                  <i className="fa-solid fa-user-doctor"></i>
-                </button>
+                {canAssignDoctor && (
+                  <button className="mes-patients-action-btn" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}>
+                    <i className="fa-solid fa-user-doctor"></i>
+                  </button>
+                )}
                 {patient.phone && <a className="mes-patients-action-btn" href={`tel:${patient.phone}`}><i className="fa-solid fa-phone"></i></a>}
               </div>
             </article>
@@ -287,7 +300,9 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                     <td>
                       <div className="mes-patients-list-actions">
                         <Link className="icon-action" to={`${detailPath}?patient_id=${patient.id}`}><i className="fa-solid fa-folder-open"></i></Link>
-                        <button className="icon-action" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}><i className="fa-solid fa-user-doctor"></i></button>
+                        {canAssignDoctor && (
+                          <button className="icon-action" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}><i className="fa-solid fa-user-doctor"></i></button>
+                        )}
                         {patient.phone && <a className="icon-action" href={`tel:${patient.phone}`}><i className="fa-solid fa-phone"></i></a>}
                       </div>
                     </td>
@@ -371,6 +386,19 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
               <div className="form-group"><label>Date de naissance</label><input name="date_naissance" type="date" value={patientForm.date_naissance} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Sexe</label><select name="sexe" value={patientForm.sexe} onChange={updatePatientForm} required><option value="M">Masculin</option><option value="F">Feminin</option></select></div>
               <div className="form-group"><label>Groupe sanguin</label><select name="groupe_sanguin" value={patientForm.groupe_sanguin} onChange={updatePatientForm}><option value="">Non renseigne</option>{['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group) => <option key={group} value={group}>{group}</option>)}</select></div>
+              {source === 'etablissement' && (
+                <div className="form-group">
+                  <label>Service</label>
+                  <select name="service_id" value={patientForm.service_id} onChange={updatePatientForm} required>
+                    <option value="">Orienter vers un service</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.nom || service.user?.name || `Service #${service.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="form-group"><label>Ville</label><input name="ville" type="text" value={patientForm.ville} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Adresse</label><input name="adresse" type="text" value={patientForm.adresse} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Personne a contacter</label><input name="personne_contact" type="text" value={patientForm.personne_contact} onChange={updatePatientForm} /></div>

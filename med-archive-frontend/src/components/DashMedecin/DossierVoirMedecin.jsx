@@ -25,6 +25,12 @@ function displayValue(value, suffix = "") {
   return `${value}${suffix}`;
 }
 
+function displayList(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).join(", ") || "-";
+  if (value && typeof value === "object") return Object.values(value).filter(Boolean).join(", ") || "-";
+  return value || "-";
+}
+
 export default function DossierVoirMedecin() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [patients, setPatients] = useState([]);
@@ -33,6 +39,7 @@ export default function DossierVoirMedecin() {
   const [activeTab, setActiveTab] = useState("consultations");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [viewModal, setViewModal] = useState(null);
 
   // Charger la liste des patients du service
   useEffect(() => {
@@ -113,6 +120,21 @@ export default function DossierVoirMedecin() {
     const id = event.target.value;
     setSelectedPatientId(id);
     setSearchParams(id ? { patient_id: id } : {});
+  }
+
+  function openViewModal(type, data) {
+    setViewModal({ type, data });
+  }
+
+  function closeViewModal() {
+    setViewModal(null);
+  }
+
+  function modalTitle() {
+    if (viewModal?.type === "consultation") return "Details de la consultation";
+    if (viewModal?.type === "analyse") return "Details de l'analyse";
+    if (viewModal?.type === "ordonnance") return "Details de l'ordonnance";
+    return "Details";
   }
 
   // Calcul de l'âge
@@ -264,7 +286,7 @@ export default function DossierVoirMedecin() {
                   <span className="pill">Aucun antécédent renseigné</span>
                 )}
               </div>
-              <strong className="subsection-title">Vaccinations</strong>
+              {/* <strong className="subsection-title">Vaccinations</strong>
               <div className="pill-list">
                 {dossier?.vaccinations ? (
                   dossier.vaccinations.split(',').map((vaccin, idx) => (
@@ -273,7 +295,7 @@ export default function DossierVoirMedecin() {
                 ) : (
                   <span className="pill">Aucune vaccination renseignée</span>
                 )}
-              </div>
+              </div> */}
             </article>
 
             {/* Historique des consultations */}
@@ -300,7 +322,11 @@ export default function DossierVoirMedecin() {
                           <td>{consultation.medecin?.user?.name || "-"}</td>
                           <td>{consultation.motif || "-"}</td>
                           <td>{consultation.diagnostic || "-"}</td>
-                          <td><a className="action-link" href="#"><i className="fa-regular fa-eye"></i> Voir détails</a></td>
+                          <td>
+                            <button type="button" className="action-link action-button" onClick={() => openViewModal("consultation", consultation)}>
+                              <i className="fa-regular fa-eye"></i> Voir
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -319,7 +345,7 @@ export default function DossierVoirMedecin() {
                       <th>Date</th>
                       <th>Analyse</th>
                       <th>Résultat</th>
-                      <th>Document</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -331,7 +357,11 @@ export default function DossierVoirMedecin() {
                           <td>{formatDate(analyse.date_prelevement || analyse.created_at)}</td>
                           <td>{analyse.type_analyse || "-"}</td>
                           <td><span className="pill pill-warning">{analyse.statut || "-"}</span></td>
-                          <td><a className="action-link" href="#"><i className="fa-solid fa-download"></i> Télécharger</a></td>
+                          <td>
+                            <button type="button" className="action-link action-button" onClick={() => openViewModal("analyse", analyse)}>
+                              <i className="fa-regular fa-eye"></i> Voir
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -350,7 +380,7 @@ export default function DossierVoirMedecin() {
                       <th>Date</th>
                       <th>Médecin</th>
                       <th>Médicaments</th>
-                      <th>Télécharger</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -362,7 +392,11 @@ export default function DossierVoirMedecin() {
                           <td>{formatDate(ordonnance.created_at)}</td>
                           <td>{ordonnance.consultation?.medecin?.user?.name || "-"}</td>
                           <td>{Array.isArray(ordonnance.medicaments) ? ordonnance.medicaments.join(", ") : ordonnance.medicaments || "-"}</td>
-                          <td><a className="action-link" href="#"><i className="fa-regular fa-file-pdf"></i> PDF</a></td>
+                          <td>
+                            <button type="button" className="action-link action-button" onClick={() => openViewModal("ordonnance", ordonnance)}>
+                              <i className="fa-regular fa-eye"></i> Voir
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -413,6 +447,56 @@ export default function DossierVoirMedecin() {
       </section>
 
       {/* Styles CSS (inchangés) */}
+      {viewModal && (
+        <div className="dossier-view-modal-backdrop" onClick={closeViewModal}>
+          <div className="dossier-view-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="dossier-view-modal-header">
+              <div>
+                <span className="modal-kicker">Voir</span>
+                <h2>{modalTitle()}</h2>
+              </div>
+              <button type="button" className="modal-close" title="Fermer" onClick={closeViewModal}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            {viewModal.type === "consultation" && (
+              <div className="dossier-view-grid">
+                <div><span>Date</span><strong>{formatDate(viewModal.data.date_consultation || viewModal.data.created_at)}</strong></div>
+                <div><span>Medecin</span><strong>{viewModal.data.medecin?.user?.name || "-"}</strong></div>
+                <div><span>Service</span><strong>{viewModal.data.service?.nom || "-"}</strong></div>
+                <div><span>Motif</span><strong>{viewModal.data.motif || "-"}</strong></div>
+                <div className="detail-wide"><span>Diagnostic</span><strong>{viewModal.data.diagnostic || "-"}</strong></div>
+                <div className="detail-wide"><span>Observations</span><strong>{viewModal.data.observations || viewModal.data.notes || "-"}</strong></div>
+              </div>
+            )}
+
+            {viewModal.type === "analyse" && (
+              <div className="dossier-view-grid">
+                <div><span>Date</span><strong>{formatDate(viewModal.data.date_prelevement || viewModal.data.created_at)}</strong></div>
+                <div><span>Analyse</span><strong>{viewModal.data.type_analyse || "-"}</strong></div>
+                <div><span>Statut</span><strong>{viewModal.data.statut || "-"}</strong></div>
+                <div><span>Laboratoire</span><strong>{viewModal.data.laboratoire?.user?.name || viewModal.data.laboratoire?.name || "-"}</strong></div>
+                <div className="detail-wide"><span>Resultat</span><strong>{displayList(viewModal.data.resultats)}</strong></div>
+                <div className="detail-wide"><span>Commentaire</span><strong>{viewModal.data.commentaire || viewModal.data.commentaires || "-"}</strong></div>
+              </div>
+            )}
+
+            {viewModal.type === "ordonnance" && (
+              <div className="dossier-view-grid">
+                <div><span>Date</span><strong>{formatDate(viewModal.data.created_at)}</strong></div>
+                <div><span>Medecin</span><strong>{viewModal.data.consultation?.medecin?.user?.name || "-"}</strong></div>
+                <div><span>Validite</span><strong>{formatDate(viewModal.data.date_validite)}</strong></div>
+                <div><span>Reference</span><strong>ORD-{viewModal.data.id}</strong></div>
+                <div className="detail-wide"><span>Medicaments</span><strong>{displayList(viewModal.data.medicaments)}</strong></div>
+                <div className="detail-wide"><span>Posologie</span><strong>{displayList(viewModal.data.posologie)}</strong></div>
+                <div className="detail-wide"><span>Instructions</span><strong>{displayList(viewModal.data.instructions)}</strong></div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <style>{`
         /* ========== CONTENEUR PRINCIPAL AÉRÉ ========== */
         .patient-dossier {
@@ -684,6 +768,88 @@ export default function DossierVoirMedecin() {
         }
 
         /* ========== DOCUMENTS MÉDICAUX ========== */
+        .action-button {
+          border: 0;
+          background: transparent;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+        }
+
+        .dossier-view-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 100000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          background: rgba(15, 23, 42, 0.55);
+        }
+        .dossier-view-modal {
+          width: min(760px, 92vw);
+          max-height: 86vh;
+          overflow: auto;
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+        }
+        .dossier-view-modal-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+          padding: 22px 24px;
+          border-bottom: 1px solid rgba(24, 68, 101, 0.12);
+        }
+        .dossier-view-modal-header h2 {
+          margin: 6px 0 0;
+          color: #132f53;
+          font-size: 1.35rem;
+        }
+        .modal-kicker {
+          color: #0f9f9b;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-transform: uppercase;
+        }
+        .modal-close {
+          width: 42px;
+          height: 42px;
+          border: 1px solid rgba(24, 68, 101, 0.14);
+          border-radius: 10px;
+          background: #f8fafc;
+          color: #315b84;
+          cursor: pointer;
+        }
+        .dossier-view-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+          padding: 24px;
+        }
+        .dossier-view-grid div {
+          display: grid;
+          gap: 6px;
+          padding: 14px;
+          border: 1px solid rgba(24, 68, 101, 0.12);
+          border-radius: 12px;
+          background: #fbfdff;
+        }
+        .dossier-view-grid .detail-wide {
+          grid-column: 1 / -1;
+        }
+        .dossier-view-grid span {
+          color: #67829b;
+          font-size: 0.8rem;
+        }
+        .dossier-view-grid strong {
+          color: #15395f;
+          font-size: 0.95rem;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
+
         .doc-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -54,7 +54,7 @@ function Hero() {
                                     Sécurisé, rapide et gratuit.
                                 </p>
 
-                                <a href="#" className="btn hero-btn">
+                                <a href="/connexion" className="btn hero-btn">
                                     Mon Dossier <i className="ti-arrow-right"></i>
                                 </a>
                             </div>

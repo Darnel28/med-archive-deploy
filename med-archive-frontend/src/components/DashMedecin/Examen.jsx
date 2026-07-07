@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAnalyses } from '../../api/analyseApi';
+import { getAnalyseResultatFichier } from '../../api/analyseApi';
 import { getCurrentUser } from '../../api/authApi';
 import { getAuthUser } from '../../api/client';
 import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from '../shared/Pagination.jsx';
@@ -32,6 +33,15 @@ function statusInfo(status) {
     termine: ['Terminé', 'rdv-status done'],
   };
   return values[status] || [status || 'Inconnu', 'rdv-status'];
+}
+
+async function openResultFile(analysis) {
+  if (!analysis?.fichier_resultat) return;
+
+  const response = await getAnalyseResultatFichier(analysis.id);
+  const url = URL.createObjectURL(response.data);
+  window.open(url, '_blank', 'noopener,noreferrer');
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 export default function ExamensMedecin() {
@@ -91,7 +101,21 @@ export default function ExamensMedecin() {
                 <td>{item.laboratoire?.user?.name || 'Non assigné'}</td>
                 <td>{item.date_prelevement ? new Date(item.date_prelevement).toLocaleString('fr-FR') : 'À planifier'}</td>
                 <td><span className={className}>{label}</span></td>
-                <td>{item.statut === 'termine' ? (item.resultats?.commentaire || 'Disponible') : 'En attente'}</td>
+                <td className="rdv-actions table-actions-compact">
+                  {item.fichier_resultat ? (
+                    <button
+                      type="button"
+                      className="icon-action"
+                      title="Voir le resultat"
+                      aria-label="Voir le resultat"
+                      onClick={() => openResultFile(item)}
+                    >
+                      <i className="fa-regular fa-eye"></i>
+                    </button>
+                  ) : (
+                    <span>{item.statut === 'termine' ? (item.resultats?.commentaire || 'Disponible') : 'En attente'}</span>
+                  )}
+                </td>
               </tr>;
             })}
             {!loading && filtered.length === 0 && <tr><td colSpan="6" style={{ textAlign: 'center', padding: 24 }}>Aucune demande d'examen prescrite.</td></tr>}
@@ -102,68 +126,68 @@ export default function ExamensMedecin() {
           <Pagination page={pagination.page} totalItems={filtered.length} onPageChange={setPage} />
         </div>
       </article></section>
-        {showAddModal && (
-  <div
-    className="custom-modal-overlay"
-    onClick={() => setShowAddModal(false)}
-  >
-    <div
-      className="custom-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-     <div className="custom-modal-header">
-  <h3>Ajouter une demande d'examen</h3>
-</div>
-
-<div className="custom-modal-body">
-  <div className="form-grid">
-
-    <div className="form-group">
-      <label>Patient *</label>
-      <select name="patient_id">
-        <option value="">Sélectionner un patient</option>
-        <option value="1">Jean Dupont</option>
-        <option value="2">Marie Koffi</option>
-        <option value="3">Paul Mensah</option>
-      </select>
-    </div>
-
-    <div className="form-group">
-      <label>Type d'analyse *</label>
-      <select name="type_analyse">
-        <option value="">Sélectionner une analyse</option>
-        <option value="NFS">NFS</option>
-        <option value="Glycemie">Glycémie</option>
-        <option value="Creatinine">Créatinine</option>
-        <option value="Uree">Urée</option>
-        <option value="ECBU">ECBU</option>
-        <option value="Bilan_hepatique">Bilan hépatique</option>
-        <option value="Bilan_lipidique">Bilan lipidique</option>
-        <option value="TSH">TSH</option>
-      </select>
-    </div>
-
-  </div>
-</div>
-
-      <div className="custom-modal-footer">
-        <button
-          className="btn-cancel"
+      {showAddModal && (
+        <div
+          className="custom-modal-overlay"
           onClick={() => setShowAddModal(false)}
         >
-          Annuler
-        </button>
+          <div
+            className="custom-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="custom-modal-header">
+              <h3>Ajouter une demande d'examen</h3>
+            </div>
 
-        <button className="btn-save">
-          Enregistrer
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="custom-modal-body">
+              <div className="form-grid">
 
-<style>
-  {`
+                <div className="form-group">
+                  <label>Patient *</label>
+                  <select name="patient_id">
+                    <option value="">Sélectionner un patient</option>
+                    <option value="1">Jean Dupont</option>
+                    <option value="2">Marie Koffi</option>
+                    <option value="3">Paul Mensah</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Type d'analyse *</label>
+                  <select name="type_analyse">
+                    <option value="">Sélectionner une analyse</option>
+                    <option value="NFS">NFS</option>
+                    <option value="Glycemie">Glycémie</option>
+                    <option value="Creatinine">Créatinine</option>
+                    <option value="Uree">Urée</option>
+                    <option value="ECBU">ECBU</option>
+                    <option value="Bilan_hepatique">Bilan hépatique</option>
+                    <option value="Bilan_lipidique">Bilan lipidique</option>
+                    <option value="TSH">TSH</option>
+                  </select>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="custom-modal-footer">
+              <button
+                className="btn-cancel"
+                onClick={() => setShowAddModal(false)}
+              >
+                Annuler
+              </button>
+
+              <button className="btn-save">
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>
+        {`
   .custom-modal-overlay{
   position:fixed;
   inset:0;
@@ -276,7 +300,7 @@ export default function ExamensMedecin() {
   }
 }
   `}
-  </style>
+      </style>
     </main>
   );
 }

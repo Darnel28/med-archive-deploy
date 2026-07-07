@@ -145,9 +145,9 @@ const DemandeExamLabo = () => {
                       <td><span className={`rdv-status ${isPaid ? 'done' : 'pending'}`}>{isPaid ? 'Paye' : 'En attente de paiement'}</span></td>
                       <td><span className="rdv-status upcoming">{analysis.statut}</span></td>
                       <td className="rdv-actions table-actions-compact">
-                        <button className="icon-action" title="Prelever" onClick={() => changeStatus(analysis, 'preleve')} disabled={!isPaid || analysis.statut === 'termine'}>
+                        {/* <button className="icon-action" title="Prelever" onClick={() => changeStatus(analysis, 'preleve')} disabled={!isPaid || analysis.statut === 'termine'}>
                           <i className="fa-solid fa-vial"></i>
-                        </button>
+                        </button> */}
                         <button className="icon-action" title="Ajouter resultat" onClick={() => openResultModal(analysis)} disabled={!isPaid || analysis.statut === 'termine'}>
                           <i className="fa-solid fa-file-medical"></i>
                         </button>
@@ -167,262 +167,352 @@ const DemandeExamLabo = () => {
         </article>
       </section>
 
-     {resultModal && (
-    <div className="modal-backdrop">
-        <form className="modal-card modal-result" onSubmit={submitResult}>
-
-            {/* <div className="modal-icon">
-                <i className="fa-solid fa-flask-vial"></i>
-            </div> */}
+      {resultModal && (
+        <div className="modal-backdrop" onClick={() => { setResultModal(null); setResultFile(null); }}>
+          <div className="modal-card modal-result" onClick={(e) => e.stopPropagation()}>
+            {/* Bouton de fermeture */}
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => { setResultModal(null); setResultFile(null); }}
+              aria-label="Fermer"
+            >
+              ×
+            </button>
 
             <h2>Résultat d'analyse</h2>
-
             <p className="modal-description">
-                Saisissez les informations concernant le résultat de
-                <strong> {resultModal.type_analyse}</strong>.
+              Saisissez les informations concernant le résultat de
+              <strong> {resultModal.type_analyse}</strong>.
             </p>
 
-            <div className="modal-form">
-
+            <form className="modal-form" onSubmit={submitResult}>
+              <div className="form-row">
                 <div className="form-group">
-                    <label>Valeur</label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        placeholder="Ex : 12.5"
-                        value={resultForm.valeur}
-                        onChange={(e) =>
-                            setResultForm((prev) => ({
-                                ...prev,
-                                valeur: e.target.value,
-                            }))
-                        }
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Unité</label>
-                    <input
-                        type="text"
-                        placeholder="Ex : g/L"
-                        value={resultForm.unite}
-                        onChange={(e) =>
-                            setResultForm((prev) => ({
-                                ...prev,
-                                unite: e.target.value,
-                            }))
-                        }
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Commentaire</label>
-                    <textarea
-                        rows="4"
-                        placeholder="Conclusion ou observations..."
-                        value={resultForm.commentaire}
-                        onChange={(e) =>
-                            setResultForm((prev) => ({
-                                ...prev,
-                                commentaire: e.target.value,
-                            }))
-                        }
-                    />
+                  <label>Valeur</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="Ex : 12.5"
+                    value={resultForm.valeur}
+                    onChange={(e) =>
+                      setResultForm((prev) => ({
+                        ...prev,
+                        valeur: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div className="form-group">
-    <label>Résultat (Image ou PDF)</label>
+                  <label>Unité</label>
+                  <input
+                    type="text"
+                    placeholder="Ex : g/L"
+                    value={resultForm.unite}
+                    onChange={(e) =>
+                      setResultForm((prev) => ({
+                        ...prev,
+                        unite: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
 
-    <input
-        type="file"
-        accept="image/*,.pdf"
-        onChange={(e) => setResultFile(e.target.files[0])}
-    />
-</div>
+              <div className="form-group">
+                <label>Commentaire</label>
+                <textarea
+                  rows="2"
+                  placeholder="Conclusion ou observations..."
+                  value={resultForm.commentaire}
+                  onChange={(e) =>
+                    setResultForm((prev) => ({
+                      ...prev,
+                      commentaire: e.target.value,
+                    }))
+                  }
+                />
+              </div>
 
-                <label className="result-checkbox">
-                    <input
-                        type="checkbox"
-                        checked={resultForm.normale}
-                        onChange={(e) =>
-                            setResultForm((prev) => ({
-                                ...prev,
-                                normale: e.target.checked,
-                            }))
-                        }
-                    />
+              <div className="form-group">
+                <label>Résultat (Image ou PDF)</label>
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setResultFile(e.target.files[0])}
+                />
+              </div>
 
-                    <span>Résultat dans les valeurs normales</span>
-                </label>
-
-            </div>
-
-            <div className="modal-actions">
-
+              <label className="result-checkbox">
+                <input
+                  type="checkbox"
+                  checked={resultForm.normale}
+                  onChange={(e) =>
+                    setResultForm((prev) => ({
+                      ...prev,
+                      normale: e.target.checked,
+                    }))
+                  }
+                />
+                <span>Résultat dans les valeurs normales</span>
+              </label>
+              <div className="modal-actions">
                 <button
-                    type="button"
-                    className="btn-outline"
-                    onClick={() => {
-                      setResultModal(null);
-                      setResultFile(null);
-                    }}
+                  type="button"
+                  className="btn-outline"
+                  onClick={() => { setResultModal(null); setResultFile(null); }}
                 >
-                    Annuler
+                  Annuler
                 </button>
-
-                <button
-                    type="submit"
-                    className="btn-solid"
-                >
-                    <i className="fa-solid fa-floppy-disk"></i>
-                    &nbsp; Enregistrer
+                <button type="submit" className="btn-solid">
+                  <i className="fa-solid fa-floppy-disk"></i>
+                  &nbsp; Enregistrer
                 </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-            </div>
-
-        </form>
-    </div>
-)}
-
-  <style>
-        {
-          `
-         .modal-backdrop{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
-}
-
-.modal-card{
-    background:#fff;
-    width:95%;
-    max-width:650px;
-    border-radius:18px;
-    padding:30px;
-    box-shadow:0 15px 45px rgba(0,0,0,.25);
-    animation:popup .25s;
-}
-
-@keyframes popup{
-    from{
-        opacity:0;
-        transform:scale(.9);
+      <style>
+        {`
+    /* ---------- Modal ---------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      animation: fadeIn 0.2s ease;
     }
-    to{
-        opacity:1;
-        transform:scale(1);
+
+    .modal-card {
+      background: #ffffff;
+      width: 95%;
+      max-width: 560px;
+      border-radius: 20px;
+      padding: 24px 28px 28px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.25s ease;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
     }
-}
 
-.modal-card h2{
-    text-align:center;
-    margin-bottom:10px;
-    color:#0f172a;
-}
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
 
-.modal-description{
-    text-align:center;
-    color:#64748b;
-    margin-bottom:25px;
-}
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
-.modal-form{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-}
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      line-height: 1;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: 0.2s;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
 
-.form-group{
-    display:flex;
-    flex-direction:column;
-}
+    .modal-close:hover {
+      color: #0f172a;
+      background: #f1f5f9;
+    }
 
-.form-group label{
-    margin-bottom:8px;
-    font-weight:600;
-    color:#334155;
-}
+    .modal-card h2 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      text-align: center;
+    }
 
-.form-group input,
-.form-group textarea{
-    width:100%;
-    padding:14px;
-    border:1px solid #d1d5db;
-    border-radius:12px;
-    font-size:15px;
-    box-sizing:border-box;
-}
+    .modal-description {
+      text-align: center;
+      color: #475569;
+      font-size: 14px;
+      margin: 0 0 22px 0;
+    }
 
-.form-group textarea{
-    min-height:120px;
-}
+    .modal-description strong {
+      color: #0f172a;
+    }
 
-.result-checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    background:#f8fafc;
-    padding:15px;
-    border-radius:12px;
-}
+    /* ---------- Formulaire ---------- */
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-.modal-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:15px;
-    margin-top:25px;
-}
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
 
-.btn-outline{
-    background:#f1f5f9;
-    border:none;
-    border-radius:10px;
-    padding:12px 20px;
-    cursor:pointer;
-}
+    .form-row .form-group {
+      flex: 1;
+    }
 
-.btn-solid{
-    background:#0ea5e9;
-    color:#fff;
-    border:none;
-    border-radius:10px;
-    padding:12px 20px;
-    cursor:pointer;
-}
-    /* Chrome, Edge, Opera */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{
-    -webkit-appearance:none;
-    margin:0;
-}
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
 
-/* Firefox */
-input[type=number]{
-    appearance:textfield;
-    -moz-appearance:textfield;
-}
+    .form-group label {
+      margin-bottom: 5px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #334155;
+    }
 
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: 0.15s;
+      box-sizing: border-box;
+      background: #fafbfc;
+    }
 
-.form-group input[type=file]{
-    border:2px dashed #0ea5e9;
-    border-radius:12px;
-    padding:18px;
-    cursor:pointer;
-    background:#f8fbff;
-    transition:.25s;
-}
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #0ea5e9;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+      background: #ffffff;
+    }
 
-.form-group input[type=file]:hover{
-    background:#eef8ff;
-}
-          `
+    .form-group textarea {
+      min-height: 60px;
+      resize: vertical;
+      font-family: inherit;
+    }
 
-        }
+    .form-group input[type="file"] {
+      padding: 12px;
+      border: 2px dashed #0ea5e9;
+      border-radius: 10px;
+      background: #f8fbff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .form-group input[type="file"]:hover {
+      background: #eef8ff;
+    }
+
+    /* Checkbox personnalisée */
+    .result-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #1e293b;
+      transition: 0.15s;
+    }
+
+    .result-checkbox:hover {
+      background: #f1f5f9;
+    }
+
+    .result-checkbox input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #0ea5e9;
+      cursor: pointer;
+    }
+
+    /* Boutons */
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn-outline,
+    .btn-solid {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-outline {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .btn-outline:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-solid {
+      background: #0ea5e9;
+      color: #ffffff;
+    }
+
+    .btn-solid:hover {
+      background: #0284c7;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .form-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .modal-card {
+        padding: 20px;
+      }
+    }
+
+    /* Supprimer les flèches des champs number */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+  `}
       </style>
-  
+
     </main>
   );
 };

@@ -29,30 +29,15 @@ export async function getMedecinById(medecinId, token) {
   const json = await response.json();
 
   if (!response.ok) {
-    throw new Error(json?.message || "Erreur lors de la récupération du médecin");
+    throw new Error(json?.message || "Erreur lors de la recuperation du medecin");
   }
 
   return json.data;
 }
 
-export async function updateMedecin(id, payload, token) {
-  const response = await fetch(`${API_URL}/medecins/${id}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const json = await response.json();
-
-  if (!response.ok) {
-    throw new Error(json?.message || "Erreur lors de la mise à jour du médecin");
-  }
-
-  return json.data;
+export async function updateMedecin(id, payload) {
+  const res = await apiClient.put(`/medecins/${id}`, payload);
+  return res.data;
 }
 
 export async function getPlanning(id) {
