@@ -11,10 +11,11 @@ const statusLabels = {
 
 function unwrapPaginated(response) {
   const payload = response?.data ?? response;
+  const paginated = payload?.data && !Array.isArray(payload.data) ? payload.data : payload;
   return {
-    rows: Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [],
-    total: payload?.total ?? payload?.data?.length ?? 0,
-    lastPage: payload?.last_page ?? 1,
+    rows: Array.isArray(paginated?.data) ? paginated.data : Array.isArray(paginated) ? paginated : [],
+    total: paginated?.total ?? paginated?.data?.length ?? 0,
+    lastPage: paginated?.last_page ?? 1,
   };
 }
 

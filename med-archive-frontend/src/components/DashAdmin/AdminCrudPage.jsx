@@ -6,6 +6,9 @@ export function unwrapList(response) {
   const payload = response?.data ?? response;
   if (Array.isArray(payload)) return { rows: payload, total: payload.length };
   if (Array.isArray(payload?.data)) return { rows: payload.data, total: payload.total ?? payload.data.length };
+  if (Array.isArray(payload?.data?.data)) {
+    return { rows: payload.data.data, total: payload.data.total ?? payload.data.data.length };
+  }
   if (Array.isArray(response?.data?.data)) {
     return { rows: response.data.data, total: response.data.total ?? response.data.data.length };
   }

@@ -165,7 +165,7 @@ function formFromConsultation(item) {
     patientNaissance: ageLabel(flat.patient_date_naissance || patientUser?.date_naissance),
     patientDossier: flat.numero_dossier || item?.dossier?.numero_dossier || '',
     consultDate: parts.date,
-    consultHeure: flat.heure || parts.time,
+   consultHeure: getCurrentTime(),
     consultMedecin: textValue(
       typeof flat.medecin === 'string' ? flat.medecin : '',
       doctor?.user?.name,
@@ -188,9 +188,36 @@ function formFromConsultation(item) {
 export default function ConsultationMedecin() {
   const [consultationId, setConsultationId] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
+  const getCurrentDateTime = () => {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hour = String(now.getHours()).padStart(2, "0");
+    const minute = String(now.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hour}:${minute}`;
+};
+function getCurrentTime() {
+    const now = new Date();
+
+    const hour = String(now.getHours()).padStart(2, "0");
+    const minute = String(now.getMinutes()).padStart(2, "0");
+
+    return `${hour}:${minute}`;
+}
+
+useEffect(() => {
+    setFormData(current => ({
+        ...current,
+        consultProchainRdv: getCurrentDateTime()
+    }));
+}, []);
   const [laboratoires, setLaboratoires] = useState([]);
   const [message, setMessage] = useState('');
   const [saving, setSaving] = useState(false);
+  
   const handleExamenCheckbox = (e) => {
     const { name, checked } = e.target;
 
@@ -248,6 +275,13 @@ export default function ConsultationMedecin() {
       });
     return () => { active = false; };
   }, []);
+  
+  useEffect(() => {
+    setFormData((current) => ({
+        ...current,
+        consultHeure: getCurrentTime(),
+    }));
+}, []);
 
   const change = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
   const changePrescription = (index, key, value) => setFormData((current) => ({
@@ -350,7 +384,10 @@ export default function ConsultationMedecin() {
               <div className="line-field"><label>Médecin responsable</label><input value={formData.consultMedecin} readOnly /></div>
               <div className="line-field"><label>Hôpital / établissement</label><input value={formData.consultHopital} readOnly /></div>
               <div className="line-field"><label>Type de consultation</label><select value={formData.consultType} onChange={(e) => change('consultType', e.target.value)}><option>Nouvelle consultation</option><option>Suivi</option><option>Urgence</option></select></div>
-              <div className="line-field"><label>Prochain RDV</label><input type="datetime-local" value={formData.consultProchainRdv} onChange={(e) => change('consultProchainRdv', e.target.value)} /></div>
+              <div className="line-field"><label>Prochain RDV</label><input type="datetime-local"
+    value={formData.consultProchainRdv}
+    min={getCurrentDateTime()}
+    onChange={(e) => change("consultProchainRdv", e.target.value)} /></div>
             </div>
           </section>
           <section className="sheet-section">

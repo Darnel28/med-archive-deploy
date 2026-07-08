@@ -4,7 +4,7 @@ import { getAuthUser } from '../../api/client';
 import { getCurrentUser } from '../../api/authApi';
 import { affecterDossierMedecin, createPatient, getMesPatientsEtablissement, getPatients as getAllPatients, listMedecins } from '../../api';
 import { getPatients as getDoctorPatients } from '../../api/medecinApi';
-import { getMesPatientsService, getServices } from '../../api/serviceApi';
+import { getCurrentService, getMesPatientsService, getServices } from '../../api/serviceApi';
 import { apiErrorMessage, unwrapList, valueAt } from '../DashAdmin/AdminCrudPage.jsx';
 import AvatarInitials from '../AvatarInitials.jsx';
 import Pagination, { DEFAULT_PAGE_SIZE, paginateRows } from './Pagination.jsx';
@@ -31,9 +31,14 @@ function normalizePatient(row) {
   const patient = row.patient || row;
   const user = patient.user || row.user || {};
   const dossier = patient.dossier || row.dossier || {};
+  const service = patient.service || row.service || {};
+  const dossierServiceOwner = dossier.serviceProprietaire || dossier.service_proprietaire || {};
   return {
     id: patient.id || row.id,
     dossierId: dossier.id,
+    serviceId: patient.service_id || service.id || row.service_id,
+    dossierStatus: dossier.statut || '',
+    dossierOwnerServiceId: dossier.service_proprietaire_id || dossierServiceOwner.id,
     name: user.name || row.name || patient.name || '-',
     role: patient.groupe_sanguin ? `Groupe ${patient.groupe_sanguin}` : 'Patient suivi',
     org: dossier.numero_dossier ? `Dossier: ${dossier.numero_dossier}` : `IMU: ${patient.imu || '-'}`,
@@ -77,11 +82,23 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   const [modalMessage, setModalMessage] = useState('');
   const [modalError, setModalError] = useState('');
   const [doctors, setDoctors] = useState([]);
+  const [currentServiceId, setCurrentServiceId] = useState(null);
   const [assignPatient, setAssignPatient] = useState(null);
   const [assignForm, setAssignForm] = useState({ medecin_id: '', date_consultation: '', motif: 'Rendez-vous d affectation', observations: '' });
   const [assignSaving, setAssignSaving] = useState(false);
   const [assignError, setAssignError] = useState('');
   const [assignMessage, setAssignMessage] = useState('');
+  const getMinDateTime = () => {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
   async function loadPatients() {
     setLoading(true);
@@ -104,7 +121,12 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
           response = await getAllPatients({ per_page: 1000 });
         }
       } else if (source === 'service') {
-        response = await getMesPatientsService({ per_page: 1000 });
+        const [patientsResponse, serviceResponse] = await Promise.all([
+          getMesPatientsService({ per_page: 1000 }),
+          getCurrentService().catch(() => null),
+        ]);
+        response = patientsResponse;
+        setCurrentServiceId(serviceResponse?.data?.id || serviceResponse?.id || null);
       } else {
         response = await getAllPatients({ per_page: 1000 });
       }
@@ -206,7 +228,18 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   }, [searchQuery, patients.length, view]);
 
   const paginatedPatients = useMemo(() => paginateRows(filteredPatients, page, DEFAULT_PAGE_SIZE), [filteredPatients, page]);
-  const canAssignDoctor = source !== 'doctor';
+
+  function canAssignDoctor(patient) {
+    if (source === 'doctor') return false;
+    if (source !== 'service') return true;
+    if (!currentServiceId) return false;
+
+    if (patient.dossierOwnerServiceId) {
+      return String(patient.dossierOwnerServiceId) === String(currentServiceId);
+    }
+
+    return patient.dossierStatus !== 'transfere' && String(patient.serviceId) === String(currentServiceId);
+  }
 
   const renderAvatar = (patient) => <AvatarInitials name={patient.name} size={72} bgColor="#13c3b8" />;
 
@@ -264,7 +297,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                 <Link className="mes-patients-action-btn" to={`${detailPath}?patient_id=${patient.id}`}>
                   <i className="fa-solid fa-folder-open"></i>
                 </Link>
-                {canAssignDoctor && (
+                {canAssignDoctor(patient) && (
                   <button className="mes-patients-action-btn" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}>
                     <i className="fa-solid fa-user-doctor"></i>
                   </button>
@@ -300,7 +333,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
                     <td>
                       <div className="mes-patients-list-actions">
                         <Link className="icon-action" to={`${detailPath}?patient_id=${patient.id}`}><i className="fa-solid fa-folder-open"></i></Link>
-                        {canAssignDoctor && (
+                        {canAssignDoctor(patient) && (
                           <button className="icon-action" type="button" title="Affecter a un medecin" onClick={() => openAssignModal(patient)}><i className="fa-solid fa-user-doctor"></i></button>
                         )}
                         {patient.phone && <a className="icon-action" href={`tel:${patient.phone}`}><i className="fa-solid fa-phone"></i></a>}
@@ -346,7 +379,19 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
               </div>
               <div className="form-group">
                 <label>Date et heure du rendez-vous</label>
-                <input type="datetime-local" name="date_consultation" value={assignForm.date_consultation} onChange={(event) => setAssignForm((form) => ({ ...form, date_consultation: event.target.value }))} required />
+                <input
+  type="datetime-local"
+  name="date_consultation"
+  value={assignForm.date_consultation}
+  min={getMinDateTime()}
+  onChange={(event) =>
+    setAssignForm((form) => ({
+      ...form,
+      date_consultation: event.target.value,
+    }))
+  }
+  required
+/>
               </div>
               <div className="form-group">
                 <label>Motif</label>
@@ -417,161 +462,175 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
         </div>
       )}<style>
   {`
-  .add-patient-btn{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 18px;
-  border:none;
-  border-radius:12px;
-  background:#13c3b8;
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
+ .custom-modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
 }
 
-.add-patient-btn:hover{
-  opacity:.9;
-}
-
-.custom-modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:9999;
-}
-
+/* Modal normal (Affecter à un médecin) */
 .custom-modal{
-  width:100%;
-  max-width:500px;
-  background:#fff;
-  border-radius:20px;
-  overflow:hidden;
-  box-shadow:0 20px 50px rgba(0,0,0,.15);
+  width: 90%;
+  max-width: 620px;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,.15);
 }
 
+/* Grand modal (Ajouter un patient) */
 .custom-modal-wide{
-  max-width:860px;
+  max-width: 900px;
 }
 
 .custom-modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 22px;
-  border-bottom:1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.custom-modal-header h3{
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #16204a;
 }
 
 .custom-modal-close{
-  border:none;
-  background:none;
-  font-size:20px;
-  cursor:pointer;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+  color: #555;
 }
 
 .custom-modal-body{
-  padding:22px;
+  padding: 18px 22px;
+  overflow-y: auto;
 }
 
 .custom-modal-grid{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:14px;
-  max-height:65vh;
-  overflow:auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
 }
 
 .form-group-full,
 .modal-alert{
-  grid-column:1 / -1;
-}
-
-.modal-alert{
-  margin:0;
-  padding:10px 12px;
-  border-radius:8px;
-}
-
-.modal-alert-error{
-  color:#b42318;
-  background:#fff1f0;
-}
-
-.modal-alert-success{
-  color:#027a48;
-  background:#ecfdf3;
+  grid-column: 1 / -1;
 }
 
 .form-group{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  margin-bottom:16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.form-group label{
+  font-size: 15px;
+  font-weight: 500;
+  color: #29436b;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea{
-  border:1px solid #d9e1ea;
-  border-radius:10px;
-  padding:10px 14px;
-  font:inherit;
+  width: 100%;
+  border: 1px solid #d9e1ea;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 15px;
+  transition: .2s;
 }
 
 .form-group input,
 .form-group select{
-  height:44px;
+  height: 46px;
+}
+
+.form-group textarea{
+  min-height: 90px;
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  outline: none;
+  border-color: #13c3b8;
+  box-shadow: 0 0 0 3px rgba(19,195,184,.15);
 }
 
 .custom-modal-footer{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  padding:18px 22px;
-  border-top:1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 22px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .btn-cancel{
-  border:none;
-  padding:10px 18px;
-  border-radius:10px;
-  cursor:pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: #eef2f7;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .btn-save{
-  border:none;
-  padding:10px 18px;
-  border-radius:10px;
-  background:#13c3b8;
-  color:#fff;
-  cursor:pointer;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: #13c3b8;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .btn-save:disabled{
-  opacity:.65;
-  cursor:not-allowed;
+  opacity: .6;
+  cursor: not-allowed;
 }
 
-@media (max-width:720px){
-  .custom-modal-grid{
-    grid-template-columns:1fr;
+.modal-alert{
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.modal-alert-error{
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.modal-alert-success{
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+@media (max-width: 768px){
+
+  .custom-modal{
+    width: 95%;
+    max-width: 95%;
+    max-height: 90vh;
   }
-}
 
-  .custom-modal {
-  width: 95%;
-  max-width: 950px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
+  .custom-modal-grid{
+    grid-template-columns: 1fr;
+  }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
 }
 
 .form-group {

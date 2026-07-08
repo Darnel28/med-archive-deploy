@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { jsPDF } from 'jspdf';
-import { getMesConsultations } from '../../api/patientApi';
+import { getMesFactures } from '../../api/patientApi';
 import { payerFacture } from '../../api/factureApi';
 import { updateConsultation } from '../../api/consultationApi';
 import { apiClient, getAuthUser } from '../../api/client';
@@ -18,6 +18,24 @@ const formatMoney = (value) => `${Number(value || 0).toLocaleString('fr-FR')} FC
 const safeText = (value, fallback = '-') => {
   if (value === null || value === undefined || value === '') return fallback;
   return String(value);
+};
+
+const factureToRdv = (facture) => {
+  const consultation = facture?.consultation || {};
+  return {
+    ...consultation,
+    id: consultation.id || `facture-${facture.id}`,
+    facture,
+    date_consultation: consultation.date_consultation || facture.created_at,
+    medecin: consultation.medecin,
+    service: consultation.service,
+    motif: consultation.motif || (facture.type === 'examen' ? 'Examen medical' : 'Consultation medicale'),
+    statut: consultation.statut || facture.statut,
+    statut_paiement: facture.statut === 'payee' ? 'payee' : facture.statut,
+    montant_consultation: facture.montant_total,
+    updated_at: facture.updated_at,
+    created_at: facture.created_at,
+  };
 };
 
 const getHospitalName = (rdv) => (
@@ -302,10 +320,10 @@ const RendezVousPatient = () => {
     setLoading(true);
     setMessage('');
     try {
-      const response = await getMesConsultations({ periode: 'avenir', per_page: 50 });
-      setAppointments(unwrapRows(response));
+      const response = await getMesFactures({ per_page: 100 });
+      setAppointments(unwrapRows(response).map(factureToRdv));
     } catch (error) {
-      setMessage(error?.response?.data?.message || 'Impossible de charger vos rendez-vous.');
+      setMessage(error?.response?.data?.message || 'Impossible de charger vos paiements.');
       setAppointments([]);
     } finally {
       setLoading(false);
@@ -325,6 +343,8 @@ const RendezVousPatient = () => {
         rdv?.medecin?.user?.name,
         rdv?.medecin?.specialite?.nom,
         rdv?.service?.nom,
+        rdv?.facture?.numero,
+        rdv?.facture?.type,
         rdv?.statut,
         rdv?.statut_paiement,
       ].join(' ').toLowerCase();
@@ -425,13 +445,13 @@ const RendezVousPatient = () => {
   return (
     <main className="content page-tight">
       <section className="page-title-card">
-        <h1>Rendez-vous medicaux</h1>
+        <h1>Paiements</h1>
       </section>
 
       <section className="table-toolbar">
-        <label className="table-search" aria-label="Recherche rendez-vous">
+        <label className="table-search" aria-label="Recherche paiements">
           <i className="fa-solid fa-magnifying-glass"></i>
-          <input type="text" placeholder="Chercher un rendez-vous..." value={searchTerm} onChange={handleSearch} />
+          <input type="text" placeholder="Chercher un paiement..." value={searchTerm} onChange={handleSearch} />
         </label>
       </section>
 
@@ -455,7 +475,7 @@ const RendezVousPatient = () => {
               <tbody>
                 {loading && <tr><td colSpan="7" style={{ textAlign: 'center' }}>Chargement...</td></tr>}
                 {!loading && currentRdv.map((rdv) => (
-                  <tr key={rdv.id}>
+                  <tr key={rdv.facture?.id || rdv.id}>
                     <td>{formatDate(rdv.date_consultation)}</td>
                     <td>{formatHour(rdv.date_consultation)}</td>
                     <td>{rdv.medecin?.user?.name || 'Medecin'}</td>
@@ -485,13 +505,13 @@ const RendezVousPatient = () => {
                   </tr>
                 ))}
                 {!loading && currentRdv.length === 0 && (
-                  <tr><td colSpan="7" style={{ textAlign: 'center' }}>Aucun rendez-vous a venir</td></tr>
+                  <tr><td colSpan="7" style={{ textAlign: 'center' }}>Aucun paiement trouve</td></tr>
                 )}
               </tbody>
             </table>
           </div>
           <div className="table-footer">
-            <span className="table-meta">{filteredRdv.length} rendez-vous planifies</span>
+            <span className="table-meta">{filteredRdv.length} paiement(s)</span>
             <div className="table-pagination">
               <button className="table-page" onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
                 Precedent
