@@ -389,6 +389,13 @@
   /* Pas de min-height, pas de height fixe : la hauteur est celle de la ligne */
 }
 
+.rdv-table td.rdv-actions,
+.rdv-table td.table-actions-compact {
+  display: table-cell !important;
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+}
+
 .rdv-table .rdv-actions .icon-action {
   display: inline-flex;
   align-items: center;
@@ -408,6 +415,17 @@
 .rdv-table .rdv-actions .icon-action i {
   font-size: 16px;
   line-height: 1;
+}
+
+.rdv-table td.rdv-actions .icon-action,
+.rdv-table td.table-actions-compact .icon-action {
+  vertical-align: middle;
+  margin-right: 0.6rem;
+}
+
+.rdv-table td.rdv-actions .icon-action:last-child,
+.rdv-table td.table-actions-compact .icon-action:last-child {
+  margin-right: 0;
 }
 
 .rdv-table .rdv-actions .icon-action.danger {

@@ -249,7 +249,7 @@ const TransfertService = () => {
                     <th>Service actuel</th>
                     <th>Service demandé</th>
                     <th>Statut</th>
-                    {/* <th>Demandeur</th> */}
+                    <th>Demandeur</th>
                     <th>Motif</th>
                     <th>Date demande</th>
                     <th>Actions</th>
@@ -286,7 +286,7 @@ const TransfertService = () => {
                           </td>
                           <td>{item.medecinReferent}</td>
                           <td>{item.motif}</td>
-                          {/* <td className="table-nowrap">{item.dateDemande}</td> */}
+                          <td className="table-nowrap">{item.dateDemande}</td>
                           <td className="transfer-actions table-actions-compact">
                             <button className="action-icon" title="Voir" type="button" onClick={() => openView(item)}>
                               <i className="fa-solid fa-eye"></i>

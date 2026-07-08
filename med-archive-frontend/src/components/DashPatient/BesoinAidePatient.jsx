@@ -140,13 +140,13 @@ const BesoinAidePatient = () => {
             </div>
 
             {/* BLOC CTA */}
-            <div className="besoin-aide-cta-block">
+            {/* <div className="besoin-aide-cta-block">
               <h4>Vous avez toujours besoin d'aide ?</h4>
               <p>Impossible de trouver la réponse? Notre équipe de support est là pour vous aider.</p>
               <button className="besoin-aide-btn besoin-aide-btn-primary" onClick={openTicketModal}>
                 Contacter le support
               </button>
-            </div>
+            </div> */}
           </aside>
 
           {/* COLONNE DROITE - FAQ */}

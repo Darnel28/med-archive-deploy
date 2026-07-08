@@ -33,12 +33,23 @@ function normalizePatient(row) {
   const dossier = patient.dossier || row.dossier || {};
   const service = patient.service || row.service || {};
   const dossierServiceOwner = dossier.serviceProprietaire || dossier.service_proprietaire || {};
+  const transferts = Array.isArray(dossier.transferts) ? dossier.transferts : [];
+  const latestAcceptedTransfer = transferts
+    .filter((transfer) => transfer.statut === 'accepte')
+    .sort((left, right) => {
+      const leftDate = new Date(left.date_approbation || left.updated_at || left.created_at || 0).getTime();
+      const rightDate = new Date(right.date_approbation || right.updated_at || right.created_at || 0).getTime();
+      return rightDate - leftDate;
+    })[0] || null;
   return {
     id: patient.id || row.id,
     dossierId: dossier.id,
     serviceId: patient.service_id || service.id || row.service_id,
     dossierStatus: dossier.statut || '',
     dossierOwnerServiceId: dossier.service_proprietaire_id || dossierServiceOwner.id,
+    transferStatus: latestAcceptedTransfer?.statut || '',
+    transferSourceEtablissementId: latestAcceptedTransfer?.etablissement_source_id,
+    transferDestinationEtablissementId: latestAcceptedTransfer?.etablissement_destination_id,
     name: user.name || row.name || patient.name || '-',
     role: patient.groupe_sanguin ? `Groupe ${patient.groupe_sanguin}` : 'Patient suivi',
     org: dossier.numero_dossier ? `Dossier: ${dossier.numero_dossier}` : `IMU: ${patient.imu || '-'}`,
@@ -83,6 +94,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   const [modalError, setModalError] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [currentServiceId, setCurrentServiceId] = useState(null);
+  const [currentEtablissementId, setCurrentEtablissementId] = useState(null);
   const [assignPatient, setAssignPatient] = useState(null);
   const [assignForm, setAssignForm] = useState({ medecin_id: '', date_consultation: '', motif: 'Rendez-vous d affectation', observations: '' });
   const [assignSaving, setAssignSaving] = useState(false);
@@ -115,11 +127,13 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
         if (!medecinId) throw new Error('Impossible d identifier le medecin connecte.');
         response = await getDoctorPatients(medecinId);
       } else if (source === 'etablissement') {
-        try {
-          response = await getMesPatientsEtablissement({ per_page: 1000 });
-        } catch {
-          response = await getAllPatients({ per_page: 1000 });
-        }
+        const [patientsResponse, authResponse] = await Promise.all([
+          getMesPatientsEtablissement({ per_page: 1000 }),
+          getCurrentUser().catch(() => null),
+        ]);
+        const currentUser = normalizeAuthPayload(authResponse);
+        response = patientsResponse;
+        setCurrentEtablissementId(currentUser?.id || currentUser?.user?.id || null);
       } else if (source === 'service') {
         const [patientsResponse, serviceResponse] = await Promise.all([
           getMesPatientsService({ per_page: 1000 }),
@@ -231,6 +245,11 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
 
   function canAssignDoctor(patient) {
     if (source === 'doctor') return false;
+    if (source === 'etablissement' && patient.dossierStatus === 'transfere') {
+      return patient.transferStatus === 'accepte'
+        && currentEtablissementId
+        && String(patient.transferDestinationEtablissementId) === String(currentEtablissementId);
+    }
     if (source !== 'service') return true;
     if (!currentServiceId) return false;
 

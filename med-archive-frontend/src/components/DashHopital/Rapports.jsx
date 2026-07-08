@@ -17,6 +17,14 @@ function normalizeStatus(value) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+function firstValue(item, paths, fallback = '-') {
+  for (const path of paths) {
+    const value = valueAt(item, path, undefined);
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return fallback;
+}
+
 const Rapports = () => {
   const [transferts, setTransferts] = useState([]);
   const [consultations, setConsultations] = useState([]);
@@ -54,11 +62,11 @@ const Rapports = () => {
 
   const movements = useMemo(() => {
     const fromTransfers = transferts.map((item) => ({
-      patient: valueAt(item, 'dossier.patient.user.name', 'Patient'),
+      patient: firstValue(item, ['dossier.patient.user.name', 'dossier.numero_dossier'], 'Patient'),
       movement: 'Transfert',
-      detail: `${valueAt(item, 'serviceSource.nom', '-')} vers ${valueAt(item, 'serviceDestination.nom', '-')}`,
-      author: valueAt(item, 'medecin.user.name', valueAt(item, 'created_by.name', '-')),
-      timestamp: formatDateTime(item.created_at || item.date_transfert || item.updated_at),
+      detail: `${firstValue(item, ['service_source.nom', 'serviceSource.nom'])} vers ${firstValue(item, ['service_destination.nom', 'serviceDestination.nom'], 'A affecter')}`,
+      author: firstValue(item, ['demandeur.name', 'created_by.name', 'dossier.medecin_referent.user.name', 'dossier.medecinReferent.user.name']),
+      timestamp: formatDateTime(item.date_demande || item.created_at || item.date_transfert || item.updated_at),
     }));
 
     const fromConsultations = consultations.map((item) => ({
@@ -79,15 +87,15 @@ const Rapports = () => {
       counts[service] = (counts[service] || 0) + 1;
     });
     transferts.forEach((item) => {
-      const service = valueAt(item, 'serviceDestination.nom', '');
+      const service = firstValue(item, ['service_destination.nom', 'serviceDestination.nom'], '');
       if (service) counts[service] = (counts[service] || 0) + 1;
     });
 
     const max = Math.max(1, ...Object.values(counts));
     return Object.entries(counts).map(([service, mouvements]) => ({
       service,
-      entrants: transferts.filter((item) => valueAt(item, 'serviceDestination.nom', '') === service).length,
-      sortants: transferts.filter((item) => valueAt(item, 'serviceSource.nom', '') === service).length,
+      entrants: transferts.filter((item) => firstValue(item, ['service_destination.nom', 'serviceDestination.nom'], '') === service).length,
+      sortants: transferts.filter((item) => firstValue(item, ['service_source.nom', 'serviceSource.nom'], '') === service).length,
       mouvements,
       charge: Math.round((mouvements / max) * 100),
     }));
@@ -95,13 +103,13 @@ const Rapports = () => {
 
   const transferRows = useMemo(() => transferts.map((item) => ({
     id: item.id,
-    patient: valueAt(item, 'dossier.patient.user.name', 'Patient'),
-    fromService: valueAt(item, 'serviceSource.nom', '-'),
-    toService: valueAt(item, 'serviceDestination.nom', '-'),
-    transferredBy: valueAt(item, 'createdBy.name', valueAt(item, 'medecin.user.name', '-')),
-    referringDoctor: valueAt(item, 'medecin.user.name', '-'),
+    patient: firstValue(item, ['dossier.patient.user.name', 'dossier.numero_dossier'], 'Patient'),
+    fromService: firstValue(item, ['service_source.nom', 'serviceSource.nom']),
+    toService: firstValue(item, ['service_destination.nom', 'serviceDestination.nom'], 'A affecter'),
+    transferredBy: firstValue(item, ['demandeur.name', 'created_by.name']),
+    referringDoctor: firstValue(item, ['dossier.medecin_referent.user.name', 'dossier.medecinReferent.user.name']),
     reason: item.motif || item.raison || '-',
-    date: formatDateTime(item.created_at || item.date_transfert || item.updated_at),
+    date: formatDateTime(item.date_demande || item.created_at || item.date_transfert || item.updated_at),
     status: normalizeStatus(item.statut),
   })), [transferts]);
 

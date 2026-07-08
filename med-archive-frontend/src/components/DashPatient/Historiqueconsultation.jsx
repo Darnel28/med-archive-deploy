@@ -80,9 +80,9 @@ const ConsultationsHistory = () => {
                     <td>{consultation.motif || '-'}</td>
                     <td>{consultation.diagnostic || consultation.observations || '-'}</td>
                     <td className="rdv-actions table-actions-compact">
-                      <button type="button" className="icon-action" title="Voir" onClick={() => openConsultationModal(consultation, 'details')}>
+                      {/* <button type="button" className="icon-action" title="Voir" onClick={() => openConsultationModal(consultation, 'details')}>
                         <i className="fa-regular fa-eye"></i>
-                      </button>
+                      </button> */}
                       <button type="button" className="icon-action" title="Notes medicales" onClick={() => openConsultationModal(consultation, 'notes')}>
                         <i className="fa-regular fa-file-lines"></i>
                       </button>

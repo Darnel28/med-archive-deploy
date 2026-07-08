@@ -402,7 +402,7 @@ export default function DossierDuPatient({ currentPatient = false }) {
               <div className="profile-tags">
                 <span className="tag tag-neutral">Patient suivi</span>
                 {permissions.can_write === false && (
-                  <span className="tag tag-vip">Lecture seule</span>
+                  <span ></span>
                 )}
               </div>
               <p>{patient?.user?.adresse || "Adresse non renseignée"}</p>

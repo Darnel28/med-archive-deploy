@@ -289,6 +289,13 @@ body.dark-mode .transfer-group-row+tr td {
     white-space: nowrap;
 }
 
+td.transfer-actions,
+td.table-actions-compact.transfer-actions {
+    display: table-cell !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
 .transfer-actions .action-icon {
     padding: 0.35rem;
     font-size: 0.95rem;
@@ -297,6 +304,12 @@ body.dark-mode .transfer-group-row+tr td {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+.transfer-actions .action-icon:last-child {
+    margin-right: 0;
 }
 
 /* Add button specific to TransferService to avoid affecting other pages */

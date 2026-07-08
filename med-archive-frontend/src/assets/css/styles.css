@@ -1355,7 +1355,7 @@ body.dark-mode .pulse-item p {
     border-bottom: 1px solid var(--line);
     font-size: 15px;
     color: var(--text);
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .rdv-table th {
@@ -1595,7 +1595,7 @@ body.dark-mode .table-page.active {
 }
 
 .table-actions-compact {
-    justify-content: flex-end;
+    white-space: nowrap;
 }
 
 /* Badges */
@@ -2872,10 +2872,29 @@ body:not(.dark-mode) .settings-field textarea {
     flex-wrap: nowrap !important;
 }
 
+td.rdv-actions,
+td.table-actions-compact {
+    display: table-cell !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
 .icon-action {
     width: 30px;
     height: 30px;
     flex-shrink: 0;
+}
+
+td.rdv-actions .icon-action,
+td.table-actions-compact .icon-action {
+    display: inline-flex !important;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+td.rdv-actions .icon-action:last-child,
+td.table-actions-compact .icon-action:last-child {
+    margin-right: 0;
 }
 
 /* 6. Sidebar et topbar en blanc (mode clair) */

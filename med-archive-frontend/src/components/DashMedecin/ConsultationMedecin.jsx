@@ -165,7 +165,7 @@ function formFromConsultation(item) {
     patientNaissance: ageLabel(flat.patient_date_naissance || patientUser?.date_naissance),
     patientDossier: flat.numero_dossier || item?.dossier?.numero_dossier || '',
     consultDate: parts.date,
-   consultHeure: getCurrentTime(),
+    consultHeure: flat.heure || parts.time,
     consultMedecin: textValue(
       typeof flat.medecin === 'string' ? flat.medecin : '',
       doctor?.user?.name,
@@ -199,14 +199,6 @@ export default function ConsultationMedecin() {
 
     return `${year}-${month}-${day}T${hour}:${minute}`;
 };
-function getCurrentTime() {
-    const now = new Date();
-
-    const hour = String(now.getHours()).padStart(2, "0");
-    const minute = String(now.getMinutes()).padStart(2, "0");
-
-    return `${hour}:${minute}`;
-}
 
 useEffect(() => {
     setFormData(current => ({
@@ -275,13 +267,6 @@ useEffect(() => {
       });
     return () => { active = false; };
   }, []);
-  
-  useEffect(() => {
-    setFormData((current) => ({
-        ...current,
-        consultHeure: getCurrentTime(),
-    }));
-}, []);
 
   const change = (key, value) => setFormData((current) => ({ ...current, [key]: value }));
   const changePrescription = (index, key, value) => setFormData((current) => ({
@@ -384,10 +369,7 @@ useEffect(() => {
               <div className="line-field"><label>Médecin responsable</label><input value={formData.consultMedecin} readOnly /></div>
               <div className="line-field"><label>Hôpital / établissement</label><input value={formData.consultHopital} readOnly /></div>
               <div className="line-field"><label>Type de consultation</label><select value={formData.consultType} onChange={(e) => change('consultType', e.target.value)}><option>Nouvelle consultation</option><option>Suivi</option><option>Urgence</option></select></div>
-              <div className="line-field"><label>Prochain RDV</label><input type="datetime-local"
-    value={formData.consultProchainRdv}
-    min={getCurrentDateTime()}
-    onChange={(e) => change("consultProchainRdv", e.target.value)} /></div>
+              <div className="line-field"><label>Prochain RDV</label><input type="datetime-local" value={formData.consultProchainRdv} onChange={(e) => change('consultProchainRdv', e.target.value)} /></div>
             </div>
           </section>
           <section className="sheet-section">
@@ -414,7 +396,7 @@ useEffect(() => {
           <section className="sheet-section">
             <div className="section-title-row"><h3>6. Prescription (ordonnance)</h3><button className="btn-add-row" type="button" onClick={() => change('prescriptions', [...formData.prescriptions, { medicament: '', dosage: '', duree: '', frequence: '' }])}>+</button></div>
             <div className="rx-table-wrap"><table className="rx-table"><thead><tr><th>Nom du médicament</th><th>Posologie</th><th>Date de validité</th><th>Fréquence</th></tr></thead><tbody>
-              {formData.prescriptions.map((row, index) => <tr key={index}>{['medicament', 'dosage', 'duree', 'frequence'].map((key) => <td key={key}><input type={key === 'duree' ? 'date' : 'text'} required={key === 'duree'} value={row[key]} onChange={(e) => changePrescription(index, key, e.target.value)} /></td>)}</tr>)}
+              {formData.prescriptions.map((row, index) => <tr key={index}>{['medicament', 'dosage', 'duree', 'frequence'].map((key) => <td key={key}><input type={key === 'duree' ? 'date' : 'text'}  value={row[key]} onChange={(e) => changePrescription(index, key, e.target.value)} /></td>)}</tr>)}
             </tbody></table></div>
           </section>
           <section className="sheet-section">
