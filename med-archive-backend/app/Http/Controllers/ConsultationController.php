@@ -9,6 +9,7 @@ use App\Models\Ordonnance;
 use App\Models\Facture;
 use App\Models\AnalyseLaboratoire;
 use App\Models\Laboratoire;
+use App\Models\Medecin;
 use App\Models\Service;
 use App\Support\DossierAccess;
 use Illuminate\Http\Request;
@@ -51,14 +52,6 @@ class ConsultationController extends Controller
         // Filtre par motif
         if ($request->has('motif')) {
             $query->where('motif', 'like', "%{$request->motif}%");
-        }
-
-        // Filtre pour consultations payées ou urgentes (médecins)
-        if ($request->user()->isMedecin()) {
-            $query->where(function($q) {
-                $q->where('statut_paiement', 'payee')
-                ->orWhere('est_urgence', true);
-            });
         }
 
         if ($request->user()->isEtablissement()) {
@@ -141,6 +134,22 @@ class ConsultationController extends Controller
         DB::beginTransaction();
 
         try {
+            $currentUser = $request->user();
+            $medecin = $currentUser?->isMedecin()
+                ? $currentUser->medecin
+                : Medecin::findOrFail($validated['medecin_id']);
+
+            if (!$medecin) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profil medecin introuvable.',
+                ], 403);
+            }
+
+            $validated['medecin_id'] = $medecin->id;
+            $validated['service_id'] = $validated['service_id'] ?? $medecin->service_id;
+
             // Récupérer le dossier dès le début
             // $dossier = Dossier::findOrFail($validated['dossier_id']);
             $dossier = Dossier::where(
@@ -148,20 +157,22 @@ class ConsultationController extends Controller
     $validated['patient_id']
 )->firstOrFail();
 
-            if (!DossierAccess::canWrite($request->user(), $dossier)) {
+            if (!DossierAccess::canScheduleConsultation($request->user(), $dossier)) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Ce dossier a ete transfere et vous ne pouvez plus le modifier.',
+                    'message' => 'Ce patient a ete transfere vers un autre service. Vous ne pouvez plus lui programmer de rendez-vous.',
                 ], 403);
             }
 
             // Créer la consultation
             $estUrgence = $request->boolean('est_urgence', false);
+            $serviceId = $validated['service_id'] ?? null;
 
             $consultation = Consultation::create([
                 'dossier_id' => $dossier->id,
                 'medecin_id' => $validated['medecin_id'],
-                'service_id' => $validated['service_id'] ?? null,
+                'service_id' => $serviceId,
                 'date_consultation' => $validated['date_consultation'],
                 'motif' => $validated['motif'],
                 'diagnostic' => $validated['diagnostic'] ?? null,
@@ -172,7 +183,7 @@ class ConsultationController extends Controller
             ]);
 
             if (!$estUrgence) {
-                $service = !empty($validated['service_id']) ? Service::find($validated['service_id']) : null;
+                $service = $serviceId ? Service::find($serviceId) : null;
                 $montant = $request->input('montant_consultation', $service?->tarif_patient_simple ?? 5000);
                 $latestId = Facture::max('id') ?? 0;
                 $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
@@ -250,6 +261,13 @@ class ConsultationController extends Controller
             }
 
             // Mettre à jour les stats du dossier (on réutilise $dossier)
+            $dossier->update([
+                'medecin_referent_id' => $dossier->medecin_referent_id ?: $medecin->id,
+                'service_proprietaire_id' => $dossier->service_proprietaire_id ?: $serviceId,
+                'medecin_traitant' => $dossier->medecin_traitant ?: $medecin->user?->name,
+                'derniere_consultation' => $consultation->date_consultation,
+            ]);
+            $dossier->patient?->update(['service_id' => $serviceId]);
             $dossier->updateStatistiques();
 
             DB::commit();
@@ -257,7 +275,7 @@ class ConsultationController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Consultation créée avec succès',
-                'data' => $consultation->load(['constantes', 'ordonnance', 'analyses.facture', 'medecin.user'])
+                'data' => $consultation->load(['dossier.patient.user', 'constantes', 'ordonnance', 'analyses.facture', 'facture', 'medecin.user', 'service'])
             ], 201);
 
         } catch (\Exception $e) {
@@ -327,6 +345,25 @@ class ConsultationController extends Controller
             'observations' => 'nullable|string',
             'statut' => 'nullable|in:en_attente,en_cours,termine,absent',
             'date_consultation' => 'nullable|date',
+            'constantes' => 'nullable|array',
+            'constantes.tension_arterielle' => 'nullable|string',
+            'constantes.temperature' => 'nullable|numeric|between:35,42',
+            'constantes.poids' => 'nullable|numeric|between:20,300',
+            'constantes.taille' => 'nullable|integer|between:100,250',
+            'constantes.frequence_cardiaque' => 'nullable|integer|between:40,200',
+            'constantes.glycemie' => 'nullable|numeric|between:2,30',
+            'constantes.saturation_oxygene' => 'nullable|numeric|between:70,100',
+            'ordonnance' => 'nullable|array',
+            'ordonnance.medicaments' => 'required_with:ordonnance|array',
+            'ordonnance.posologie' => 'nullable|string',
+            'ordonnance.instructions' => 'nullable|string',
+            'ordonnance.date_validite' => 'nullable|date',
+            'analyses' => 'nullable|array',
+            'analyses.*.laboratoire_id' => 'required_with:analyses|exists:laboratoires,id',
+            'analyses.*.type_analyse' => 'required_with:analyses|string|max:255',
+            'analyses.*.date_prelevement' => 'nullable|date',
+            'analyses.*.commentaires' => 'nullable|string',
+            'analyses.*.montant_analyse' => 'nullable|numeric|min:0',
         ]);
 
         if (!DossierAccess::canWrite($request->user(), $consultation->dossier)) {
@@ -351,12 +388,80 @@ class ConsultationController extends Controller
             ]);
         }
 
-        $consultation->update($validated);
+        if (($validated['statut'] ?? null) === 'en_cours' && $consultation->statut_paiement !== 'payee' && !$consultation->est_urgence) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Le paiement doit etre valide avant de demarrer cette consultation.',
+            ], 403);
+        }
+
+        DB::transaction(function () use ($consultation, $validated, $request) {
+            $consultation->update(collect($validated)->only(['diagnostic', 'observations', 'statut', 'date_consultation'])->all());
+
+            if (array_key_exists('constantes', $validated)) {
+                $consultation->constantes()->updateOrCreate(
+                    ['consultation_id' => $consultation->id],
+                    $validated['constantes'] ?? []
+                );
+            }
+
+            if (array_key_exists('ordonnance', $validated)) {
+                $consultation->ordonnance()->updateOrCreate(
+                    ['consultation_id' => $consultation->id],
+                    [
+                        'medicaments' => $validated['ordonnance']['medicaments'],
+                        'posologie' => $validated['ordonnance']['posologie'] ?? null,
+                        'instructions' => $validated['ordonnance']['instructions'] ?? null,
+                        'date_validite' => $validated['ordonnance']['date_validite'] ?? null,
+                    ]
+                );
+            }
+
+            foreach ($validated['analyses'] ?? [] as $analyseData) {
+                $laboratoire = Laboratoire::findOrFail($analyseData['laboratoire_id']);
+                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 10000;
+
+                $analyse = AnalyseLaboratoire::firstOrCreate(
+                    [
+                        'consultation_id' => $consultation->id,
+                        'laboratoire_id' => $analyseData['laboratoire_id'],
+                        'type_analyse' => $analyseData['type_analyse'],
+                    ],
+                    [
+                        'date_prelevement' => $analyseData['date_prelevement'] ?? now()->toDateString(),
+                        'prescripteur_id' => $consultation->medecin_id,
+                        'commentaires' => $analyseData['commentaires'] ?? null,
+                        'statut' => 'prescrit',
+                        'statut_paiement' => 'non_payee',
+                        'montant_analyse' => $montantAnalyse,
+                    ]
+                );
+
+                if (!$analyse->facture_id) {
+                    $latestId = Facture::max('id') ?? 0;
+                    $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
+                    $facture = Facture::create([
+                        'numero' => $numero,
+                        'patient_id' => $consultation->dossier->patient_id,
+                        'type' => 'examen',
+                        'montant_total' => $montantAnalyse,
+                        'montant_paye' => 0,
+                        'montant_restant' => $montantAnalyse,
+                        'statut' => 'non_payee',
+                        'created_by' => $request->user()->id,
+                    ]);
+
+                    $analyse->update(['facture_id' => $facture->id]);
+                }
+            }
+
+            $consultation->dossier?->updateStatistiques();
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Consultation mise à jour avec succès',
-            'data' => $consultation->fresh()
+            'data' => $consultation->fresh(['constantes', 'ordonnance', 'analyses.facture'])
         ]);
     }
 
@@ -394,6 +499,55 @@ class ConsultationController extends Controller
             'success' => true,
             'message' => 'Constantes ajoutées avec succès',
             'data' => $constantes
+        ]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        $consultation = Consultation::with(['dossier', 'facture'])->find($id);
+
+        if (!$consultation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Consultation non trouvee'
+            ], 404);
+        }
+
+        $user = $request->user();
+
+        if (!$user->isAdmin() && (!$user->isMedecin() || (int) $consultation->medecin_id !== (int) $user->medecin?->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous ne pouvez supprimer que vos propres rendez-vous.'
+            ], 403);
+        }
+
+        if (($consultation->statut && $consultation->statut !== 'en_attente') || $consultation->statut_paiement === 'payee') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce rendez-vous ne peut plus etre supprime.'
+            ], 422);
+        }
+
+        if ($consultation->facture && $consultation->facture->statut !== 'non_payee') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ce rendez-vous a deja un paiement associe et ne peut plus etre supprime.'
+            ], 422);
+        }
+
+        DB::transaction(function () use ($consultation) {
+            $consultation->facture()
+                ->where('statut', 'non_payee')
+                ->delete();
+
+            $consultation->delete();
+            $consultation->dossier?->updateStatistiques();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Rendez-vous supprime avec succes'
         ]);
     }
 

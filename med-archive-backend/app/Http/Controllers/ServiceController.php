@@ -2,10 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CompteCreeMail;
+use App\Models\Role;
 use App\Models\Service;
 use App\Models\Patient;
+use App\Models\SystemNotification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ServiceController extends Controller
 {
@@ -42,7 +50,7 @@ class ServiceController extends Controller
     private function scopeForUser(Request $request)
     {
         $user = $request->user();
-        $query = Service::with('etablissement');
+        $query = Service::with(['etablissement', 'user']);
 
         if ($request->filled('etablissement_id')) {
             return $query->where('etablissement_id', $request->etablissement_id);
@@ -86,9 +94,12 @@ class ServiceController extends Controller
             return $this->error('Accès réservé au service connecté', Response::HTTP_FORBIDDEN);
         }
 
-        $patients = Patient::with(['user', 'dossier'])
+        $patients = Patient::with(['user', 'dossier.medecinReferent.user', 'dossier.medecinReferent.specialite', 'dossier.serviceProprietaire', 'service'])
             ->where(function ($patientQuery) use ($user) {
                 $patientQuery->where('service_id', $user->service->id)
+                    ->orWhereHas('dossier', function ($query) use ($user) {
+                        $query->where('service_proprietaire_id', $user->service->id);
+                    })
                     ->orWhereHas('consultations', function ($query) use ($user) {
                         $query->where('service_id', $user->service->id);
                     });
@@ -144,6 +155,8 @@ class ServiceController extends Controller
 
         $rules = [
             'nom' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:6',
             'description' => 'nullable|string',
             'est_actif' => 'boolean',
             'tarif_patient_simple' => 'nullable|numeric|min:0',
@@ -160,9 +173,65 @@ class ServiceController extends Controller
             $data['etablissement_id'] = $request->user()->id;
         }
 
-        $service = Service::create($data)->load('etablissement');
+        $plainPassword = $data['password'] ?? Str::password(12);
+        $mailWarning = null;
 
-        return $this->success($service, 'Service créé avec succès', Response::HTTP_CREATED);
+        $service = DB::transaction(function () use ($data, $plainPassword) {
+            $roleService = Role::where('nom', 'Service')->firstOrFail();
+
+            $user = User::create([
+                'name' => $data['nom'],
+                'email' => $data['email'],
+                'password' => Hash::make($plainPassword),
+                'role_id' => $roleService->id,
+                'etablissement_id' => $data['etablissement_id'],
+                'statut' => 'actif',
+                'must_change_password' => true,
+                'temporary_password_expires_at' => now()->addDay(),
+            ]);
+
+            return Service::create([
+                'user_id' => $user->id,
+                'etablissement_id' => $data['etablissement_id'],
+                'nom' => $data['nom'],
+                'description' => $data['description'] ?? null,
+                'est_actif' => $data['est_actif'] ?? true,
+                'tarif_patient_simple' => $data['tarif_patient_simple'] ?? 5000,
+                'tarif_patient_assure' => $data['tarif_patient_assure'] ?? 2500,
+            ])->load(['etablissement', 'user']);
+        });
+
+        if (in_array(config('mail.default'), ['log', 'array'], true)) {
+            $mailWarning = 'Service cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
+        } else {
+            try {
+                Mail::to($service->user->email)->send(new CompteCreeMail($service->user, $plainPassword));
+            } catch (\Throwable $mailException) {
+                $mailWarning = str_contains($mailException->getMessage(), 'Username and Password not accepted')
+                    ? 'Service cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
+                    : 'Service cree, mais l email des identifiants n a pas pu etre envoye.';
+            }
+        }
+
+        SystemNotification::create([
+            'event_key' => "service:{$service->id}:created",
+            'type' => 'service_created',
+            'title' => 'Nouveau service cree',
+            'body' => ($service->etablissement?->name ?? 'Un etablissement') . " a cree le service {$service->nom}.",
+            'etablissement_id' => $service->etablissement_id,
+            'meta' => [
+                'service_id' => $service->id,
+                'service_nom' => $service->nom,
+                'created_by' => $request->user()?->id,
+                'created_by_name' => $request->user()?->name,
+            ],
+        ]);
+
+        return $this->success(
+            ['service' => $service, 'warning' => $mailWarning],
+            $mailWarning ?: 'Service cree avec succes. Les identifiants ont ete envoyes par email.',
+            Response::HTTP_CREATED
+        );
     }
 
     public function show(Request $request, $id)
@@ -217,7 +286,18 @@ class ServiceController extends Controller
             return $this->error('Service non trouvé', Response::HTTP_NOT_FOUND);
         }
 
-        $service->delete();
+        if ($service->transfertsSource()->exists() || $service->transfertsDestination()->exists()) {
+            return $this->error(
+                'Ce service possede un historique de transferts. Desactivez-le au lieu de le supprimer afin de conserver la tracabilite.',
+                Response::HTTP_CONFLICT
+            );
+        }
+
+        DB::transaction(function () use ($service) {
+            $service->medecins()->update(['service_id' => null]);
+            $service->consultations()->update(['service_id' => null]);
+            $service->delete();
+        });
 
         return $this->success(null, 'Service supprimé avec succès');
     }

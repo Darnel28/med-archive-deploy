@@ -64,7 +64,7 @@ class PaiementController extends Controller
     $facture = Facture::findOrFail($factureId);
 
     FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
-    FedaPay::setEnvironment('sandbox');
+    FedaPay::setEnvironment('live');
 
     $transaction = Transaction::create([
         "description" => "Paiement consultation",

@@ -8,6 +8,7 @@ use App\Models\Laboratoire;
 use App\Models\Facture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AnalyseController extends Controller
 {
@@ -210,11 +211,11 @@ class AnalyseController extends Controller
 
         $validated = $request->validate([
             'resultats' => 'required|array',
-            'resultats.valeur' => 'required|numeric',
-            'resultats.unite' => 'required|string',
+            'resultats.valeur' => 'nullable|numeric',
+            'resultats.unite' => 'nullable|string',
             'resultats.normale' => 'required|boolean',
             'resultats.commentaire' => 'nullable|string',
-            'fichier_resultat' => 'nullable|file|mimes:pdf|max:5120' // 5MB max
+            'fichier_resultat' => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif,webp,bmp|max:5120' // 5MB max
         ]);
 
         $data = [
@@ -236,6 +237,45 @@ class AnalyseController extends Controller
             'message' => 'Résultats ajoutés avec succès',
             'data' => $analyse
         ]);
+    }
+
+    /**
+     * Voir le fichier de resultat d'une analyse.
+     */
+    public function voirFichierResultat(Request $request, $id)
+    {
+        $analyse = AnalyseLaboratoire::with('consultation.dossier.patient')->find($id);
+
+        if (!$analyse) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Analyse non trouvee'
+            ], 404);
+        }
+
+        $user = $request->user();
+        $patientId = $analyse->consultation?->dossier?->patient_id;
+
+        $canView = $user->isAdmin()
+            || ($user->isPatient() && $user->patient?->id === $patientId)
+            || ($user->isLaborantin() && $user->laboratoire?->id === $analyse->laboratoire_id)
+            || ($user->isMedecin() && $user->medecin?->id === $analyse->prescripteur_id);
+
+        if (!$canView) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acces refuse'
+            ], 403);
+        }
+
+        if (!$analyse->fichier_resultat || !Storage::disk('public')->exists($analyse->fichier_resultat)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fichier de resultat introuvable'
+            ], 404);
+        }
+
+        return response()->file(storage_path('app/public/' . $analyse->fichier_resultat));
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CompteCreeMail;
 use App\Models\Patient;
 use App\Models\User;
 use App\Models\Dossier;
+use App\Models\Role;
+use App\Models\Service;
 use App\Support\DossierAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,15 +75,37 @@ class PatientController extends Controller
             'telephone_contact' => 'nullable|string',
             'profession' => 'nullable|string',
             'nationalite' => 'nullable|string',
-            'lieu_naissance' => 'nullable|string'
+            'lieu_naissance' => 'nullable|string',
+            'service_id' => 'nullable|exists:services,id'
         ]);
 
         $plainPassword = $validated['password'] ?? Str::password(12);
         $mailWarning = null;
+        $selectedServiceId = null;
+        $selectedService = null;
+        $currentUser = $request->user();
+
+        if ($currentUser?->isService()) {
+            $selectedService = $currentUser->service;
+            $selectedServiceId = $selectedService?->id;
+        } elseif (!empty($validated['service_id'])) {
+            $selectedService = Service::find($validated['service_id']);
+
+            if ($currentUser?->isEtablissement() && (int) $selectedService?->etablissement_id !== (int) $currentUser->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Le service choisi n appartient pas a votre etablissement.'
+                ], 422);
+            }
+
+            $selectedServiceId = $selectedService?->id;
+        }
 
         DB::beginTransaction();
 
         try {
+            $rolePatient = Role::where('nom', 'Patient')->firstOrFail();
+
             // Créer l'utilisateur
             $user = User::create([
                 'name' => $validated['name'],
@@ -91,7 +116,8 @@ class PatientController extends Controller
                 'ville' => $validated['ville'],
                 'date_naissance' => $validated['date_naissance'],
                 'sexe' => $validated['sexe'],
-                'role_id' => 3,
+                'role_id' => $rolePatient->id,
+                'etablissement_id' => $selectedService?->etablissement_id,
                 'statut' => 'actif',
                 'must_change_password' => true,
                 'temporary_password_expires_at' => now()->addDay(),
@@ -100,7 +126,7 @@ class PatientController extends Controller
             // Créer le patient
             $patient = Patient::create([
                 'user_id' => $user->id,
-                'service_id' => $request->user()?->isService() ? $request->user()->service?->id : null,
+                'service_id' => $selectedServiceId,
                 'npi' => $validated['npi'],
                 'imu' => Patient::generateIMU(),
                 'groupe_sanguin' => $validated['groupe_sanguin'] ?? null,
@@ -120,28 +146,29 @@ class PatientController extends Controller
                 'imu' => $patient->imu,
                 'statut' => 'actif',
                 'date_ouverture' => now(),
-                'medecin_traitant' => null
+                'medecin_traitant' => null,
+                'service_proprietaire_id' => $selectedServiceId
             ]);
 
             DB::commit();
 
-            try {
-                Mail::raw(
-                    "Bonjour {$user->name},\n\nVotre compte patient MedArchive a ete cree.\nEmail: {$user->email}\nMot de passe temporaire: {$plainPassword}\n\nVous devrez modifier ce mot de passe lors de votre premiere connexion.",
-                    function ($message) use ($user) {
-                        $message->to($user->email)
-                            ->subject('Vos identifiants patient MedArchive');
-                    }
-                );
-            } catch (\Throwable $mailException) {
-                $mailWarning = 'Patient cree, mais l email des identifiants n a pas pu etre envoye.';
+            if (in_array(config('mail.default'), ['log', 'array'], true)) {
+                $mailWarning = 'Patient cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
+            } else {
+                try {
+                    Mail::to($user->email)->send(new CompteCreeMail($user, $plainPassword));
+                } catch (\Throwable $mailException) {
+                    $mailWarning = str_contains($mailException->getMessage(), 'Username and Password not accepted')
+                        ? 'Patient cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
+                        : 'Patient cree, mais l email des identifiants n a pas pu etre envoye.';
+                }
             }
 
             return response()->json([
                 'success' => true,
                 'message' => $mailWarning ?: 'Patient cree avec succes. Les identifiants ont ete envoyes par email.',
                 'warning' => $mailWarning,
-                'data' => $patient->load('user', 'dossier')
+                'data' => $patient->load('user', 'service', 'dossier.serviceProprietaire')
             ], 201);
 
         } catch (\Exception $e) {
@@ -160,7 +187,9 @@ class PatientController extends Controller
     {
         $patient = Patient::with([
             'user',
-            'dossier',
+            'service',
+            'dossier.medecinReferent.user',
+            'dossier.serviceProprietaire',
             'consultations' => function($q) {
                 $q->with(['medecin.user', 'constantes'])
                   ->latest('date_consultation')
@@ -230,10 +259,17 @@ class PatientController extends Controller
             ->get();
         $visibleConsultationIds = $consultations->pluck('id');
 
+        $latestConstantes = $consultations
+            ->pluck('constantes')
+            ->filter()
+            ->sortByDesc(fn ($constante) => $constante->created_at)
+            ->first();
+
         $contenuComplet = [
-            'dossier' => $dossier,
+            'dossier' => $dossier->load(['medecinReferent.user', 'medecinReferent.specialite', 'serviceProprietaire']),
             'patient' => $patient->load('user'),
             'consultations' => $consultations,
+            'dernieres_constantes' => $latestConstantes,
             'documents' => $dossier->documents()
                 ->whereIn('consultations.id', $visibleConsultationIds)
                 ->with('typeDocument')
@@ -267,6 +303,20 @@ class PatientController extends Controller
         ]);
     }
 
+    public function monDossierComplet(Request $request)
+    {
+        $patient = $request->user()->patient;
+
+        if (!$patient) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Espace patient introuvable',
+            ], 403);
+        }
+
+        return $this->dossierComplet($request, $patient->id);
+    }
+
     public function mesConsultations(Request $request)
     {
         $patient = $request->user()->patient;
@@ -281,7 +331,7 @@ class PatientController extends Controller
 
         if ($request->filled('periode')) {
             $request->periode === 'avenir'
-                ? $query->where('date_consultation', '>=', now())
+                ? $query->where('date_consultation', '>=', now()->startOfDay())
                 : $query->where('date_consultation', '<', now());
         }
 
@@ -341,7 +391,12 @@ class PatientController extends Controller
             return response()->json(['success' => false, 'message' => 'Espace patient introuvable'], 403);
         }
 
-        $query = $patient->factures()->with(['consultation.medecin.user', 'paiements']);
+        $query = $patient->factures()->with([
+            'consultation.medecin.user.etablissement',
+            'consultation.medecin.specialite',
+            'consultation.service',
+            'paiements',
+        ]);
 
         if ($request->filled('statut')) {
             $query->where('statut', $request->statut);

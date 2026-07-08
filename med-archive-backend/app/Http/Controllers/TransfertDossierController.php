@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Medecin;
 use App\Models\Service;
 use App\Models\TransfertDossier;
 use App\Models\User;
@@ -44,9 +43,15 @@ class TransfertDossierController extends Controller
             return true;
         }
 
-        return $user?->isService()
-            && $user->service
-            && (int) $transfert->service_destination_id === (int) $user->service->id;
+        if ($user?->isService() && $user->service) {
+            if ($transfert->service_destination_id) {
+                return (int) $transfert->service_destination_id === (int) $user->service->id;
+            }
+
+            return (int) $transfert->etablissement_destination_id === (int) $user->service->etablissement_id;
+        }
+
+        return false;
     }
 
     private function canManageSentTransfer(Request $request, TransfertDossier $transfert): bool
@@ -77,9 +82,10 @@ class TransfertDossierController extends Controller
         $user = $request->user();
         $query = TransfertDossier::with([
             'dossier.patient.user',
+            'dossier.medecinReferent.user',
+            'dossier.medecinReferent.specialite',
             'serviceSource',
             'serviceDestination',
-            'medecinReferentDestination.user',
             'etablissementSource',
             'etablissementDestination',
             'demandeur',
@@ -99,15 +105,18 @@ class TransfertDossierController extends Controller
 
         if ($user?->isMedecin()) {
             return $query->where(function ($q) use ($user) {
-                $q->where('demandeur_id', $user->id)
-                    ->orWhere('medecin_referent_destination_id', $user->medecin?->id);
+                $q->where('demandeur_id', $user->id);
             });
         }
 
         if ($user?->isService() && $user->service) {
             return $query->where(function ($q) use ($user) {
                 $q->where('service_source_id', $user->service->id)
-                    ->orWhere('service_destination_id', $user->service->id);
+                    ->orWhere('service_destination_id', $user->service->id)
+                    ->orWhere(function ($transferQuery) use ($user) {
+                        $transferQuery->whereNull('service_destination_id')
+                            ->where('etablissement_destination_id', $user->service->etablissement_id);
+                    });
             });
         }
 
@@ -136,8 +145,7 @@ class TransfertDossierController extends Controller
         $data = $request->validate([
             'dossier_id' => 'required|exists:dossiers,id',
             'service_source_id' => 'required|exists:services,id',
-            'service_destination_id' => 'required|exists:services,id',
-            'medecin_referent_destination_id' => 'nullable|exists:medecins,id',
+            'service_destination_id' => 'nullable|exists:services,id',
             'etablissement_source_id' => 'required|exists:users,id',
             'etablissement_destination_id' => 'required|exists:users,id',
             'medecin_traitant_id' => 'nullable|exists:medecins,id',
@@ -145,15 +153,12 @@ class TransfertDossierController extends Controller
             'observations' => 'nullable|string',
         ]);
 
-        if (empty($data['medecin_referent_destination_id']) && !empty($data['medecin_traitant_id'])) {
-            $data['medecin_referent_destination_id'] = $data['medecin_traitant_id'];
-        }
-        unset($data['medecin_traitant_id']);
-
         $source = User::with('role')->find($data['etablissement_source_id']);
         $destination = User::with('role')->find($data['etablissement_destination_id']);
         $serviceSource = Service::find($data['service_source_id']);
-        $serviceDestination = Service::find($data['service_destination_id']);
+        $serviceDestination = !empty($data['service_destination_id'])
+            ? Service::find($data['service_destination_id'])
+            : null;
         $user = $request->user();
 
         if (!$user?->isAdmin()) {
@@ -178,19 +183,8 @@ class TransfertDossierController extends Controller
             return $this->error('Le service de depart ne correspond pas a hopital de depart', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ((int) $serviceDestination->etablissement_id !== (int) $destination->id) {
-            return $this->error('Le service demande doit appartenir a hopital accueil', Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        if (!empty($data['medecin_referent_destination_id'])) {
-            $medecinValide = Medecin::where('id', $data['medecin_referent_destination_id'])
-                ->where('service_id', $data['service_destination_id'])
-                ->where('etablissement_id', $data['etablissement_destination_id'])
-                ->exists();
-
-            if (!$medecinValide) {
-                return $this->error('Le medecin referent doit appartenir au service destinataire', Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
+        if ($serviceDestination && (int) $serviceDestination->etablissement_id !== (int) $destination->id) {
+            return $this->error('Le service d accueil doit appartenir a hopital destinataire', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $data['demandeur_id'] = $request->user()->id;
@@ -199,9 +193,10 @@ class TransfertDossierController extends Controller
 
         $transfert = TransfertDossier::create($data)->load([
             'dossier.patient.user',
+            'dossier.medecinReferent.user',
+            'dossier.medecinReferent.specialite',
             'serviceSource',
             'serviceDestination',
-            'medecinReferentDestination.user',
             'etablissementSource',
             'etablissementDestination',
             'demandeur',
@@ -233,7 +228,6 @@ class TransfertDossierController extends Controller
             'dossier_id' => 'sometimes|exists:dossiers,id',
             'service_destination_id' => 'sometimes|exists:services,id',
             'etablissement_destination_id' => 'sometimes|exists:users,id',
-            'medecin_referent_destination_id' => 'nullable|exists:medecins,id',
             'statut' => 'sometimes|in:demande,accepte,refuse',
             'motif' => 'nullable|string',
             'observations' => 'nullable|string',
@@ -244,7 +238,22 @@ class TransfertDossierController extends Controller
 
         if ($statusChanged) {
             if (!$this->canApproveTransfer($request, $transfert)) {
-                return $this->error('Seul le service destinataire peut valider ce transfert', Response::HTTP_FORBIDDEN);
+                return $this->error('Seul hopital destinataire ou le service d accueil peut valider ce transfert', Response::HTTP_FORBIDDEN);
+            }
+
+            if ($nextStatus === 'accepte') {
+                if ($request->user()?->isService() && $request->user()?->service && empty($data['service_destination_id']) && empty($transfert->service_destination_id)) {
+                    $data['service_destination_id'] = $request->user()->service->id;
+                }
+
+                if (empty($data['service_destination_id']) && empty($transfert->service_destination_id)) {
+                    return $this->error('Le service de prise en charge doit etre affecte avant acceptation', Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
+                $serviceDestination = Service::find($data['service_destination_id'] ?? $transfert->service_destination_id);
+                if (!$serviceDestination || (int) $serviceDestination->etablissement_id !== (int) $transfert->etablissement_destination_id) {
+                    return $this->error('Le service affecte doit appartenir a hopital destinataire', Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
             }
 
             $data['approbateur_id'] = $request->user()->id;
@@ -253,28 +262,16 @@ class TransfertDossierController extends Controller
             return $this->error('Vous ne pouvez modifier que les demandes envoyees par votre service et encore en attente', Response::HTTP_FORBIDDEN);
         }
 
-        if (!empty($data['medecin_referent_destination_id'])) {
-            $destinationServiceId = $data['service_destination_id'] ?? $transfert->service_destination_id;
-            $medecinValide = Medecin::where('id', $data['medecin_referent_destination_id'])
-                ->where('service_id', $destinationServiceId)
-                ->exists();
-
-            if (!$medecinValide) {
-                return $this->error('Le medecin referent doit appartenir au service destinataire', Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
-        }
-
         $transfert->update($data);
         $transfert->refresh();
 
         if ($nextStatus === 'accepte') {
-            $referent = $transfert->medecinReferentDestination()->with('user')->first();
             $transfert->dossier?->update([
                 'statut' => 'transfere',
                 'statut_transfert' => 'accepte',
                 'service_proprietaire_id' => $transfert->service_destination_id,
-                'medecin_referent_id' => $transfert->medecin_referent_destination_id,
-                'medecin_traitant' => $referent?->user?->name,
+                'medecin_referent_id' => null,
+                'medecin_traitant' => null,
             ]);
             $transfert->dossier?->patient?->update(['service_id' => $transfert->service_destination_id]);
         } elseif ($nextStatus === 'refuse') {
@@ -282,7 +279,7 @@ class TransfertDossierController extends Controller
         }
 
         return $this->success(
-            $transfert->fresh(['dossier.patient.user', 'serviceSource', 'serviceDestination', 'medecinReferentDestination.user', 'demandeur', 'approbateur']),
+            $transfert->fresh(['dossier.patient.user', 'dossier.medecinReferent.user', 'serviceSource', 'serviceDestination', 'demandeur', 'approbateur']),
             'Transfert mis a jour avec succes'
         );
     }

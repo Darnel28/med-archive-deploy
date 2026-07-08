@@ -239,15 +239,15 @@ public function creerPaiementFedapay(Request $request, $id)
         $facture = Facture::findOrFail($id);
 
         FedaPay::setApiKey(env('FEDAPAY_SECRET_KEY'));
-        FedaPay::setEnvironment('sandbox');
+        FedaPay::setEnvironment('live');
 
-       $transaction = Transaction::create([
-    'description' => 'Paiement facture '.$facture->numero,
-    'amount' => 100,
-    'currency' => [
-        'iso' => 'XOF'
-    ]
-]);
+        $transaction = Transaction::create([
+            'description' => 'Paiement facture '.$facture->numero,
+            'amount' => 100,
+            'currency' => [
+                'iso' => 'XOF'
+            ]
+        ]);
 
         $token = $transaction->generateToken();
 
@@ -257,15 +257,12 @@ public function creerPaiementFedapay(Request $request, $id)
             'transaction_id' => $transaction->id
         ]);
 
-    } catch (\Throwable $e) {
+    } catch (\Exception $e) {
 
         return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ], 500);
-
     }
 }
 

@@ -19,6 +19,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\PatientMedecinController;
 use App\Http\Controllers\ParametreController;
 use App\Http\Controllers\TransfertDossierController;
+use App\Http\Controllers\SystemNotificationController;
 use App\Models\Role;
 
 Route::get('/ping', function() {
@@ -28,6 +29,7 @@ Route::get('/ping', function() {
 // Routes publiques
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/forgot-password', [AuthController::class, 'motDePasseOublie']);
 Route::get('/specialites', [SpecialiteController::class, 'index']);
 Route::get('/patients-medecins', [PatientMedecinController::class, 'index']);
 
@@ -57,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/patients/me/ordonnances', [PatientController::class, 'mesOrdonnances']);
     Route::get('/patients/me/analyses', [PatientController::class, 'mesAnalyses']);
     Route::get('/patients/me/factures', [PatientController::class, 'mesFactures']);
+    Route::get('/patients/me/dossier-complet', [PatientController::class, 'monDossierComplet']);
     Route::apiResource('patients', PatientController::class);
     Route::get('/patients/{id}/dossier-complet', [PatientController::class, 'dossierComplet']);
     Route::get('/statistiques/patients', [PatientController::class, 'statistiques']);
@@ -107,7 +110,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Transferts de dossiers
     Route::apiResource('transferts-dossiers', TransfertDossierController::class);
 
+    // Notifications
+    Route::get('/notifications', [SystemNotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [SystemNotificationController::class, 'markRead']);
+    Route::patch('/notifications/read-all', [SystemNotificationController::class, 'markAllRead']);
+
     // Analyses
+    Route::get('/analyses/{id}/resultat-fichier', [AnalyseController::class, 'voirFichierResultat']);
     Route::apiResource('analyses', AnalyseController::class);
     Route::patch('/analyses/{id}/statut', [AnalyseController::class, 'updateStatut']);
     Route::post('/analyses/{id}/resultats', [AnalyseController::class, 'ajouterResultats']);
@@ -123,6 +132,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('statistiques')->group(function () {
         Route::get('/dashboard', [StatistiqueController::class, 'dashboard']);
         Route::get('/avancees', [StatistiqueController::class, 'avancees']);
+        Route::get('/rapports-admin', [StatistiqueController::class, 'rapportsAdmin']);
     });
 
     // Factures

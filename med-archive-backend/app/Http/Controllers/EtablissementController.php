@@ -103,7 +103,11 @@ class EtablissementController extends Controller
         }
 
         $patients = $etablissement->mesPatients()
-            ->with(['patient.dossier'])
+            ->with([
+                'patient.service',
+                'patient.dossier.medecinReferent.user',
+                'patient.dossier.serviceProprietaire',
+            ])
             ->paginate($request->get('per_page', 15));
 
         return response()->json([
@@ -279,6 +283,8 @@ class EtablissementController extends Controller
         }
 
         $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $etablissement->id,
             'telephone' => 'sometimes|string|max:20',
             'adresse' => 'sometimes|string',
             'directeur_nom' => 'sometimes|string|max:255',
@@ -286,8 +292,10 @@ class EtablissementController extends Controller
         ]);
 
         // Mettre à jour l'utilisateur
-        if ($request->has('telephone') || $request->has('adresse')) {
+        if ($request->has('name') || $request->has('email') || $request->has('telephone') || $request->has('adresse')) {
             $userData = [];
+            if ($request->has('name')) $userData['name'] = $request->name;
+            if ($request->has('email')) $userData['email'] = $request->email;
             if ($request->has('telephone')) $userData['telephone'] = $request->telephone;
             if ($request->has('adresse')) $userData['adresse'] = $request->adresse;
 

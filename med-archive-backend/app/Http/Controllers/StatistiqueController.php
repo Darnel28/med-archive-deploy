@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Patient;
 use App\Models\Medecin;
+use App\Models\Service;
+use App\Models\SystemNotification;
 use App\Models\Consultation;
 use App\Models\AnalyseLaboratoire;
 use App\Models\Document;
@@ -240,6 +242,130 @@ class StatistiqueController extends Controller
                         ];
                     })
             ]
+        ]);
+    }
+
+    public function rapportsAdmin(Request $request)
+    {
+        if (!$request->user()?->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acces reserve aux administrateurs',
+            ], 403);
+        }
+
+        $weekStart = now()->startOfWeek();
+        $platformTypes = [
+            'service_created',
+            'etablissement_created',
+            'etablissement_updated',
+            'etablissement_disabled',
+            'user_created',
+            'user_activated',
+            'user_disabled',
+            'role_updated',
+            'laboratoire_disabled',
+            'security_alert',
+            'admin_login_failed',
+            'system_critical',
+            'database_unavailable',
+        ];
+        $securityTypes = ['security_alert', 'admin_login_failed', 'system_critical', 'database_unavailable'];
+        $securityJournalTypes = array_merge(['login_success'], $securityTypes);
+
+        $roles = User::select('role_id', DB::raw('count(*) as total'))
+            ->with('role')
+            ->groupBy('role_id')
+            ->get()
+            ->map(fn ($item) => [
+                'role' => $item->role?->nom ?? 'Non renseigne',
+                'total' => (int) $item->total,
+            ])
+            ->values();
+
+        $hospitals = User::whereHas('role', fn ($q) => $q->where('nom', 'Responsable Etablissement'))
+            ->latest('updated_at')
+            ->limit(8)
+            ->get()
+            ->map(function ($hospital) {
+                $lastServiceActivity = Service::where('etablissement_id', $hospital->id)->max('updated_at');
+                $lastUserActivity = User::where('etablissement_id', $hospital->id)->max('updated_at');
+                $lastActivity = collect([$hospital->updated_at, $lastServiceActivity, $lastUserActivity])
+                    ->filter()
+                    ->max();
+
+                return [
+                    'id' => $hospital->id,
+                    'nom' => $hospital->name,
+                    'statut' => $hospital->statut === 'actif' ? 'En ligne' : 'Hors ligne',
+                    'utilisateurs' => User::where('etablissement_id', $hospital->id)->count(),
+                    'derniere_activite' => $lastActivity,
+                ];
+            })
+            ->values();
+
+        $adminActivities = SystemNotification::whereIn('type', $platformTypes)
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'date' => $notification->created_at,
+                'administrateur' => $notification->meta['admin_name'] ?? $notification->meta['created_by_name'] ?? 'Systeme',
+                'action' => $notification->title,
+                'details' => $notification->body,
+                'type' => $notification->type,
+            ])
+            ->values();
+
+        $hospitalActions = SystemNotification::whereIn('type', ['service_created', 'etablissement_created', 'etablissement_updated', 'etablissement_disabled'])
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'date' => $notification->created_at,
+                'action' => $notification->title,
+                'etablissement' => $notification->body,
+                'realise_par' => $notification->meta['created_by_name'] ?? 'Systeme',
+            ])
+            ->values();
+
+        $securityJournal = SystemNotification::whereIn('type', $securityJournalTypes)
+            ->latest('created_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($notification) => [
+                'id' => $notification->id,
+                'date' => $notification->created_at,
+                'evenement' => $notification->title,
+                'utilisateur' => $notification->meta['user_name'] ?? 'Systeme',
+                'resultat' => $notification->type === 'login_success' ? 'Succes' : ($notification->type === 'admin_login_failed' ? 'Echec' : 'Securite'),
+            ])
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'date' => now(),
+                'kpis' => [
+                    'utilisateurs_crees' => User::count(),
+                    'utilisateurs_crees_semaine' => User::where('created_at', '>=', $weekStart)->count(),
+                    'hopitaux_connectes' => User::whereHas('role', fn ($q) => $q->where('nom', 'Responsable Etablissement'))->count(),
+                    'connexions_aujourdhui' => SystemNotification::where('type', 'login_success')->whereDate('created_at', today())->count(),
+                    'alertes_securite' => SystemNotification::whereIn('type', $securityTypes)->whereNull('read_at')->count(),
+                ],
+                'activites_administratives' => $adminActivities,
+                'etablissements' => $hospitals,
+                'activite_utilisateurs' => $roles,
+                'journal_securite' => $securityJournal,
+                'gestion_hopitaux' => $hospitalActions,
+                'alertes_systeme' => SystemNotification::whereIn('type', $securityTypes)
+                    ->whereNull('read_at')
+                    ->latest('created_at')
+                    ->limit(6)
+                    ->get(['id', 'title', 'body', 'type', 'created_at']),
+            ],
         ]);
     }
 }

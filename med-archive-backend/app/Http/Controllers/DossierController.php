@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dossier;
 use App\Models\Consultation;
+use App\Models\Facture;
 use App\Models\Medecin;
 use App\Models\User;
 use App\Support\DossierAccess;
@@ -189,7 +190,7 @@ class DossierController extends Controller
             'observations' => 'nullable|string',
         ]);
 
-        $medecin = Medecin::with('user')->findOrFail($validated['medecin_id']);
+        $medecin = Medecin::with(['user', 'service'])->findOrFail($validated['medecin_id']);
 
         if ($request->user()->isService() && (int) $medecin->service_id !== (int) $request->user()->service?->id) {
             return response()->json([
@@ -197,6 +198,8 @@ class DossierController extends Controller
                 'message' => 'Le medecin choisi doit appartenir a votre service.',
             ], 422);
         }
+
+        $montant = $medecin->service?->tarif_patient_simple ?? 5000;
 
         $consultation = Consultation::create([
             'dossier_id' => $dossier->id,
@@ -206,8 +209,24 @@ class DossierController extends Controller
             'motif' => $validated['motif'] ?? 'Rendez-vous d affectation',
             'observations' => $validated['observations'] ?? null,
             'statut' => 'en_attente',
-            'statut_paiement' => 'payee',
+            'statut_paiement' => 'non_payee',
+            'montant_consultation' => $montant,
             'est_urgence' => false,
+        ]);
+
+        $latestId = Facture::max('id') ?? 0;
+        $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
+
+        Facture::create([
+            'numero' => $numero,
+            'patient_id' => $dossier->patient_id,
+            'consultation_id' => $consultation->id,
+            'type' => 'consultation',
+            'montant_total' => $montant,
+            'montant_paye' => 0,
+            'montant_restant' => $montant,
+            'statut' => 'non_payee',
+            'created_by' => $request->user()->id,
         ]);
 
         $dossier->update([
@@ -224,7 +243,7 @@ class DossierController extends Controller
             'message' => 'Dossier affecte au medecin et rendez-vous cree avec succes',
             'data' => [
                 'dossier' => $dossier->fresh(['patient.user', 'medecinReferent.user', 'serviceProprietaire']),
-                'consultation' => $consultation->load(['medecin.user', 'service']),
+                'consultation' => $consultation->load(['medecin.user', 'service', 'facture']),
             ],
         ], 201);
     }

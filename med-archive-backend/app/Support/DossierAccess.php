@@ -27,7 +27,8 @@ class DossierAccess
             }
 
             if ($user->isMedecin() && $user->medecin) {
-                return (int) $dossier->medecin_referent_id === (int) $user->medecin->id;
+                return (int) $dossier->medecin_referent_id === (int) $user->medecin->id
+                    || $dossier->consultations()->where('medecin_id', $user->medecin->id)->exists();
             }
         }
 
@@ -45,11 +46,30 @@ class DossierAccess
             return (int) $acceptedTransfer->service_destination_id === (int) $user->service->id;
         }
 
-        if ($user->isMedecin()) {
-            return (int) $acceptedTransfer->medecin_referent_destination_id === (int) $user->medecin?->id;
+        return false;
+    }
+
+    public static function canScheduleConsultation(User $user, Dossier $dossier): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
         }
 
-        return false;
+        if (!$user->isMedecin() || !$user->medecin) {
+            return self::canWrite($user, $dossier);
+        }
+
+        if ($dossier->service_proprietaire_id && $user->medecin->service_id) {
+            return (int) $dossier->service_proprietaire_id === (int) $user->medecin->service_id;
+        }
+
+        if ((int) $dossier->medecin_referent_id === (int) $user->medecin->id) {
+            return true;
+        }
+
+        $acceptedTransfer = self::latestAcceptedTransfer($dossier);
+
+        return !$acceptedTransfer;
     }
 
     public static function canRead(User $user, Dossier $dossier): bool
@@ -112,7 +132,7 @@ class DossierAccess
             }
         }
 
-        if ($user->isMedecin() && (int) $acceptedTransfer->medecin_referent_destination_id === (int) $user->medecin?->id) {
+        if ($user->isMedecin() && (int) $dossier->medecin_referent_id === (int) $user->medecin?->id) {
             return $query;
         }
 

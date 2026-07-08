@@ -40,6 +40,16 @@ class Service extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function medecins(): HasMany
+    {
+        return $this->hasMany(Medecin::class);
+    }
+
+    public function consultations(): HasMany
+    {
+        return $this->hasMany(Consultation::class);
+    }
+
     public function transfertsSource(): HasMany
     {
         return $this->hasMany(TransfertDossier::class, 'service_source_id');

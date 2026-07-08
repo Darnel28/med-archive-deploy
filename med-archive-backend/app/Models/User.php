@@ -149,9 +149,14 @@ class User extends Authenticatable
 
         $medecinIds = $this->medecins()->pluck('id');
 
-        return User::whereHas('patient.consultations', function($q) use ($medecinIds) {
-            $q->whereIn('medecin_id', $medecinIds);
-        })->whereHas('role', fn($q) => $q->where('nom', 'Patient'))
+        return User::whereHas('patient')
+          ->where(function ($query) use ($medecinIds) {
+              $query->whereHas('patient.consultations', function($q) use ($medecinIds) {
+                  $q->whereIn('medecin_id', $medecinIds);
+              })
+              ->orWhereHas('patient.service', fn($q) => $q->where('etablissement_id', $this->id))
+              ->orWhereHas('patient.dossier.serviceProprietaire', fn($q) => $q->where('etablissement_id', $this->id));
+          })
           ->with('patient')
           ->distinct();
     }

@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CompteCreeMail;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\SystemNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -60,6 +64,20 @@ class AuthController extends Controller
                     ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            if ($user?->isAdmin()) {
+                SystemNotification::create([
+                    'event_key' => 'admin-login-failed:' . Str::uuid(),
+                    'type' => 'admin_login_failed',
+                    'title' => 'Tentative de connexion administrateur echouee',
+                    'body' => "Plusieurs tentatives de connexion echouees doivent etre surveillees pour {$request->email}.",
+                    'user_id' => $user->id,
+                    'meta' => [
+                        'user_name' => $user->name,
+                        'email' => $request->email,
+                    ],
+                ]);
+            }
+
             throw ValidationException::withMessages([
                 'email' => ['Les identifiants sont incorrects.'],
             ]);
@@ -86,6 +104,19 @@ class AuthController extends Controller
         // Créer un nouveau token
         $token = $user->createToken('auth_token', [$user->role->nom])->plainTextToken;
 
+        SystemNotification::create([
+            'event_key' => 'login-success:' . Str::uuid(),
+            'type' => 'login_success',
+            'title' => 'Connexion reussie',
+            'body' => "{$user->name} s'est connecte a la plateforme.",
+            'user_id' => $user->id,
+            'etablissement_id' => $user->etablissement_id,
+            'meta' => [
+                'user_name' => $user->name,
+                'role' => $user->role?->nom,
+            ],
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Connexion réussie',
@@ -111,6 +142,40 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Mot de passe modifie avec succes',
+        ]);
+    }
+
+    public function motDePasseOublie(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Si un compte existe avec cet email, un nouveau mot de passe temporaire sera envoye.',
+            ]);
+        }
+
+        $plainPassword = Str::password(12);
+        Mail::to($user->email)->send(new CompteCreeMail(
+            $user,
+            $plainPassword,
+            config('app.frontend_url', 'http://localhost:5173/connexion')
+        ));
+
+        $user->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => true,
+            'temporary_password_expires_at' => now()->addDay(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Un nouveau mot de passe temporaire a ete envoye par email. Il est valable 24 heures.',
         ]);
     }
 

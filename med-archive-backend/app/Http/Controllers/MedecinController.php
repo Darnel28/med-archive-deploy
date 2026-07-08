@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\CompteCreeMail;
 use App\Models\Medecin;
 use App\Models\Role;
 use App\Models\Service;
+use App\Models\Specialite;
 use App\Models\User;
 use App\Models\Consultation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class MedecinController extends Controller
 {
@@ -23,6 +27,10 @@ class MedecinController extends Controller
 
         if ($request->user()?->isService() && $request->user()->service) {
             $query->where('service_id', $request->user()->service->id);
+        }
+
+        if ($request->user()?->isEtablissement()) {
+            $query->where('etablissement_id', $request->user()->id);
         }
 
         // Filtre par spécialité
@@ -53,6 +61,22 @@ class MedecinController extends Controller
         }
 
         $medecins = $query->paginate($request->get('per_page', 15));
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+
+        $medecins->getCollection()->transform(function (Medecin $medecin) use ($monthStart, $monthEnd) {
+            $patientsActifs = $medecin->patients()->count();
+            $consultationsMois = $medecin->consultations()
+                ->whereBetween('date_consultation', [$monthStart, $monthEnd])
+                ->count();
+
+            $medecin->setAttribute('statistiques', [
+                'patients_actifs' => $patientsActifs,
+                'consultations_mois' => $consultationsMois,
+            ]);
+
+            return $medecin;
+        });
 
         return response()->json([
             'success' => true,
@@ -73,13 +97,16 @@ class MedecinController extends Controller
             'adresse' => 'required|string',
             'date_naissance' => 'required|date',
             'sexe' => 'required|in:M,F',
-            'specialite_id' => 'required|exists:specialites,id',
+            'specialite_id' => 'nullable|exists:specialites,id',
             'etablissement_id' => 'nullable|exists:users,id',
             'service_id' => 'nullable|exists:services,id',
             'numero_professionnel' => 'required|string|unique:medecins,numero_professionnel',
             'diplome' => 'nullable|string',
             'annees_experience' => 'nullable|integer|min:0',
         ]);
+
+        $plainPassword = $validated['password'] ?? Str::password(12);
+        $mailWarning = null;
 
         DB::beginTransaction();
 
@@ -93,6 +120,7 @@ class MedecinController extends Controller
             $etablissementId = $service?->etablissement_id ?? $validated['etablissement_id'] ?? null;
 
             if (!$etablissementId) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Etablissement ou service requis pour creer un medecin',
@@ -100,6 +128,7 @@ class MedecinController extends Controller
             }
 
             if ($request->user()?->isEtablissement() && (int) $etablissementId !== (int) $request->user()->id) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Vous ne pouvez creer un medecin que dans votre etablissement',
@@ -107,10 +136,23 @@ class MedecinController extends Controller
             }
 
             if ($request->user()?->isService() && (int) $service?->id !== (int) $request->user()->service?->id) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'message' => 'Vous ne pouvez creer un medecin que dans votre service',
                 ], 403);
+            }
+
+            $specialiteId = $service?->specialite_id
+                ?? ($service ? Specialite::where('nom', $service->nom)->value('id') : null)
+                ?? $validated['specialite_id'];
+
+            if (!$specialiteId) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Specialite requise pour creer un medecin',
+                ], 422);
             }
 
             $roleMedecin = Role::where('nom', 'Medecin')->firstOrFail();
@@ -118,7 +160,7 @@ class MedecinController extends Controller
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => Hash::make($validated['password'] ?? 'password123'),
+                'password' => Hash::make($plainPassword),
                 'telephone' => $validated['telephone'],
                 'adresse' => $validated['adresse'],
                 'date_naissance' => $validated['date_naissance'],
@@ -126,13 +168,15 @@ class MedecinController extends Controller
                 'role_id' => $roleMedecin->id,
                 'etablissement_id' => $etablissementId,
                 'statut' => 'actif',
+                'must_change_password' => true,
+                'temporary_password_expires_at' => now()->addDay(),
             ]);
 
             $medecin = Medecin::create([
                 'user_id' => $user->id,
                 'etablissement_id' => $etablissementId,
                 'service_id' => $service?->id,
-                'specialite_id' => $validated['specialite_id'],
+                'specialite_id' => $specialiteId,
                 'numero_professionnel' => $validated['numero_professionnel'],
                 'diplome' => $validated['diplome'] ?? null,
                 'annees_experience' => $validated['annees_experience'] ?? 0,
@@ -140,10 +184,25 @@ class MedecinController extends Controller
 
             DB::commit();
 
+            if (in_array(config('mail.default'), ['log', 'array'], true)) {
+                $mailWarning = 'Medecin cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
+            } else {
+                try {
+                    Mail::to($user->email)->send(new CompteCreeMail($user, $plainPassword));
+                } catch (\Throwable $mailException) {
+                    $mailWarning = str_contains($mailException->getMessage(), 'Username and Password not accepted')
+                        ? 'Medecin cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
+                        : 'Medecin cree, mais l email des identifiants n a pas pu etre envoye.';
+                }
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => 'Medecin cree avec succes',
-                'data' => $medecin->load(['user', 'specialite', 'etablissement', 'service']),
+                'message' => $mailWarning ?: 'Medecin cree avec succes. Les identifiants ont ete envoyes par email.',
+                'data' => [
+                    'medecin' => $medecin->load(['user', 'specialite', 'etablissement', 'service']),
+                    'warning' => $mailWarning,
+                ],
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -159,6 +218,7 @@ class MedecinController extends Controller
             'user',
             'specialite',
             'etablissement',
+            'service',
             'consultations' => function($q) {
                 $q->with(['dossier.patient.user'])
                   ->latest('date_consultation')
@@ -197,7 +257,7 @@ class MedecinController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $medecin = Medecin::find($id);
+        $medecin = Medecin::with('user')->find($id);
 
         if (!$medecin) {
             return response()->json([
@@ -207,29 +267,79 @@ class MedecinController extends Controller
         }
 
         $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $medecin->user_id,
+            'password' => 'nullable|string|min:6',
+            'telephone' => 'sometimes|string|max:20',
+            'adresse' => 'sometimes|string',
+            'date_naissance' => 'sometimes|date',
+            'sexe' => 'sometimes|in:M,F',
+            'statut' => 'sometimes|in:actif,inactif,en_attente',
             'specialite_id' => 'sometimes|exists:specialites,id',
+            'etablissement_id' => 'nullable|exists:users,id',
+            'service_id' => 'nullable|exists:services,id',
+            'numero_professionnel' => 'sometimes|string|unique:medecins,numero_professionnel,' . $medecin->id,
             'diplome' => 'nullable|string',
             'annees_experience' => 'nullable|integer|min:0',
-            'telephone' => 'sometimes|string|max:20',
-            'adresse' => 'sometimes|string'
         ]);
 
         DB::beginTransaction();
 
         try {
             // Mettre à jour le médecin
+            $service = array_key_exists('service_id', $validated) && !empty($validated['service_id'])
+                ? Service::find($validated['service_id'])
+                : null;
+
+            if ($request->user()?->isService()) {
+                $service = $request->user()->service;
+            }
+
+            $etablissementId = $service?->etablissement_id
+                ?? $validated['etablissement_id']
+                ?? $medecin->etablissement_id;
+
+            if ($request->user()?->isEtablissement() && (int) $etablissementId !== (int) $request->user()->id) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez modifier un medecin que dans votre etablissement',
+                ], 403);
+            }
+
+            if ($request->user()?->isService() && (int) $service?->id !== (int) $request->user()->service?->id) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous ne pouvez modifier un medecin que dans votre service',
+                ], 403);
+            }
+
             $medecin->update([
+                'etablissement_id' => $etablissementId,
+                'service_id' => array_key_exists('service_id', $validated) ? $service?->id : $medecin->service_id,
                 'specialite_id' => $validated['specialite_id'] ?? $medecin->specialite_id,
+                'numero_professionnel' => $validated['numero_professionnel'] ?? $medecin->numero_professionnel,
                 'diplome' => $validated['diplome'] ?? $medecin->diplome,
                 'annees_experience' => $validated['annees_experience'] ?? $medecin->annees_experience
             ]);
 
             // Mettre à jour l'utilisateur
-            if ($request->has('telephone') || $request->has('adresse')) {
-                $userData = [];
-                if ($request->has('telephone')) $userData['telephone'] = $request->telephone;
-                if ($request->has('adresse')) $userData['adresse'] = $request->adresse;
-
+            $userData = [];
+            foreach (['name', 'email', 'telephone', 'adresse', 'date_naissance', 'sexe', 'statut'] as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $userData[$field] = $validated[$field];
+                }
+            }
+            if (!empty($validated['password'])) {
+                $userData['password'] = Hash::make($validated['password']);
+                $userData['must_change_password'] = true;
+                $userData['temporary_password_expires_at'] = now()->addDay();
+            }
+            if ($etablissementId) {
+                $userData['etablissement_id'] = $etablissementId;
+            }
+            if ($userData) {
                 $medecin->user->update($userData);
             }
 
@@ -238,7 +348,7 @@ class MedecinController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Médecin mis à jour avec succès',
-                'data' => $medecin->fresh(['user', 'specialite', 'etablissement'])
+                'data' => $medecin->fresh(['user', 'specialite', 'etablissement', 'service'])
             ]);
 
         } catch (\Exception $e) {
@@ -255,7 +365,7 @@ class MedecinController extends Controller
      */
     public function planning(Request $request, $id)
     {
-        $medecin = Medecin::find($id);
+        $medecin = Medecin::with('user')->find($id);
 
         if (!$medecin) {
             return response()->json([
@@ -268,10 +378,6 @@ class MedecinController extends Controller
 
         $consultations = Consultation::where('medecin_id', $id)
             ->whereDate('date_consultation', $date)
-            ->where(function ($query) {
-                $query->where('statut_paiement', 'payee')
-                    ->orWhere('est_urgence', true);
-            })
             ->with(['dossier.patient.user', 'medecin.user', 'medecin.etablissement'])
             ->orderBy('date_consultation')
             ->get();
@@ -321,7 +427,9 @@ class MedecinController extends Controller
                         'medecin' => $c->medecin?->user?->name,
                         'hopital' => $c->medecin?->etablissement?->name,
                         'hopital_adresse' => $c->medecin?->etablissement?->adresse,
-                        'statut' => $c->statut ?: 'en_attente'
+                        'statut' => $c->statut ?: 'en_attente',
+                        'statut_paiement' => $c->statut_paiement,
+                        'est_urgence' => $c->est_urgence,
                     ];
                 })
             ]
@@ -342,8 +450,16 @@ class MedecinController extends Controller
             ], 404);
         }
 
-        $patients = $medecin->patients()
-            ->with(['patient.dossier'])
+        $patients = \App\Models\User::whereHas('patient.dossier', function ($query) use ($medecin) {
+                $query->where('medecin_referent_id', $medecin->id)
+                    ->orWhere(function ($serviceQuery) use ($medecin) {
+                        $serviceQuery->whereNotNull('service_proprietaire_id')
+                            ->where('service_proprietaire_id', $medecin->service_id);
+                    });
+            })
+            ->whereHas('role', fn ($query) => $query->where('nom', 'Patient'))
+            ->with(['patient.dossier.medecinReferent.user'])
+            ->orderBy('name')
             ->paginate(15);
 
         return response()->json([
