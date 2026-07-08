@@ -147,16 +147,25 @@ class User extends Authenticatable
             return collect();
         }
 
-        $medecinIds = $this->medecins()->pluck('id');
+        $medecinIds = Medecin::where('etablissement_id', $this->id)->pluck('id');
+        $etablissementId = $this->id;
 
         return User::whereHas('patient')
-          ->where(function ($query) use ($medecinIds) {
-              $query->whereHas('patient.consultations', function($q) use ($medecinIds) {
-                  $q->whereIn('medecin_id', $medecinIds);
-              })
-              ->orWhereHas('patient.service', fn($q) => $q->where('etablissement_id', $this->id))
-              ->orWhereHas('patient.dossier.serviceProprietaire', fn($q) => $q->where('etablissement_id', $this->id));
-          })
+          ->where(function ($query) use ($medecinIds, $etablissementId) {
+               $query->where('etablissement_id', $etablissementId)
+               ->orWhereHas('patient.consultations', function($q) use ($medecinIds) {
+                   $q->whereIn('medecin_id', $medecinIds);
+               })
+               ->orWhereHas('patient.service', fn($q) => $q->where('etablissement_id', $etablissementId))
+               ->orWhereHas('patient.dossier.serviceProprietaire', fn($q) => $q->where('etablissement_id', $etablissementId))
+               ->orWhereHas('patient.dossier.transferts', function ($q) use ($etablissementId) {
+                   $q->where('statut', 'accepte')
+                     ->where(function ($transferQuery) use ($etablissementId) {
+                         $transferQuery->where('etablissement_source_id', $etablissementId)
+                             ->orWhere('etablissement_destination_id', $etablissementId);
+                     });
+               });
+           })
           ->with('patient')
           ->distinct();
     }

@@ -97,10 +97,16 @@ class TransfertDossierController extends Controller
         }
 
         if ($user?->isEtablissement()) {
-            return $query->where(function ($q) use ($user) {
+            $query->where(function ($q) use ($user) {
                 $q->where('etablissement_source_id', $user->id)
                     ->orWhere('etablissement_destination_id', $user->id);
             });
+
+            if ($request->boolean('inter_etablissement')) {
+                $query->whereColumn('etablissement_source_id', '!=', 'etablissement_destination_id');
+            }
+
+            return $query;
         }
 
         if ($user?->isMedecin()) {
@@ -112,11 +118,7 @@ class TransfertDossierController extends Controller
         if ($user?->isService() && $user->service) {
             return $query->where(function ($q) use ($user) {
                 $q->where('service_source_id', $user->service->id)
-                    ->orWhere('service_destination_id', $user->service->id)
-                    ->orWhere(function ($transferQuery) use ($user) {
-                        $transferQuery->whereNull('service_destination_id')
-                            ->where('etablissement_destination_id', $user->service->etablissement_id);
-                    });
+                    ->orWhere('service_destination_id', $user->service->id);
             });
         }
 

@@ -107,6 +107,7 @@ class EtablissementController extends Controller
                 'patient.service',
                 'patient.dossier.medecinReferent.user',
                 'patient.dossier.serviceProprietaire',
+                'patient.dossier.transferts',
             ])
             ->paginate($request->get('per_page', 15));
 
