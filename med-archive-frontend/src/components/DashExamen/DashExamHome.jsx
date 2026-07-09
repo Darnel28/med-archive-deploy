@@ -249,10 +249,10 @@ const DashboardLabo = () => {
               <span>Analyses terminees</span>
               <strong>{dashboard.completed}</strong>
             </div>
-            <div className="performance-item">
+            {/* <div className="performance-item">
               <span>Taux de completion</span>
               <strong>{dashboard.completionRate}%</strong>
-            </div>
+            </div> */}
             <div className="performance-item">
               <span>Demandes payees en attente</span>
               <strong>{dashboard.paidPending}</strong>

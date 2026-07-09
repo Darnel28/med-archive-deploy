@@ -84,7 +84,7 @@ const ResultatExamLabo = () => {
                     />
                 </label>
                 <button className="btn transfer-add-btn" type="button" onClick={loadAnalyses} disabled={loading}>
-                    <i className="fa-solid fa-rotate"></i> Actualiser
+                    <i ></i> Actualiser
                 </button>
             </section>
 

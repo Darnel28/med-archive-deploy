@@ -98,7 +98,7 @@ const DemandeExamLabo = () => {
   return (
     <main className="content page-tight">
       <section className="page-title-card">
-        <h1>Demandes d'examens de laboratoire</h1>
+        <h1>Demandes d'examen</h1>
       </section>
 
       <section className="table-toolbar">
