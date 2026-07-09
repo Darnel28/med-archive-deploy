@@ -360,10 +360,10 @@ function APropos() {
 
                                 <div className="stat-card">
 
-                                    <h2>4h/24 – 7j/7</h2>
+                                    <h2>24h/24</h2>
 
                                     <span>
-                                        Accès aux dossiers autorisés
+                                       Disponible
                                     </span>
 
                                 </div>
@@ -374,10 +374,10 @@ function APropos() {
 
                                 <div className="stat-card">
 
-                                    <h2>Historique complet</h2>
+                                    <h2>Historique </h2>
 
                                     <span>
-                                      Toutes vos données médicales centralisées
+                                    Complet
                                     </span>
 
                                 </div>
@@ -391,7 +391,7 @@ function APropos() {
                                     <h2>99.9%</h2>
 
                                     <span>
-                                        Disponibilité
+                                       Fiable
                                     </span>
 
                                 </div>
