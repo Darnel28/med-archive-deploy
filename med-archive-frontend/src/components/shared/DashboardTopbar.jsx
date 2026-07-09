@@ -105,7 +105,7 @@ export default function DashboardTopbar({
         <div className="chart-modal-backdrop" onClick={() => setShowChart(false)}>
           <div className="chart-modal" onClick={(event) => event.stopPropagation()}>
             <button className="chart-modal-close" type="button" onClick={() => setShowChart(false)} aria-label="Fermer">&times;</button>
-            <Chart />
+            <Chart isDarkMode={isDarkMode} />
           </div>
         </div>
       )}

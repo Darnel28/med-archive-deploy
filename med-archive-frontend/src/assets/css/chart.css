@@ -1079,18 +1079,16 @@ body {
         height: 90px;
     }
 }
-/* =====================================================
-   CHAT MEDARCHIVE - DARK MODE
-===================================================== */
+
 
 body.dark-mode .ma-chat-shell{
-    background:#081b29;
-    border-color:#16384d;
+    background:#081b29 !important;
+    border-color:#16384d !important;
 }
 
 body.dark-mode .ma-sidebar{
-    background:#0b2334;
-    border-right:1px solid #16384d;
+    background:#0b2334 !important;
+    border-right:1px solid #16384d !important;
 }
 
 body.dark-mode .ma-sidebar-title,
@@ -1099,183 +1097,170 @@ body.dark-mode .ma-conv-title,
 body.dark-mode .ma-file-name,
 body.dark-mode .ma-contact-hero h4,
 body.dark-mode .ma-contact-info-header h3{
-    color:#ffffff;
+    color:#ffffff !important;
 }
 
 body.dark-mode .ma-search-box input{
-    background:#102c3d;
-    color:#e6f5fa;
-    border-color:#1d4257;
+    background:#102c3d !important;
+    color:#e6f5fa !important;
+    border-color:#1d4257 !important;
 }
 
 body.dark-mode .ma-search-box input::placeholder{
-    color:#7ea3b7;
+    color:#7ea3b7 !important;
 }
 
 body.dark-mode .ma-tabs{
-    border-bottom:1px solid #16384d;
+    border-bottom:1px solid #16384d !important;
 }
 
 body.dark-mode .ma-tab-btn{
-    color:#c4dbe5;
+    color:#c4dbe5 !important;
 }
 
 body.dark-mode .ma-tab-btn.ma-active{
-    background:#17b8b022;
-    color:#27d3ca;
+    background:#17b8b022 !important;
+    color:#27d3ca !important;
 }
 
 body.dark-mode .ma-contact-item{
-    color:#fff;
+    background:transparent !important;
+    color:#fff !important;
 }
 
 body.dark-mode .ma-contact-item:hover{
-    background:#113245;
+    background:#113245 !important;
 }
 
 body.dark-mode .ma-contact-item.ma-active{
-    background:#14394d;
+    background:#14394d !important;
 }
 
 body.dark-mode .ma-contact-preview,
 body.dark-mode .ma-contact-time{
-    color:#9fc2d1;
+    color:#9fc2d1 !important;
 }
 
-/* Conversation */
-
 body.dark-mode .ma-conversation{
-    background:#081b29;
+    background:#081b29 !important;
 }
 
 body.dark-mode .ma-conv-header{
-    background:#0d2738;
-    border-bottom:1px solid #16384d;
+    background:#0d2738 !important;
+    border-bottom:1px solid #16384d !important;
 }
 
 body.dark-mode .ma-icon-btn{
-    background:#14394d;
-    color:#d9eef5;
+    background:#14394d !important;
+    color:#d9eef5 !important;
 }
 
 body.dark-mode .ma-icon-btn:hover{
-    background:#1b4961;
+    background:#1b4961 !important;
 }
 
-/* Zone messages */
-
 body.dark-mode .ma-messages{
-    background:#081b29;
+    background:#081b29 !important;
 }
 
 body.dark-mode .ma-day-separator{
-    color:#90b5c6;
+    color:#90b5c6 !important;
 }
 
 body.dark-mode .ma-day-separator::before,
 body.dark-mode .ma-day-separator::after{
-    background:#1d4257;
+    background:#1d4257 !important;
 }
 
-/* Bulles */
-
 body.dark-mode .ma-msg-row.ma-in .ma-msg-bubble{
-    background:#17384b;
-    color:#eef9fc;
+    background:#17384b !important;
+    color:#eef9fc !important;
 }
 
 body.dark-mode .ma-msg-row.ma-out .ma-msg-bubble{
-    background:#17b8b0;
-    color:white;
+    background:#17b8b0 !important;
+    color:#fff !important;
 }
 
-/* PDF */
-
 body.dark-mode .ma-file-card{
-    background:#123245;
-    border-color:#1d4257;
+    background:#123245 !important;
+    border-color:#1d4257 !important;
 }
 
 body.dark-mode .ma-file-name{
-    color:white;
+    color:#fff !important;
 }
 
 body.dark-mode .ma-file-size,
 body.dark-mode .ma-file-footer{
-    color:#a9c8d6;
+    color:#a9c8d6 !important;
 }
 
 body.dark-mode .ma-download-btn{
-    background:#17384b;
-    border-color:#1d4257;
-    color:#d9eef5;
+    background:#17384b !important;
+    border-color:#1d4257 !important;
+    color:#d9eef5 !important;
 }
 
-/* Barre d'envoi */
-
 body.dark-mode .ma-composer{
-    background:#0d2738;
-    border-top:1px solid #16384d;
+    background:#0d2738 !important;
+    border-top:1px solid #16384d !important;
 }
 
 body.dark-mode .ma-message-input{
-    color:white;
+    color:#fff !important;
 }
 
 body.dark-mode .ma-message-input::placeholder{
-    color:#86a8b8;
+    color:#86a8b8 !important;
 }
 
 body.dark-mode .ma-attach-btn,
 body.dark-mode .ma-emoji-btn{
-    color:#cbe8ef;
+    color:#cbe8ef !important;
 }
 
 body.dark-mode .ma-attach-btn:hover,
 body.dark-mode .ma-emoji-btn:hover{
-    background:#17384b;
+    background:#17384b !important;
 }
 
-/* Menu */
-
 body.dark-mode .ma-chat-menu{
-    background:#102c3d;
-    border-color:#1d4257;
+    background:#102c3d !important;
+    border-color:#1d4257 !important;
 }
 
 body.dark-mode .ma-chat-menu-item{
-    color:#e8f6fa;
+    color:#e8f6fa !important;
 }
 
 body.dark-mode .ma-chat-menu-item:hover{
-    background:#17384b;
+    background:#17384b !important;
 }
 
-/* Panneau infos */
-
 body.dark-mode .ma-contact-info{
-    background:#0b2334;
-    border-left:1px solid #16384d;
+    background:#0b2334 !important;
+    border-left:1px solid #16384d !important;
 }
 
 body.dark-mode .ma-contact-role,
 body.dark-mode .ma-section-label,
 body.dark-mode .ma-details-list li,
 body.dark-mode .ma-shared-file-size{
-    color:#b7d5df;
+    color:#b7d5df !important;
 }
 
 body.dark-mode .ma-shared-file-item{
-    background:#123245;
-    border-color:#1d4257;
+    background:#123245 !important;
+    border-color:#1d4257 !important;
 }
 
 body.dark-mode .ma-shared-file-name{
-    color:white;
+    color:#fff !important;
 }
 
 body.dark-mode .ma-shared-download{
-    background:#17384b;
-    border-color:#1d4257;
-    color:white;
+    background:#17384b !important;
+    border-color:#1d4257 !important;
+    color:#fff !important;
 }

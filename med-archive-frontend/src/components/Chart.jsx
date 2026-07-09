@@ -460,7 +460,7 @@ const Sidebar = ({ contacts, activeTab, onTabChange, searchQuery, onSearchChange
   );
 };
 
-function Chart() {
+const Chart = ({ isDarkMode }) => {
   const [contacts, setContacts] = useState(INITIAL_CONTACTS);
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -554,7 +554,7 @@ function Chart() {
   };
 
   return (
-    <main className={getShellClass()}>
+    <main  className={`${getShellClass()} ${isDarkMode ? "ma-dark" : ""}`}>
       <Sidebar
         contacts={contacts}
         activeTab={activeTab}
