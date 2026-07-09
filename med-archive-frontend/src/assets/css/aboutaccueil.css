@@ -1086,3 +1086,18 @@ font-size:38px;
     }
 
 }
+.stat-card h2{
+    font-size: 54px;
+    font-weight: 800;
+    color: #16324f;
+    line-height: 1;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.stat-card span{
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    }
+    

@@ -346,10 +346,10 @@ function APropos() {
 
                                 <div className="stat-card">
 
-                                    <h2>15+</h2>
+                                    <h2>100 %</h2>
 
                                     <span>
-                                        Hôpitaux partenaires
+                                      Données sécurisées
                                     </span>
 
                                 </div>
@@ -360,10 +360,10 @@ function APropos() {
 
                                 <div className="stat-card">
 
-                                    <h2>150+</h2>
+                                    <h2>4h/24 – 7j/7</h2>
 
                                     <span>
-                                        Professionnels de santé
+                                        Accès aux dossiers autorisés
                                     </span>
 
                                 </div>
@@ -374,10 +374,10 @@ function APropos() {
 
                                 <div className="stat-card">
 
-                                    <h2>9000+</h2>
+                                    <h2>Historique complet</h2>
 
                                     <span>
-                                        Patients enregistrés
+                                      Toutes vos données médicales centralisées
                                     </span>
 
                                 </div>
