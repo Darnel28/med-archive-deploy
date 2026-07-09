@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
-import Topbar from './Topbar';
+import Sidebar from './sidebar';
+import Topbar from './topbar';
 import '../../assets/css/styles.css';
 import telecharger1 from "../../assets/img/télécharger (1).jpeg";
 
