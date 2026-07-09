@@ -70,7 +70,7 @@ function APropos() {
                                         alt=""
                                     />
 
-                                    <div className="floating-card card-one">
+                                    {/* <div className="floating-card card-one">
 
                                         <h5>+15</h5>
 
@@ -78,9 +78,9 @@ function APropos() {
                                             Hôpitaux connectés
                                         </span>
 
-                                    </div>
+                                    </div> */}
 
-                                    <div className="floating-card card-two">
+                                    {/* <div className="floating-card card-two">
 
                                         <h5>9000+</h5>
 
@@ -88,7 +88,7 @@ function APropos() {
                                             Dossiers suivis
                                         </span>
 
-                                    </div>
+                                    </div> */}
 
                                 </div>
 
@@ -265,7 +265,7 @@ function APropos() {
                                         alt="Historique médical"
                                     />
 
-                                    <div className="floating-card card-four">
+                                    {/* <div className="floating-card card-four">
 
                                         <h5>24h/24</h5>
 
@@ -273,7 +273,7 @@ function APropos() {
                                             Accès à votre dossier
                                         </span>
 
-                                    </div>
+                                    </div> */}
 
                                 </div>
 
@@ -424,14 +424,14 @@ function APropos() {
                                         alt=""
                                     />
 
-                                    <div className="floating-card card-three">
+                                    {/* <div className="floating-card card-three">
 
                                         🔒
                                         <br />
                                         Données
                                         sécurisées
 
-                                    </div>
+                                    </div> */}
 
                                 </div>
 
@@ -449,40 +449,32 @@ function APropos() {
 
                                     <h3>
 
-                                        Partage sécurisé
-                                        entre établissements
-                                        de santé
+                                    Un suivi médical continu
 
                                     </h3>
 
                                     <p>
 
-                                        Lorsqu'un patient est transféré,
-                                        ses informations médicales
-                                        sont accessibles uniquement
-                                        aux professionnels autorisés,
-                                        garantissant confidentialité
-                                        et continuité des soins.
-
+                                     Quel que soit l'établissement de santé consulté, votre historique médical reste disponible. Les professionnels de santé disposent des informations nécessaires pour assurer un suivi cohérent tout au long de votre parcours de soins.
                                     </p>
 
                                     <ul>
 
                                         <li>
-                                            ✔ Contrôle des accès
+                                            ✔ Continuité des soins
                                         </li>
 
                                         <li>
-                                            ✔ Autorisations du patient
+                                            ✔ Historique toujours disponible
                                         </li>
 
                                         <li>
-                                            ✔ Traçabilité complète
+                                            ✔ Réduction des examens répétitifs
                                         </li>
 
-                                        <li>
+                                        {/* <li>
                                             ✔ Chiffrement des données
-                                        </li>
+                                        </li> */}
 
                                     </ul>
 

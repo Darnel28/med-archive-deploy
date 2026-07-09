@@ -38,7 +38,7 @@ function Footer() {
     <span className="med">Med</span>
     <span className="archive">Archive</span>
   </a>
-                                    <p>Plateforme nationale de gestion de dossier médical sécurisé pour les patients et
+                                    <p>Plateforme  de gestion de dossier médical sécurisé pour les patients et
                                         professionnels de santé au Bénin.</p>
                                     <div className="socials">
                                         <a href="#"><i className="fab fa-facebook-f"></i></a>
@@ -54,7 +54,7 @@ function Footer() {
                                 <ul>
                                     <li><a href="/about" onClick={(event) => { event.preventDefault(); navigate("/about"); }}>À propos</a></li>
                                     <li><a href="/" onClick={(event) => { event.preventDefault(); navigate("/"); }}>Services</a></li>
-                                    <li><a href="/" onClick={(event) => { event.preventDefault(); navigate("/"); }}>Professionnels</a></li>
+                                    {/* <li><a href="/" onClick={(event) => { event.preventDefault(); navigate("/"); }}>Professionnels</a></li> */}
                                     <li><a href="/contact" onClick={(event) => { event.preventDefault(); navigate("/contact"); }}>Support</a></li>
                                 </ul>
                             </div>
@@ -63,7 +63,7 @@ function Footer() {
                                 <h4 className="footer-title">Liens utiles</h4>
                                 <ul>
                                     <li><a href="#">Créer mon dossier</a></li>
-                                    <li><a href="#">Accès d'urgence</a></li>
+                                    {/* <li><a href="#">Accès d'urgence</a></li> */}
                                     <li><a href="#">Confidentialité</a></li>
                                     <li><a href="#">Conditions d'utilisation</a></li>
                                 </ul>
