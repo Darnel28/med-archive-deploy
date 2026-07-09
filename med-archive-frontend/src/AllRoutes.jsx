@@ -142,7 +142,7 @@ function AllRoutes() {
             </Route>
 
             {/* Alternative dashboard path */}
-            <Route path="/DasbordPatient" element={protect(<DashPatient />, ["patient"])}>
+            {/* <Route path="/DasbordPatient" element={protect(<DashPatient />, ["patient"])}>
                 <Route index element={<DashboardHome />} />
                 <Route path="consultations" element={<ConsultationsHistory />} />
                 <Route path="resultats-analyses" element={<ResultatsAnalyses />} />
@@ -159,7 +159,7 @@ function AllRoutes() {
                 <Route path="securite-compte" element={<SecuriteCompte />} />
             
                 
-            </Route>
+            </Route> */}
             <Route path="/espacemedecin" element={protect(<DashMedecin />, ["medecin"])}>
                 <Route index element={<DashboardHomeMedecin />} />
                 {/* Ajoute ici les autres routes propres au médecin */}
