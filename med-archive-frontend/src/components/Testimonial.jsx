@@ -17,7 +17,7 @@ function Testimonial() {
 
                 <div className="row align-items-center">
 
-                    {/* LEFT */}
+               
 
                     <div className="col-lg-5">
 
