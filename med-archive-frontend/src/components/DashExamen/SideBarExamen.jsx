@@ -113,7 +113,7 @@ const SidebarExamen = () => {
                         <span>{profile.service}</span>
                         {/* <span>ID: MED-24-007</span> */}
                     </div>
-                     <NavLink className="settings-link" to="/espacemedecin/parametres">
+                     <NavLink className="settings-link" to="/espaceexamen/parametres">
                                                       <i className="fa-solid fa-gear"></i>
                                                     </NavLink>
                     <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se déconnecter">

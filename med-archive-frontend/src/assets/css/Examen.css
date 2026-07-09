@@ -611,3 +611,120 @@ body.dark-mode .modal-actions .btn-secondary {
 body.dark-mode .modal-actions .btn-secondary:hover {
   background: #114d62 !important;
 }
+/* ============================================
+   DASHBOARD LABORATOIRE - MODE NUIT
+============================================ */
+
+body.dark-mode .labo-dashboard {
+    background: #081b29;
+    color: #eef7fb;
+}
+
+body.dark-mode .dashboard-header h1,
+body.dark-mode .chart-card h3,
+body.dark-mode .recent-activities h3,
+body.dark-mode .info-card h3,
+body.dark-mode .performance-item strong,
+body.dark-mode .stat-value,
+body.dark-mode .activity-details strong {
+    color: #ffffff;
+}
+
+body.dark-mode .subtitle,
+body.dark-mode .performance-item,
+body.dark-mode .activity-details,
+body.dark-mode .stat-label,
+body.dark-mode .header-date,
+body.dark-mode .alert-list li {
+    color: #b9d6df;
+}
+
+/* Toutes les cartes */
+
+body.dark-mode .stat-card,
+body.dark-mode .chart-card,
+body.dark-mode .recent-activities,
+body.dark-mode .info-card {
+    background: #102c3d;
+    border: 1px solid rgba(255,255,255,.06);
+    box-shadow: none;
+}
+
+/* Date */
+
+body.dark-mode .header-date {
+    background: #102c3d;
+}
+
+/* Badge */
+
+body.dark-mode .stat-change {
+    background: rgba(23,184,176,.15);
+    color: #27d3ca !important;
+}
+
+/* Activités */
+
+body.dark-mode .activity-item {
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+body.dark-mode .activity-item.urgent {
+    background: rgba(231,111,81,.12);
+}
+
+body.dark-mode .activity-time {
+    background: rgba(23,184,176,.15);
+    color: #4be0d8;
+}
+
+/* Status */
+
+body.dark-mode .status-badge {
+    background: #17394d;
+    color: #c9e8f2;
+}
+
+/* Alertes */
+
+body.dark-mode .alert-list li {
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+/* Graphiques */
+
+body.dark-mode .recharts-cartesian-grid line {
+    stroke: rgba(255,255,255,.08);
+}
+
+body.dark-mode .recharts-cartesian-axis-line,
+body.dark-mode .recharts-cartesian-axis-tick line {
+    stroke: #527186;
+}
+
+body.dark-mode .recharts-text {
+    fill: #d8edf5 !important;
+}
+
+body.dark-mode .recharts-default-tooltip {
+    background: #102c3d !important;
+    border: none !important;
+}
+
+body.dark-mode .recharts-tooltip-label,
+body.dark-mode .recharts-tooltip-item {
+    color: white !important;
+}
+
+body.dark-mode .recharts-legend-item-text {
+    color: #d8edf5 !important;
+}
+
+/* Hover */
+
+body.dark-mode .stat-card:hover,
+body.dark-mode .chart-card:hover,
+body.dark-mode .info-card:hover {
+    border-color: rgba(23,184,176,.35);
+    transform: translateY(-3px);
+}
