@@ -13,8 +13,19 @@ WORKDIR /app
 
 COPY . .
 
+# Création des dossiers nécessaires à Laravel
+RUN mkdir -p bootstrap/cache
+RUN mkdir -p storage/framework/cache
+RUN mkdir -p storage/framework/sessions
+RUN mkdir -p storage/framework/views
+RUN mkdir -p storage/logs
+
+# Permissions AVANT composer install
+RUN chmod -R 777 storage bootstrap/cache
+
+# Installation des dépendances
 RUN composer install --no-dev --optimize-autoloader
 
-RUN chmod -R 775 storage bootstrap/cache
-
 EXPOSE 10000
+
+CMD php artisan serve --host=0.0.0.0 --port=$PORT
