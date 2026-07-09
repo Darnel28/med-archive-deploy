@@ -69,7 +69,7 @@ function BlogDetail() {
                                 </div>
                             </div>
 
-                            <div className="navigation-top">
+                            {/* <div className="navigation-top">
                                 <div className="navigation-area">
                                     <div className="row">
                                         <div className="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
@@ -108,7 +108,7 @@ function BlogDetail() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             <div className="comment-form">
                                 <h4>Un commentaire</h4>

@@ -7,6 +7,7 @@ import numerique from "../assets/img/numerique.jpg";
 import phone from "../assets/img/phone.jpg";
 import document from "../assets/img/document.jpg";
 import about4 from "../assets/img/about4.png";
+import { NavLink } from "react-router-dom";
 function About() {
     return (
         <section className="about-area section-padding2 about-area-compact">
