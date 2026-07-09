@@ -73,12 +73,13 @@ const SidebarAdmin = () => {
                         <strong>{name}</strong>
                         <span>{role}</span>
                     </div>
-                    <a className="settings-link" href="/espaceadmin/parametres-admin">
-                        <i className="fa-solid fa-gear"></i>
-                    </a>
-                    <a className="settings-link logout-link" href="/deconnexion" aria-label="Se deconnecter">
-                        <i className="fa-solid fa-right-from-bracket"></i>
-                    </a>
+                 
+                     <NavLink className="settings-link" to="/espacemedecin/parametres-admin">
+                                   <i className="fa-solid fa-gear"></i>
+                                 </NavLink>
+                   <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se déconnecter">
+                                  <i className="fa-solid fa-right-from-bracket"></i>
+                                </NavLink>
                 </div>
 
                 {/* <a className="sidebar-help" href="/espaceadmin/rapports">

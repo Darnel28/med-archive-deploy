@@ -113,19 +113,22 @@ const SidebarExamen = () => {
                         <span>{profile.service}</span>
                         {/* <span>ID: MED-24-007</span> */}
                     </div>
-                    <a className="settings-link" href="/espaceexamen/parametres">
-                        <i className="fa-solid fa-gear"></i>
-                    </a>
-                    <a className="settings-link logout-link" href="/deconnexion" aria-label="Se déconnecter">
-                        <i className="fa-solid fa-right-from-bracket"></i>
-                    </a>
+                     <NavLink className="settings-link" to="/espacemedecin/parametres">
+                                                      <i className="fa-solid fa-gear"></i>
+                                                    </NavLink>
+                    <NavLink className="settings-link logout-link" to="/deconnexion" aria-label="Se déconnecter">
+                                                     <i className="fa-solid fa-right-from-bracket"></i>
+                                                   </NavLink>
                 </div>
 
-                <a className="sidebar-help" href="#">
-                    <i className="fa-solid fa-headset"></i>
-                    <span>Besoin d'aide ? Contacter le support</span>
-                    <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>
+               <NavLink
+                      to="/espaceexamen/besoin-aide"
+                      className="sidebar-help"
+                    >
+                      <i className="fa-solid fa-headset"></i>
+                      <span>Besoin d'aide ? Contacter le support</span>
+                      <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                    </NavLink>
             </div>
         </aside>
     );

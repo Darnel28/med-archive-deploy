@@ -445,7 +445,7 @@ const RendezVousPatient = () => {
   return (
     <main className="content page-tight">
       <section className="page-title-card">
-        <h1>Paiements</h1>
+        <h1>Rendez-Vous&Paiements</h1>
       </section>
 
       <section className="table-toolbar">

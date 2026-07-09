@@ -57,6 +57,7 @@ function Hero() {
                                 <a href="/connexion" className="btn hero-btn">
                                     Mon Dossier <i className="ti-arrow-right"></i>
                                 </a>
+                                
                             </div>
                         </div>
                     </div>

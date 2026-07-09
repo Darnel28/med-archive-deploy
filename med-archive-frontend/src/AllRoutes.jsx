@@ -65,6 +65,7 @@ import DemandeExamLabo from "./components/DashExamen/DemandeExam.jsx";
 import ResultatExamLabo from "./components/DashExamen/ResultatExam.jsx";
 import AlertesExamen from "./components/DashExamen/Alertes.jsx";
 import ParametresExamen from "./components/DashExamen/ParematresExamen.jsx";
+import AideExamen from "./components/DashExamen/AideExamen.jsx";
 
 // Hopital
 import TransfertHopital from "./components/DashHopital/TransfertHopital.jsx";
@@ -162,7 +163,7 @@ function AllRoutes() {
             </Route> */}
             <Route path="/espacemedecin" element={protect(<DashMedecin />, ["medecin"])}>
                 <Route index element={<DashboardHomeMedecin />} />
-                {/* Ajoute ici les autres routes propres au médecin */}
+               
                 <Route path="rendez-vous" element={<RendezVousMedecin />} />
                 <Route path="patients" element={<MesPatientsMedecin />} />
                 <Route path="consultations" element={<ConsultationMedecin />} />
@@ -194,7 +195,7 @@ function AllRoutes() {
                 <Route path="alertes" element={<AlertesExamen />} />
                 <Route path="notifications" element={<AlertesExamen />} />
                 <Route path="parametres" element={<ParametresExamen />} />
-                {/* Ajoute ici les autres routes propres au laboratoire */}
+                <Route path="besoin-aide" element={<AideExamen />} />
             </Route>
             <Route path="/espacehopital" element={protect(<DashHopital />, ["etablissement", "hopital", "hôpital"])} >
                 <Route index element={<DashHomeHopital />} />
