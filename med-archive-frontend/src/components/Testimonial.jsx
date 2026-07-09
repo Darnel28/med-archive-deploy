@@ -2,6 +2,8 @@ import React from "react";
 import beninMap from "../assets/img/beninMap.png";
 import beninMap2 from "../assets/img/beninMap2.png";
 import medecin from "../assets/img/medecin.jpg";
+import pourlacarte from "../assets/img/pourlacarte.jpg";
+import hospitalcarte from "../assets/img/hospitalcarte.jpg";
 // import doctor1 from "../assets/img/avatar1.jpg";
 // import doctor2 from "../assets/img/avatar2.jpg";
 // import doctor3 from "../assets/img/avatar3.jpg";
@@ -141,7 +143,7 @@ function Testimonial() {
                             {/* Avatars */}
 
                             <div className="avatar avatar1">
-                                <img src={medecin} alt="" />
+                                <img src={hospitalcarte} alt="" />
                             </div>
 
                             <div className="avatar avatar2">
@@ -149,7 +151,7 @@ function Testimonial() {
                             </div>
 
                             <div className="avatar avatar3">
-                                <img src={medecin} alt="" />
+                                <img src={ pourlacarte} alt="" />
                             </div>
 
                             <div className="avatar avatar4">

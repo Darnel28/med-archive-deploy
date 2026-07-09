@@ -70,9 +70,9 @@ function BlogDetail() {
                             </div>
 
                             <div className="navigation-top">
-                                <div className="navigation-area">
-                                    <div className="row">
-                                        <div className="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
+                                {/* <div className="navigation-area"> */}
+                                    {/* <div className="row"> */}
+                                        {/* <div className="col-lg-6 col-md-6 col-12 nav-left flex-row d-flex justify-content-start align-items-center">
                                             <div className="thumb">
                                                 <button type="button" className="blog-link-button" onClick={() => navigate("/blog")}>
                                                     <img className="img-fluid" src={preview_img} alt="Preview Image" />
@@ -84,8 +84,8 @@ function BlogDetail() {
                                                     Voir les articles
                                                 </button>
                                             </div>
-                                        </div>
-                                        <div className="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
+                                        </div> */}
+                                        {/* <div className="col-lg-6 col-md-6 col-12 nav-right flex-row d-flex justify-content-end align-items-center">
                                             <div className="detials">
                                                 <p>Article suivant</p>
                                                 <button
@@ -105,23 +105,23 @@ function BlogDetail() {
                                                     →
                                                 </button>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                        </div> */}
+                                    {/* </div>
+                                </div> */}
                             </div>
 
                             <div className="comment-form">
-                                <h4>Leave a Reply</h4>
+                                <h4>Un commentaire</h4>
                                 <form className="form-contact comment_form" action="#" id="commentForm">
                                     <div className="row">
                                         <div className="col-12">
                                             <div className="form-group">
-                                                <textarea className="form-control w-100" name="comment" id="comment" cols="30" rows="9" placeholder="Write Comment"></textarea>
+                                                <textarea className="form-control w-100" name="comment" id="comment" cols="30" rows="9" placeholder="Votre commentaire..."></textarea>
                                             </div>
                                         </div>
                                         <div className="col-sm-6">
                                             <div className="form-group">
-                                                <input className="form-control" name="name" id="name" type="text" placeholder="Name" />
+                                                <input className="form-control" name="name" id="name" type="text" placeholder="Nom" />
                                             </div>
                                         </div>
                                         <div className="col-sm-6">
@@ -136,7 +136,7 @@ function BlogDetail() {
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <button type="submit" className="button button-contactForm btn_1 boxed-btn">Post Comment</button>
+                                        <button type="submit" className="button button-contactForm btn_1 boxed-btn">Poster</button>
                                     </div>
                                 </form>
                             </div>

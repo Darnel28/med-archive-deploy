@@ -25,19 +25,20 @@ function About() {
                                 et les cliniques privées en unifiant votre parcours de soin.
                             </p>
                             <div className="about-btn1 mb-30">
-                                <a href="/connexion" className="btn about-action-btn">
+                                <NavLink to="/connexion" className="btn about-action-btn">
                                     Consulter mon Historique<i className="ti-arrow-right"></i>
-                                </a>
+                                </NavLink>
                             </div>
                             <div className="about-btn1 mb-30">
-                                <a href="/connexion" className="btn about-action-btn about-action-btn--secondary">
+                                <NavLink to="/connexion" className="btn about-action-btn about-action-btn--secondary">
                                     Gérer mes Accès<i className="ti-arrow-right"></i>
-                                </a>
+                                </NavLink>
                             </div>
                             <div className="about-btn1 mb-30">
-                                <a href="/connexion" className="btn about-action-btn about-action-btn--secondary">
+                                <NavLink to="/connexion" className="btn about-action-btn about-action-btn--secondary">
                                     Fiche d'Urgence <i className="ti-arrow-right"></i>
-                                </a>
+                                </NavLink>
+                                
                             </div>
                         </div>
                     </div>

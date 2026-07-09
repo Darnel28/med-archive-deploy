@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 
 function Hero() {
     const words = ["dossier", "santé", "avenir"];
@@ -54,9 +55,9 @@ function Hero() {
                                     Sécurisé, rapide et gratuit.
                                 </p>
 
-                                <a href="/connexion" className="btn hero-btn">
-                                    Mon Dossier <i className="ti-arrow-right"></i>
-                                </a>
+                              <NavLink to="/connexion" className="btn hero-btn">
+    Mon Dossier <i className="ti-arrow-right"></i>
+</NavLink>
                                 
                             </div>
                         </div>
