@@ -14,7 +14,7 @@ export default function DeconnexionPage() {
         try {
             await logout();
         } finally {
-            navigate("/connexion", { replace: true });
+            navigate("/", { replace: true });
         }
     };
 
