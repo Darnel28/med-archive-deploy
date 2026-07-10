@@ -93,9 +93,9 @@
     font-size: 1rem;
     line-height: 1.7;
     max-width: 280px;
-    color: rgba(255,255,255,.92);
+    color: #1e293b; /* noir bleuté */
+    font-weight: 500;
 }
-
 .connexion-left-button {
     margin-top: 32px;
     width: 155px;
