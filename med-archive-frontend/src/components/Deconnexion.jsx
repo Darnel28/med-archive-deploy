@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../api";
-// import "../assets/css/Connexion.css";
+import "../assets/css/Connexion.css";
 import "../assets/css/Deconnexion.css";
 
 export default function DeconnexionPage() {
