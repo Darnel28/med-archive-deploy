@@ -4,7 +4,9 @@ import { FaFacebookF, FaGooglePlusG, FaLinkedinIn } from "react-icons/fa";
 import { FiLock, FiMail } from "react-icons/fi";
 import "../assets/css/Connexion.css";
 import { forgotPassword, getDashboardPathForUser, login } from "../api";
-
+import Nuage from "../assets/img/Nuage.png";
+import Dossier from "../assets/img/Dossier.png";
+import icone from "../assets/img/icone.png";
 export default function LoginPage() {
     const navigate = useNavigate();
     const [email, setEmail] = useState("");
@@ -65,25 +67,46 @@ export default function LoginPage() {
         <div className="connexion-page">
             <div className="connexion-card">
                 <div className="connexion-layout">
-                    <aside className="connexion-left">
-                        <div className="connexion-left-overlay" />
+                  <aside className="connexion-left">
+    <div className="connexion-left-overlay"></div>
 
-                        <div className="connexion-brand">
-                            <div className="connexion-brand-mark">
-                                360
-                            </div>
-                            <span className="connexion-brand-text">Med-Archive</span>
-                        </div>
+    {/* Nuage en haut à droite */}
+    <img src={Nuage} alt="" className="connexion-cloud connexion-cloud-top" />
 
-                        <div className="connexion-left-content">
-                            <h2 className="connexion-left-title">
-                                Bon retour !
-                            </h2>
-                            <p className="connexion-left-text">
-                                Pour rester connecte avec nous, veuillez vous connecter avec vos informations personnelles.
-                            </p>
-                        </div>
-                    </aside>
+    {/* Nuage en bas à gauche */}
+    <img src={Nuage} alt="" className="connexion-cloud connexion-cloud-bottom" />
+
+    <div className="connexion-brand">
+        {/* Ton logo */}
+        <img src={icone} alt="Med-Archive" className="connexion-logo" />
+        <span className="connexion-brand-text">Med-Archive</span>
+    </div>
+
+    <div className="connexion-left-content">
+        <h2 className="connexion-left-title">
+            Bienvenue sur <br />
+            Med-Archive !
+        </h2>
+
+        <p className="connexion-left-text">
+            Votre dossier médical numérique sécurisé,
+            accessible partout et à tout moment.
+        </p>
+    </div>
+
+    {/* Illustration du dossier médical */}
+    <img
+        src={Dossier}
+        alt=""
+        className="connexion-folder"
+    />
+
+    {/* Décorations */}
+    <span className="connexion-plus plus1">+</span>
+    <span className="connexion-plus plus2">+</span>
+    <span className="connexion-circle circle1"></span>
+    <span className="connexion-circle circle2"></span>
+</aside>
 
                     <section className="connexion-right">
                         <div  />

@@ -349,7 +349,7 @@ function APropos() {
                                     <h2>100 %</h2>
 
                                     <span>
-                                      Données sécurisées
+                                      Sécurisées
                                     </span>
 
                                 </div>
