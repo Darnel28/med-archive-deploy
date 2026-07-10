@@ -8,10 +8,7 @@ import Nuage from "../assets/img/Nuage.png";
 import Dossier from "../assets/img/Dossier.png";
 import icone from "../assets/img/icone.png";
 
-// Remplace par tes images
-// import logo from "../assets/img/logo.png";
-// import cloud from "../assets/img/cloud.png";
-// import folder from "../assets/img/folder.png";
+
 
 export default function DeconnexionPage() {
     const navigate = useNavigate();
@@ -49,7 +46,7 @@ export default function DeconnexionPage() {
 
                         
                         <img
-                            src=""
+                            src={Nuage}
                             alt=""
                             className="connexion-cloud connexion-cloud-bottom"
                         />
@@ -112,54 +109,42 @@ export default function DeconnexionPage() {
                  
                     <section className="connexion-right">
 
-                        <div className="connexion-form-panel deconnexion-form-panel">
+                      <div className="connexion-form">
 
-                            <h1 className="connexion-right-title">
-                                Déconnexion
-                            </h1>
+    <div className="deconnexion-box">
 
-                            <p className="connexion-right-subtitle deconnexion-subtitle">
-                                Votre session sera fermée en toute sécurité.
-                            </p>
+        <h2>Voulez-vous quitter votre session ?</h2>
 
-                            <div className="deconnexion-box">
+        <p>
+            Toutes vos données sont enregistrées.
+            Vous pourrez reprendre votre travail
+            dès votre prochaine connexion.
+        </p>
 
-                                <h2>
-                                    Voulez-vous quitter votre session ?
-                                </h2>
+        <div className="deconnexion-actions">
 
-                                <p>
-                                    Toutes vos données sont enregistrées.
-                                    Vous pourrez reprendre votre travail
-                                    dès votre prochaine connexion.
-                                </p>
+            <button
+                type="button"
+                className="deconnexion-secondary"
+                onClick={() => navigate(-1)}
+            >
+                Retour
+            </button>
 
-                                <div className="deconnexion-actions">
+            <button
+                type="button"
+                className="deconnexion-primary"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+            >
+                {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+            </button>
 
-                                    <button
-                                        type="button"
-                                        className="deconnexion-secondary"
-                                        onClick={() => navigate(-1)}
-                                    >
-                                        Retour
-                                    </button>
+        </div>
 
-                                    <button
-                                        type="button"
-                                        className="deconnexion-primary"
-                                        onClick={handleLogout}
-                                        disabled={isLoggingOut}
-                                    >
-                                        {isLoggingOut
-                                            ? "Déconnexion..."
-                                            : "Se déconnecter"}
-                                    </button>
+    </div>
 
-                                </div>
-
-                            </div>
-
-                        </div>
+</div>
 
                     </section>
 
