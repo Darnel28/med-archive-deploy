@@ -22,54 +22,83 @@ export default function DeconnexionPage() {
         <div className="connexion-page deconnexion-page">
             <div className="connexion-card">
                 <div className="connexion-layout deconnexion-layout">
-                    <aside className="connexion-left deconnexion-left">
-                        <div className="connexion-left-overlay" />
+                  <div className="connexion-left-overlay"></div>
 
-                        <div className="connexion-brand">
-                            <div className="connexion-brand-mark">MA</div>
-                            <span className="connexion-brand-text">Med-Archive</span>
-                        </div>
+{/* Nuage haut */}
+<img src="" alt="" className="connexion-cloud connexion-cloud-top" />
 
-                        <div className="connexion-left-content">
-                            <h2 className="connexion-left-title">Gérez votre sortie en toute sécurité</h2>
-                            <p className="connexion-left-text">
-                                Votre session Med-Archive protège les données médicales de votre espace patient et professionnel.
-                            </p>
+{/* Nuage bas */}
+<img src="" alt="" className="connexion-cloud connexion-cloud-bottom" />
 
-                            {/* <button type="button" className="connexion-left-button" onClick={() => navigate(-1)}>
-                                Retour
-                            </button> */}
-                        </div>
-                    </aside>
+<div className="connexion-brand">
+    <img src="" alt="" className="connexion-logo" />
+    <span className="connexion-brand-text">Med-Archive</span>
+</div>
+
+<div className="connexion-left-content">
+    <h2 className="connexion-left-title">
+        À bientôt sur <br />
+        Med-Archive !
+    </h2>
+
+    <p className="connexion-left-text">
+        Votre session est protégée.
+        Vous pourrez vous reconnecter à tout moment
+        en toute sécurité.
+    </p>
+</div>
+
+<img src="" alt="" className="connexion-folder" />
+
+<span className="connexion-plus plus1">+</span>
+<span className="connexion-plus plus2">+</span>
+
+<span className="connexion-circle circle1"></span>
+<span className="connexion-circle circle2"></span>
 
                     <section className="connexion-right deconnexion-right">
                         <div  />
 
                         <div className="connexion-form-panel deconnexion-form-panel">
-                            <h1 className="connexion-right-title">Déconnexion de Med-Archive</h1>
-                            <p className="connexion-right-subtitle deconnexion-subtitle">
-                                Vous êtes sur le point de fermer votre session. Vos données restent sécurisées et vous pourrez revenir à tout moment.
-                            </p>
+                          <h1 className="connexion-right-title">
+    Déconnexion
+</h1>
+                           <p className="connexion-right-subtitle deconnexion-subtitle">
+    Votre session sera fermée en toute sécurité.
+</p>
 
-                            <div className="deconnexion-box">
-                                {/* <div className="deconnexion-box-icon">
-                                    <i className="fa-solid fa-shield-heart"></i>
-                                </div> */}
+                           <div className="deconnexion-box">
 
-                                <h2>Confirmer la déconnexion ?</h2>
-                                <p>
-                                    Pour continuer, cliquez sur le bouton de déconnexion. Sinon, revenez au tableau de bord pour poursuivre votre travail.
-                                </p>
+    <h2>Voulez-vous quitter votre session ?</h2>
 
-                                <div className="deconnexion-actions">
-                                    <button type="button" className="deconnexion-secondary" onClick={() => navigate(-1)}>
-                                        Rester connecté
-                                    </button>
-                                    <button type="button" className="deconnexion-primary" onClick={handleLogout} disabled={isLoggingOut}>
-                                        {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
-                                    </button>
-                                </div>
-                            </div>
+    <p>
+        Toutes vos données sont enregistrées.
+        Vous pourrez reprendre votre travail
+        dès votre prochaine connexion.
+    </p>
+
+    <div className="deconnexion-actions">
+
+        <button
+            type="button"
+            className="deconnexion-secondary"
+            onClick={() => navigate(-1)}
+        >
+            Retour
+        </button>
+
+        <button
+            type="button"
+            className="deconnexion-primary"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+        >
+            {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+        </button>
+
+    </div>
+
+</div>
                         </div>
                     </section>
                 </div>
