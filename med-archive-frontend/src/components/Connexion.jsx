@@ -76,11 +76,11 @@ export default function LoginPage() {
     {/* Nuage en bas à gauche */}
     <img src={Nuage} alt="" className="connexion-cloud connexion-cloud-bottom" />
 
-    <div className="connexion-brand">
-        {/* Ton logo */}
+    {/* <div className="connexion-brand">
+       
         <img src={icone} alt="Med-Archive" className="connexion-logo" />
         <span className="connexion-brand-text">Med-Archive</span>
-    </div>
+    </div> */}
 
     <div className="connexion-left-content">
         <h2 className="connexion-left-title">
