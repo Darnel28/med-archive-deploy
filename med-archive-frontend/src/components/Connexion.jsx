@@ -116,7 +116,7 @@ export default function LoginPage() {
                                 Connexion a votre espace
                             </h1>
 
-                            <div className="connexion-socials">
+                            {/* <div className="connexion-socials">
                                 <button type="button" className="connexion-social-btn">
                                     <FaFacebookF />
                                 </button>
@@ -126,11 +126,11 @@ export default function LoginPage() {
                                 <button type="button" className="connexion-social-btn">
                                     <FaLinkedinIn />
                                 </button>
-                            </div>
+                            </div> */}
 
-                            <p className="connexion-right-subtitle">
+                            {/* <p className="connexion-right-subtitle">
                                 ou utilisez votre E-mail pour vous connecter :
-                            </p>
+                            </p> */}
 
                             <form onSubmit={showForgotPassword ? handleForgotPassword : handleLogin} className="connexion-form">
                                 <div className="connexion-field">

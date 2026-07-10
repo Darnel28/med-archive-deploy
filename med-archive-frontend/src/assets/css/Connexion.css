@@ -21,7 +21,7 @@
 
 .connexion-layout {
     display: grid;
-    grid-template-columns: 420px minmax(0, 1fr);
+    grid-template-columns: 480px minmax(0, 1fr);
     min-height: 620px;
 }
 
@@ -135,10 +135,11 @@
     border-left: 62px solid transparent;
 }
 
-.connexion-form-panel {
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
+.connexion-form-panel{
+    width:100%;
+    max-width:420px;
+    text-align:center;
+    margin-top:-20px;
 }
 
 .connexion-right-title {
@@ -236,7 +237,7 @@
 }
 
 .connexion-form {
-    margin-top: 20px;
+    margin-top: 45px;
     text-align: left;
 }
 
