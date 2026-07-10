@@ -46,10 +46,10 @@
 
 .connexion-brand,
 .connexion-left-content{
-    position:relative;
-    z-index:5;
-    margin-top:60px;
-    max-width:280px;
+    position: relative;
+    z-index: 5;
+    max-width: 300px;
+    margin-top: 30px; 
 }
 .connexion-brand{
     position:relative;
@@ -81,16 +81,19 @@
 }
 
 .connexion-left-title{
-    font-size:2.7rem;
-    line-height:1.15;
-    font-weight:800;
+    margin: 0;
+    font-size: 2.2rem;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -1px;
 }
 
 .connexion-left-text{
-    margin-top:20px;
-    font-size:1.08rem;
-    line-height:1.8;
-    opacity:.95;
+    margin-top: 14px;
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 280px;
+    color: rgba(255,255,255,.92);
 }
 
 .connexion-left-button {
@@ -394,12 +397,13 @@
         font-size: 1.8rem;
     }
 
-    .connexion-left {
-        padding: 28px 22px;
-    }
+   .connexion-left{
+    justify-content: flex-start;
+    padding-top: 55px;
+}
 
     .connexion-brand {
-        margin-bottom: 28px;
+        margin-bottom: 20px;
     }
 
     .connexion-left-button,
