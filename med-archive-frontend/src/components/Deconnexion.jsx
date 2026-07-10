@@ -52,7 +52,7 @@ export default function DeconnexionPage() {
                         />
 
                       
-                        <div className="connexion-brand">
+                        {/* <div className="connexion-brand">
 
                             <img
                                 src={icone}
@@ -64,7 +64,7 @@ export default function DeconnexionPage() {
                                 Med-Archive
                             </span>
 
-                        </div>
+                        </div> */}
 
 
                         <div className="connexion-left-content">
