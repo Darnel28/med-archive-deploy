@@ -108,7 +108,7 @@ class CompteCreeMailer
             }
 
             if (str_contains($message, 'Connection could not be established') || str_contains($message, 'timed out')) {
-                return ucfirst($context) . ' cree, mais Render n arrive pas a se connecter au serveur SMTP Gmail. Essayez le port 465/smtps ou un service mail API comme Resend, Mailgun ou SendGrid.';
+                return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
             }
 
             return ucfirst($context) . ' cree, mais l email des identifiants n a pas pu etre envoye.';
