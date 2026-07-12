@@ -157,3 +157,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Transfert de dossier
     Route::patch('/dossiers/{id}/transferer', [DossierController::class, 'transferer'])->middleware('role:Medecin,Administrateur');
 });
+
+Route::get('/mail-config-test', function () {
+    return [
+        'host' => config('mail.mailers.smtp.host'),
+        'port' => config('mail.mailers.smtp.port'),
+        'encryption' => config('mail.mailers.smtp.encryption'),
+    ];
+});
