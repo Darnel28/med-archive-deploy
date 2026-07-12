@@ -54,7 +54,7 @@ class CompteCreeMailer
                 ]);
 
                 if (str_contains($resendMessage, 'You can only send testing emails to your own email address')) {
-                    return ucfirst($context) . ' cree, mais Resend est encore en mode test. Vous pouvez seulement envoyer a votre propre email, ou verifier un domaine dans Resend pour envoyer aux utilisateurs.';
+                    return ucfirst($context) . ' cree, mmais les identifiants ne sont pas envoyés.';
                 }
 
                 return ucfirst($context) . ' cree, mais Resend n a pas pu envoyer l email des identifiants. Verifiez RESEND_API_KEY et RESEND_FROM_ADDRESS.';
