@@ -60,9 +60,17 @@ class CompteCreeMailer
                 'mail' => $mailConfig,
             ]);
 
-            return str_contains($mailException->getMessage(), 'Username and Password not accepted')
-                ? ucfirst($context) . ' cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
-                : ucfirst($context) . ' cree, mais l email des identifiants n a pas pu etre envoye.';
+            $message = $mailException->getMessage();
+
+            if (str_contains($message, 'Username and Password not accepted')) {
+                return ucfirst($context) . ' cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.';
+            }
+
+            if (str_contains($message, 'Connection could not be established') || str_contains($message, 'timed out')) {
+                return ucfirst($context) . ' cree, mais Render n arrive pas a se connecter au serveur SMTP Gmail. Essayez le port 465/smtps ou un service mail API comme Resend, Mailgun ou SendGrid.';
+            }
+
+            return ucfirst($context) . ' cree, mais l email des identifiants n a pas pu etre envoye.';
         }
     }
 
