@@ -40,16 +40,22 @@ class CompteCreeMailer
 
                 return null;
             } catch (\Throwable $resendException) {
+                $resendMessage = $resendException->getMessage();
+
                 Log::error('account_credentials_mail_failed', [
                     'context' => $context,
                     'user_id' => $user->id,
                     'recipient' => $user->email,
                     'provider' => 'resend',
                     'exception_class' => $resendException::class,
-                    'exception_message' => $resendException->getMessage(),
+                    'exception_message' => $resendMessage,
                     'exception_code' => $resendException->getCode(),
                     'mail' => $mailConfig,
                 ]);
+
+                if (str_contains($resendMessage, 'You can only send testing emails to your own email address')) {
+                    return ucfirst($context) . ' cree, mais Resend est encore en mode test. Vous pouvez seulement envoyer a votre propre email, ou verifier un domaine dans Resend pour envoyer aux utilisateurs.';
+                }
 
                 return ucfirst($context) . ' cree, mais Resend n a pas pu envoyer l email des identifiants. Verifiez RESEND_API_KEY et RESEND_FROM_ADDRESS.';
             }

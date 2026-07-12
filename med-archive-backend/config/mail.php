@@ -65,6 +65,10 @@ return [
             'transport' => 'resend',
         ],
 
+              'brevo' => [
+    'transport' => 'brevo',
+],
+
         'sendmail' => [
             'transport' => 'sendmail',
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
@@ -97,6 +101,8 @@ return [
             'retry_after' => 60,
         ],
 
+   
+
     ],
 
     /*
@@ -114,5 +120,7 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
+
+   
 
 ];

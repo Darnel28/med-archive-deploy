@@ -40,5 +40,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
         'fcfa_per_eur' => (float) env('STRIPE_FCFA_PER_EUR', 655.957),
     ],
+    
+    'brevo' => [
+    'key' => env('BREVO_KEY'),
+],
 
 ];
