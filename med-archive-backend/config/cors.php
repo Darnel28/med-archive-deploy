@@ -14,14 +14,19 @@ return [
     ],
 
     'allowed_origins' => [
-        'https://med-archive-projet.onrender.com/',
+        'https://med-archive-projet.onrender.com',
         'http://localhost:5173',
     ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => [
-        '*',
+        'Accept',
+        'Authorization',
+        'Content-Type',
+        'X-Requested-With',
+        'X-CSRF-TOKEN',
+        'X-XSRF-TOKEN',
     ],
 
     'exposed_headers' => [],
