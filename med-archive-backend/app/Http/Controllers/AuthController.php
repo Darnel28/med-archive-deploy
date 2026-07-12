@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\CompteCreeMail;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\SystemNotification;
+use App\Support\CompteCreeMailer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -161,11 +160,19 @@ class AuthController extends Controller
         }
 
         $plainPassword = Str::password(12);
-        Mail::to($user->email)->send(new CompteCreeMail(
+        $mailWarning = CompteCreeMailer::send(
             $user,
             $plainPassword,
+            'mot_de_passe_oublie',
             config('app.frontend_url', 'http://localhost:5173/connexion')
-        ));
+        );
+
+        if ($mailWarning) {
+            return response()->json([
+                'success' => false,
+                'message' => $mailWarning,
+            ], 500);
+        }
 
         $user->update([
             'password' => Hash::make($plainPassword),

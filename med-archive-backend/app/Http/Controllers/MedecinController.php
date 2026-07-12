@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\CompteCreeMail;
 use App\Models\Medecin;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\Specialite;
 use App\Models\User;
 use App\Models\Consultation;
+use App\Support\CompteCreeMailer;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class MedecinController extends Controller
@@ -184,17 +183,7 @@ class MedecinController extends Controller
 
             DB::commit();
 
-            if (in_array(config('mail.default'), ['log', 'array'], true)) {
-                $mailWarning = 'Medecin cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
-            } else {
-                try {
-                    Mail::to($user->email)->send(new CompteCreeMail($user, $plainPassword));
-                } catch (\Throwable $mailException) {
-                    $mailWarning = str_contains($mailException->getMessage(), 'Username and Password not accepted')
-                        ? 'Medecin cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
-                        : 'Medecin cree, mais l email des identifiants n a pas pu etre envoye.';
-                }
-            }
+            $mailWarning = CompteCreeMailer::send($user, $plainPassword, 'medecin');
 
             return response()->json([
                 'success' => true,

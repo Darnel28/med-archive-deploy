@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\CompteCreeMail;
 use App\Models\Role;
 use App\Models\Service;
 use App\Models\Patient;
 use App\Models\SystemNotification;
 use App\Models\User;
+use App\Support\CompteCreeMailer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ServiceController extends Controller
@@ -201,17 +200,7 @@ class ServiceController extends Controller
             ])->load(['etablissement', 'user']);
         });
 
-        if (in_array(config('mail.default'), ['log', 'array'], true)) {
-            $mailWarning = 'Service cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
-        } else {
-            try {
-                Mail::to($service->user->email)->send(new CompteCreeMail($service->user, $plainPassword));
-            } catch (\Throwable $mailException) {
-                $mailWarning = str_contains($mailException->getMessage(), 'Username and Password not accepted')
-                    ? 'Service cree, mais Gmail a refuse les identifiants SMTP. Verifiez le mot de passe d application Gmail.'
-                    : 'Service cree, mais l email des identifiants n a pas pu etre envoye.';
-            }
-        }
+        $mailWarning = CompteCreeMailer::send($service->user, $plainPassword, 'service');
 
         SystemNotification::create([
             'event_key' => "service:{$service->id}:created",
