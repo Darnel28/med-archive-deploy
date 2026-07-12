@@ -62,7 +62,7 @@ function Footer() {
                             <div className="col-lg-3 col-md-6 mb-4">
                                 <h4 className="footer-title">Liens utiles</h4>
                                 <ul>
-                                    <li><a href="#">Créer mon dossier</a></li>
+                                    {/* <li><a href="#">Créer mon dossier</a></li> */}
                                     {/* <li><a href="#">Accès d'urgence</a></li> */}
                                     <li><a href="#">Confidentialité</a></li>
                                     <li><a href="#">Conditions d'utilisation</a></li>

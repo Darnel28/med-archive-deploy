@@ -288,7 +288,7 @@ function APropos() {
                                     </span>
 
                                     <h3>
-                                        Tout votre historique médical
+                                        Toute votre historique médical
                                         dans une seule plateforme
                                     </h3>
 

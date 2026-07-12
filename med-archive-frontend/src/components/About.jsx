@@ -37,7 +37,7 @@ function About() {
                             </div>
                             <div className="about-btn1 mb-30">
                                 <NavLink to="/connexion" className="btn about-action-btn about-action-btn--secondary">
-                                    Fiche d'Urgence <i className="ti-arrow-right"></i>
+                                 Consulter mon profil <i className="ti-arrow-right"></i>
                                 </NavLink>
                                 
                             </div>
