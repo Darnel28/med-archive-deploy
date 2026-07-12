@@ -34,6 +34,7 @@ const Sidebar = () => {
   useEffect(() => {
     setIsDossierOpen(isDossierActive);
   }, [isDossierActive]);
+  
   useEffect(() => {
   loadPatientDashboardData()
     .then((data) => {

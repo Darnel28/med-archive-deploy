@@ -41,7 +41,7 @@ export async function loadPatientDashboardData() {
     getMesAnalyses({ per_page: 100 }),
     getMesFactures({ per_page: 100 }),
   ]);
-
+ 
   return {
     user: unwrapUser(me),
     consultations: unwrapRows(consultations),

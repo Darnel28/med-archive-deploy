@@ -4,6 +4,7 @@ import beninMap2 from "../assets/img/beninMap2.png";
 import medecin from "../assets/img/medecin.jpg";
 import pourlacarte from "../assets/img/pourlacarte.jpg";
 import hospitalcarte from "../assets/img/hospitalcarte.jpg";
+import laboratoire from "../assets/img/laboratoire.jpg";
 // import doctor1 from "../assets/img/avatar1.jpg";
 // import doctor2 from "../assets/img/avatar2.jpg";
 // import doctor3 from "../assets/img/avatar3.jpg";
@@ -155,7 +156,7 @@ function Testimonial() {
                             </div>
 
                             <div className="avatar avatar4">
-                                <img src={medecin} alt="" />
+                                <img src={laboratoire} alt="" />
                             </div>
 
                         </div>
