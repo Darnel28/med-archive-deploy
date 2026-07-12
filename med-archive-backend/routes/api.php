@@ -162,6 +162,7 @@ Route::get('/mail-config-test', function () {
     return [
         'host' => config('mail.mailers.smtp.host'),
         'port' => config('mail.mailers.smtp.port'),
-        'encryption' => config('mail.mailers.smtp.encryption'),
+        'scheme' => config('mail.mailers.smtp.scheme'),
+        'username' => config('mail.mailers.smtp.username'),
     ];
 });
