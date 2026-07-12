@@ -209,7 +209,7 @@ export default function DynamicDoctorsTable({ title = 'Medecins', useEtablisseme
       const response = modalMode === 'edit'
         ? await updateMedecin(selectedDoctor.id, payload)
         : await createMedecin(payload);
-      setSuccess(response?.message || (modalMode === 'edit' ? 'Medecin modifie avec succes.' : 'Medecin cree avec succes.'));
+      setSuccess(response?.warning || response?.message || (modalMode === 'edit' ? 'Medecin modifie avec succes.' : 'Medecin cree avec succes.'));
       await loadDoctors();
       closeModal();
     } catch (err) {

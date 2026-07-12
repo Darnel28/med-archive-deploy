@@ -191,7 +191,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
 
     try {
       const response = await createPatient(payload);
-      setModalMessage(response?.message || 'Patient cree avec succes.');
+      setModalMessage(response?.warning || response?.message || 'Patient cree avec succes.');
       await loadPatients();
       setTimeout(() => setShowAddModal(false), 900);
     } catch (err) {
