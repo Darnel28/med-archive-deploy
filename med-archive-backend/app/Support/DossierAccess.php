@@ -97,6 +97,15 @@ class DossierAccess
                 || (int) $dossier->medecin_referent_id === (int) $user->medecin->id;
         }
 
+        if ($user->isEtablissement()) {
+            return $dossier->transferts()
+                ->where('statut', 'accepte')
+                ->where(fn ($query) => $query->where('etablissement_source_id', $user->id)->orWhere('etablissement_destination_id', $user->id))
+                ->exists()
+                || $dossier->consultations()->whereHas('service', fn ($query) => $query->where('etablissement_id', $user->id))->exists()
+                || $dossier->consultations()->whereHas('medecin', fn ($query) => $query->where('etablissement_id', $user->id))->exists();
+        }
+
         return false;
     }
 
@@ -106,36 +115,26 @@ class DossierAccess
             return $query;
         }
 
-        $acceptedTransfer = self::latestAcceptedTransfer($dossier);
-
-        if (!$acceptedTransfer?->date_approbation) {
-            return $query;
-        }
-
         if ($user->isEtablissement()) {
-            if ((int) $acceptedTransfer->etablissement_destination_id === (int) $user->id) {
-                return $query;
-            }
-
-            if ((int) $acceptedTransfer->etablissement_source_id === (int) $user->id) {
-                return $query->where('date_consultation', '<=', $acceptedTransfer->date_approbation);
-            }
+            return $query->where(function ($hospitalQuery) use ($user) {
+                $hospitalQuery->whereHas('service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $user->id))
+                    ->orWhereHas('medecin', fn ($medecinQuery) => $medecinQuery->where('etablissement_id', $user->id));
+            });
         }
 
         if ($user->isService() && $user->service) {
-            if ((int) $acceptedTransfer->service_destination_id === (int) $user->service->id) {
-                return $query;
-            }
-
-            if ((int) $acceptedTransfer->service_source_id === (int) $user->service->id) {
-                return $query->where('date_consultation', '<=', $acceptedTransfer->date_approbation);
-            }
+            $hasLeftService = $dossier->transferts()->where('statut', 'accepte')
+                ->where('service_source_id', $user->service->id)->exists();
+            return $hasLeftService ? $query->where('service_id', $user->service->id) : $query;
         }
 
         if ($user->isMedecin() && (int) $dossier->medecin_referent_id === (int) $user->medecin?->id) {
             return $query;
         }
 
-        return $query->where('date_consultation', '<=', $acceptedTransfer->date_approbation);
+        $acceptedTransfer = self::latestAcceptedTransfer($dossier);
+        return $acceptedTransfer?->date_approbation
+            ? $query->where('date_consultation', '<=', $acceptedTransfer->date_approbation)
+            : $query;
     }
 }

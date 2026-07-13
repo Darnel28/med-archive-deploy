@@ -178,8 +178,11 @@ class User extends Authenticatable
 
         $medecinIds = $this->medecins()->pluck('id');
 
-        return Consultation::whereIn('medecin_id', $medecinIds)
-                          ->with(['dossier.patient.user', 'medecin.user']);
+        return Consultation::where(function ($query) use ($medecinIds) {
+                $query->whereIn('medecin_id', $medecinIds)
+                    ->orWhereHas('service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $this->id));
+            })
+            ->with(['dossier.patient.user', 'medecin.user', 'service']);
     }
 
     public function statistiquesEtablissement()

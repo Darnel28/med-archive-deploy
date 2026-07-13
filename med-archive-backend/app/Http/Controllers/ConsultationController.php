@@ -55,6 +55,11 @@ class ConsultationController extends Controller
         }
 
         if ($request->user()->isEtablissement()) {
+            $etablissementId = $request->user()->id;
+            $query->where(function ($hospitalQuery) use ($etablissementId) {
+                $hospitalQuery->whereHas('service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $etablissementId))
+                    ->orWhereHas('medecin', fn ($medecinQuery) => $medecinQuery->where('etablissement_id', $etablissementId));
+            });
             $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {
                 $transferQuery->where('statut', 'accepte')
                     ->where('etablissement_source_id', $request->user()->id)

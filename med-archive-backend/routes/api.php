@@ -20,6 +20,7 @@ use App\Http\Controllers\PatientMedecinController;
 use App\Http\Controllers\ParametreController;
 use App\Http\Controllers\TransfertDossierController;
 use App\Http\Controllers\SystemNotificationController;
+use App\Http\Controllers\ChatController;
 use App\Models\Role;
 
 Route::get('/ping', function() {
@@ -114,6 +115,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [SystemNotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [SystemNotificationController::class, 'markRead']);
     Route::patch('/notifications/read-all', [SystemNotificationController::class, 'markAllRead']);
+
+    // Chat: messages are stored as isolated chat_message notifications.
+    Route::get('/chat/contacts', [ChatController::class, 'contacts']);
+    Route::get('/chat/messages/{contact}', [ChatController::class, 'messages']);
+    Route::post('/chat/messages/{contact}', [ChatController::class, 'send']);
 
     // Analyses
     Route::get('/analyses/{id}/resultat-fichier', [AnalyseController::class, 'voirFichierResultat']);

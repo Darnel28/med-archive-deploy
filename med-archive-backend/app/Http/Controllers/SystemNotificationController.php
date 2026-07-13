@@ -33,6 +33,9 @@ class SystemNotificationController extends Controller
         $user = $request->user();
         $query = SystemNotification::query();
 
+        // Chat messages have their own endpoints and must never appear as system alerts.
+        $query->where('type', '!=', 'chat_message');
+
         if ($user?->isAdmin()) {
             return $query->whereIn('type', $this->adminTypes);
         }
