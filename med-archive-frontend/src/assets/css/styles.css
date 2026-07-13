@@ -1942,8 +1942,8 @@ body.dark-mode .notif-badge {
     flex-wrap: wrap;
 }
 
-.settings-qr-button { margin-left: 4px; }
-.settings-qr-button i { margin-right: 6px; }
+.settings-qr-button { min-width: auto; margin-left: 8px; padding: 8px 14px; border: 1px solid #0f766e; border-radius: 8px; background: #fff; color: #0f766e; font-size: 13px; line-height: 1.2; box-shadow: none; }
+.settings-qr-button:hover { background: #0f766e; color: #fff; box-shadow: none; transform: none; }
 
 .qr-modal-backdrop { position: fixed; inset: 0; z-index: 10001; display: grid; place-items: center; padding: 20px; background: rgba(14, 30, 53, .58); }
 .qr-modal { position: relative; width: min(390px, 100%); padding: 28px; border-radius: 16px; text-align: center; background: #fff; box-shadow: 0 22px 60px rgba(0, 0, 0, .25); }

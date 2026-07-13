@@ -182,8 +182,7 @@ const Parametres = () => {
             <div className="settings-avatar-actions">
               <strong>{formData.name || 'Patient'}</strong>
               <button className="btn btn-outline settings-qr-button" type="button" onClick={showQrCode} disabled={qrLoading || loading}>
-                <i className="fa-solid fa-qrcode" aria-hidden="true"></i>
-                {qrLoading ? 'Generation...' : 'QR'}
+                {qrLoading ? 'Generation...' : 'Code QR'}
               </button>
               {/* <span>{formData.email || '-'}</span> */}
             </div>
