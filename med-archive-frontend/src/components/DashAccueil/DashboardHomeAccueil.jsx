@@ -234,11 +234,11 @@ const DashboardHomeAccueil = () => {
             )}
             <button className="btn-confirm">Confirmer arrivee</button>
           </div>
-          <div className="info-card">
+          {/* <div className="info-card">
             <h3><i className="fa-solid fa-building"></i> A propos de l'hopital</h3>
             <p>{etablissement?.nom || 'Etablissement'} - {etablissement?.type || 'centre medical'}</p>
             <p>{patients.length} patient(s), {medecins.length} medecin(s).</p>
-          </div>
+          </div> */}
         </div>
 
         <div className="recent-activities">

@@ -87,7 +87,6 @@ export default function DashboardTopbar({
         </button>
         <button className="icon-btn has-badge" type="button" aria-label="Messages" onClick={() => setShowChart(true)}>
           <i className="fa-regular fa-envelope"></i>
-          <span className="badge">5</span>
         </button>
         <button className="icon-btn has-badge" type="button" aria-label="Ouvrir les notifications" onClick={() => navigate(notificationsPath)}>
           <i className="fa-regular fa-bell"></i>
