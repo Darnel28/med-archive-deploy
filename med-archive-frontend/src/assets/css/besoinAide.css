@@ -15,96 +15,138 @@
 }
 
 /* ===== DARK MODE ===== */
+/* ======================================
+   MODE SOMBRE - MODAL TICKET
+====================================== */
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --aide-text: #e1e8ef;
-    --aide-text-light: #a0b0c0;
-    --aide-border: #3a4a5a;
-    --aide-primary-light: #0f5c6b;
+
+  .ticket-modal-overlay{
+    background: rgba(2, 8, 23, .82);
+    backdrop-filter: blur(6px);
   }
 
-  .besoin-aide-page {
-    background: linear-gradient(145deg, #0f1620 0%, #1a2535 100%);
+  .ticket-modal{
+    background: #10233d;
+    border: 1px solid #284566;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
   }
 
-  .besoin-aide-header {
-    background: linear-gradient(145deg, #0f1620 0%, #1a2535 100%);
-    border-color: #3a4a5a;
+  .ticket-modal-header{
+    border-bottom: 1px solid #284566;
   }
 
-  .besoin-aide-shell {
-    background: transparent;
+  .ticket-modal-header h2{
+    color: #ffffff;
   }
 
-  .besoin-aide-categories,
-  .besoin-aide-cta-block,
-  .besoin-aide-faq-card {
-    background: #1a2a3a;
-    border-color: #3a4a5a;
+  .ticket-close-btn{
+    color: #9bb8d8;
   }
 
-  .besoin-aide-faq-question:hover {
-    background: #243342;
+  .ticket-close-btn:hover{
+    background: #1b3553;
+    color: #ffffff;
   }
 
-  .besoin-aide-faq-question:focus-visible {
-    background: #2a3e52;
+  /* Labels */
+
+  .ticket-form-group label{
+    color: #eef6ff;
   }
 
-  .besoin-aide-faq-answer {
-    background: #151f2c;
-    border-top-color: #3a4a5a;
+  .ticket-form-group label span{
+    color: #ff6b6b;
   }
 
-  .besoin-aide-category-card:hover {
-    background: #243342;
-    border-color: var(--aide-primary);
+  /* Champs */
+
+  .ticket-form input,
+  .ticket-form textarea,
+  .ticket-form select{
+    background: #17314d;
+    border: 1px solid #284566;
+    color: #eef6ff;
   }
 
-  .besoin-aide-cta-block {
-    background: linear-gradient(135deg, var(--aide-primary-dark), var(--aide-primary));
+  .ticket-form input::placeholder,
+  .ticket-form textarea::placeholder{
+    color: #8fa8c6;
   }
 
-  .besoin-aide-cta-block h4,
-  .besoin-aide-cta-block p {
-    color: white;
+  .ticket-form input:focus,
+  .ticket-form textarea:focus,
+  .ticket-form select:focus{
+    border-color: #17b8b0;
+    background: #1b3553;
+    box-shadow: 0 0 0 4px rgba(23,184,176,.15);
   }
 
-  .besoin-aide-btn-ghost {
-    background: #243342;
-    color: var(--aide-text);
-    border-color: #3a4a5a;
+  /* Upload */
+
+  .ticket-upload-box{
+    background: #17314d;
+    border: 2px dashed #17b8b0;
   }
 
-  .besoin-aide-btn-ghost:hover {
-    background: #2a3e52;
+  .ticket-upload-box:hover{
+    background: #1d3c5d;
   }
 
-  .besoin-aide-modal-overlay {
-    background: rgba(0, 0, 0, 0.85);
+  .ticket-upload-content h4{
+    color: #ffffff;
   }
 
-  .besoin-aide-modal {
-    background: #1a2a3a;
-    border-color: #3a4a5a;
+  .ticket-upload-content p{
+    color: #c7d8ea;
   }
 
-  .besoin-aide-modal-header {
-    border-bottom-color: #3a4a5a;
+  .ticket-upload-content span{
+    color: #8fa8c6;
   }
 
-  .besoin-aide-ticket-form input,
-  .besoin-aide-ticket-form textarea {
-    background: #243342;
-    color: var(--aide-text);
-    border-color: #3a4a5a;
+  /* Boutons */
+
+  .ticket-actions{
+    border-top: 1px solid #284566;
   }
 
-  .besoin-aide-ticket-form input:focus,
-  .besoin-aide-ticket-form textarea:focus {
-    border-color: var(--aide-primary);
-    box-shadow: 0 0 0 3px rgba(23, 184, 176, 0.2);
+  .ticket-btn-cancel{
+    background: #243b55;
+    color: #eef6ff;
   }
+
+  .ticket-btn-cancel:hover{
+    background: #305071;
+  }
+
+  .ticket-btn-submit{
+    background: linear-gradient(135deg,#17b8b0,#11998e);
+  }
+
+  .ticket-btn-submit:hover{
+    box-shadow: 0 12px 25px rgba(23,184,176,.35);
+  }
+
+  /* Scrollbar */
+
+  .ticket-form::-webkit-scrollbar{
+    width: 7px;
+  }
+
+  .ticket-form::-webkit-scrollbar-track{
+    background: #10233d;
+  }
+
+  .ticket-form::-webkit-scrollbar-thumb{
+    background: #2d547b;
+    border-radius: 20px;
+  }
+
+  .ticket-form::-webkit-scrollbar-thumb:hover{
+    background: #3b6a99;
+  }
+
 }
 
 /* ===== GLOBAL PAGE ===== */
