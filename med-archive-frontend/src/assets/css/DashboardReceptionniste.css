@@ -284,3 +284,148 @@
   .stat-value { font-size: 1.5rem; }
   .activity-item { flex-direction: column; align-items: flex-start; }
 }
+/* =======================
+   DASHBOARD - MODE SOMBRE
+   ======================= */
+
+body.dark .receptionniste-dashboard,
+html.dark .receptionniste-dashboard{
+    background: linear-gradient(180deg, #07111f 0%, #0c1d33 100%);
+    color: #eef6ff;
+}
+
+/* Header */
+
+body.dark .dashboard-header h1,
+html.dark .dashboard-header h1{
+    color: #ffffff;
+}
+
+body.dark .dashboard-header .subtitle,
+html.dark .dashboard-header .subtitle{
+    color: #9db7d7;
+}
+
+body.dark .header-datetime,
+html.dark .header-datetime{
+    background: #10233d;
+    color: #eef6ff;
+    border: 1px solid #243f5e;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+body.dark .header-datetime i,
+html.dark .header-datetime i{
+    color: #17b8b0;
+}
+
+/* Cartes */
+
+body.dark .stat-card,
+body.dark .chart-card,
+body.dark .info-card,
+body.dark .activity-card,
+html.dark .stat-card,
+html.dark .chart-card,
+html.dark .info-card,
+html.dark .activity-card{
+    background: #10233d;
+    border: 1px solid #243f5e;
+    box-shadow: 0 15px 35px rgba(0,0,0,.35);
+}
+
+/* Hover */
+
+body.dark .stat-card:hover,
+html.dark .stat-card:hover{
+    background: #163152;
+    box-shadow: 0 20px 40px rgba(0,0,0,.45);
+}
+
+/* Titres */
+
+body.dark .chart-card h3,
+body.dark .info-card h3,
+body.dark .activity-card h3,
+body.dark .stat-value,
+body.dark .activity-details strong,
+html.dark .chart-card h3,
+html.dark .info-card h3,
+html.dark .activity-card h3,
+html.dark .stat-value,
+html.dark .activity-details strong{
+    color: #ffffff;
+}
+
+/* Textes */
+
+body.dark .stat-label,
+body.dark .activity-details,
+body.dark .info-card p,
+body.dark .table-meta,
+html.dark .stat-label,
+html.dark .activity-details,
+html.dark .info-card p,
+html.dark .table-meta{
+    color: #9db7d7;
+}
+
+/* Icônes */
+
+body.dark .stat-icon,
+html.dark .stat-icon{
+    background: rgba(23,184,176,.15);
+    color: #17b8b0;
+}
+
+/* Liste activités */
+
+body.dark .activity-item,
+html.dark .activity-item{
+    border-bottom: 1px solid #243f5e;
+}
+
+body.dark .activity-time,
+html.dark .activity-time{
+    background: rgba(23,184,176,.15);
+    color: #17b8b0;
+}
+
+body.dark .activity-status,
+html.dark .activity-status{
+    background: #1b3858;
+    color: #d5e8ff;
+}
+
+/* Barre occupation */
+
+body.dark .occupancy-bar,
+html.dark .occupancy-bar{
+    background: #1c3552;
+}
+
+body.dark .occupancy-fill,
+html.dark .occupancy-fill{
+    background: linear-gradient(90deg,#17b8b0,#36e7d7);
+}
+
+/* Bouton */
+
+body.dark .btn-confirm,
+html.dark .btn-confirm{
+    background: #17b8b0;
+}
+
+body.dark .btn-confirm:hover,
+html.dark .btn-confirm:hover{
+    background: #12a59f;
+}
+
+/* Alertes */
+
+body.dark .alert-danger,
+html.dark .alert-danger{
+    background: #51232d;
+    border-color: #8a3a49;
+    color: #ffd9df;
+}
