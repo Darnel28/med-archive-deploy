@@ -212,6 +212,42 @@ class PatientController extends Controller
         ]);
     }
 
+    /** Public emergency card opened by a patient's QR code. */
+    public function emergencyCardByImu($imu)
+    {
+        $patient = Patient::where('imu', $imu)->with([
+            'user:id,name,telephone,date_naissance,sexe',
+            'dossier.serviceProprietaire.etablissement:id,name',
+        ])->first();
+
+        if (!$patient) {
+            return response()->json(['success' => false, 'message' => 'Patient introuvable'], 404);
+        }
+
+        $user = $patient->user;
+        $service = $patient->dossier?->serviceProprietaire;
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'nom_complet' => $user?->name,
+                'sexe' => $user?->sexe,
+                'date_naissance' => $user?->date_naissance,
+                'photo' => $user?->avatar,
+                'groupe_sanguin' => $patient->groupe_sanguin,
+                'allergies' => $patient->allergies,
+                'antecedents_medicaux' => $patient->antecedents_medicaux,
+                'maladies_chroniques' => null,
+                'medicaments_actuels' => $patient->dossier?->traitements_en_cours,
+                'implants_dispositifs' => null,
+                'personne_contact' => $patient->personne_contact,
+                'lien_parente' => null,
+                'telephone_contact' => $patient->telephone_contact,
+                'imu' => $patient->imu,
+                'dernier_etablissement' => $service?->etablissement?->name ?? $service?->nom,
+            ],
+        ]);
+    }
+
     /**
      * Dossier complet du patient
      */
@@ -466,14 +502,54 @@ class PatientController extends Controller
 
     public function generateQrCode($id)
     {
-        $patient = Patient::findOrFail($id);
+        $patient = Patient::with([
+            'user:id,name,date_naissance,sexe',
+            'dossier.serviceProprietaire.etablissement:id,name',
+        ])->findOrFail($id);
+
+        $user = $patient->user;
+        $dossier = $patient->dossier;
+        $service = $dossier?->serviceProprietaire;
+        $nameParts = preg_split('/\s+/', trim($user?->name ?? ''), 2);
+        $nom = $nameParts[0] ?? 'Non renseigné';
+        $prenom = $nameParts[1] ?? 'Non renseigné';
+        $valeur = static fn ($value) => filled($value) ? $value : 'Non renseigné';
+
+        // Le QR est volontairement une fiche texte : tout lecteur QR peut ainsi
+        // afficher les informations essentielles sans ouvrir une application.
+        $qrText = implode("\n", [
+            'FICHE MÉDICALE D’URGENCE',
+            '',
+            'Informations d’identité',
+            'Nom : ' . $nom,
+            'Prénom : ' . $prenom,
+            'Sexe : ' . $valeur($user?->sexe),
+            'Date de naissance : ' . $valeur($user?->date_naissance),
+            'Photo du patient (facultatif) : Non disponible dans le QR',
+            '',
+            '🩸 Informations médicales critiques',
+            'Groupe sanguin : ' . $valeur($patient->groupe_sanguin),
+            'Allergies (médicaments, aliments, latex...) : ' . $valeur($patient->allergies),
+            'Antécédents médicaux importants (diabète, hypertension, épilepsie, asthme, insuffisance cardiaque, etc.) : ' . $valeur($patient->antecedents_medicaux),
+            'Maladies chroniques : ' . $valeur($dossier?->diagnostics_principaux),
+            'Médicaments actuellement pris : ' . $valeur($dossier?->traitements_en_cours),
+            'Implants ou dispositifs médicaux (pacemaker...) : Non renseigné',
+            '',
+            '📞 Contact d’urgence',
+            'Nom de la personne à prévenir : ' . $valeur($patient->personne_contact),
+            'Lien de parenté : Non renseigné',
+            'Numéro de téléphone : ' . $valeur($patient->telephone_contact),
+            '',
+            'IMU (Identifiant Médical Unique) : ' . $patient->imu,
+            'Dernier établissement fréquenté : ' . $valeur($service?->etablissement?->name ?? $service?->nom),
+        ]);
 
         $builder = new Builder(
             writer: new SvgWriter(),
-            data: $patient->imu,
+            data: $qrText,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 300,
+            size: 650,
             margin: 10,
         );
 

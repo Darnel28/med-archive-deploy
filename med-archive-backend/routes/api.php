@@ -33,6 +33,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/forgot-password', [AuthController::class, 'motDePasseOublie']);
 Route::get('/specialites', [SpecialiteController::class, 'index']);
 Route::get('/patients-medecins', [PatientMedecinController::class, 'index']);
+Route::get('/patients/imu/{imu}/urgence', [PatientController::class, 'emergencyCardByImu']);
 
 // Routes protégées
 Route::middleware('auth:sanctum')->group(function () {
