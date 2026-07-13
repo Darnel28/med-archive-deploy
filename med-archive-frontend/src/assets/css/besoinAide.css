@@ -19,136 +19,76 @@
    MODE SOMBRE - MODAL TICKET
 ====================================== */
 
-@media (prefers-color-scheme: dark) {
-
-  .ticket-modal-overlay{
-    background: rgba(2, 8, 23, .82);
-    backdrop-filter: blur(6px);
-  }
-
-  .ticket-modal{
-    background: #10233d;
-    border: 1px solid #284566;
-    box-shadow: 0 30px 80px rgba(0,0,0,.55);
-  }
-
-  .ticket-modal-header{
-    border-bottom: 1px solid #284566;
-  }
-
-  .ticket-modal-header h2{
-    color: #ffffff;
-  }
-
-  .ticket-close-btn{
-    color: #9bb8d8;
-  }
-
-  .ticket-close-btn:hover{
-    background: #1b3553;
-    color: #ffffff;
-  }
-
-  /* Labels */
-
-  .ticket-form-group label{
-    color: #eef6ff;
-  }
-
-  .ticket-form-group label span{
-    color: #ff6b6b;
-  }
-
-  /* Champs */
-
-  .ticket-form input,
-  .ticket-form textarea,
-  .ticket-form select{
-    background: #17314d;
-    border: 1px solid #284566;
-    color: #eef6ff;
-  }
-
-  .ticket-form input::placeholder,
-  .ticket-form textarea::placeholder{
-    color: #8fa8c6;
-  }
-
-  .ticket-form input:focus,
-  .ticket-form textarea:focus,
-  .ticket-form select:focus{
-    border-color: #17b8b0;
-    background: #1b3553;
-    box-shadow: 0 0 0 4px rgba(23,184,176,.15);
-  }
-
-  /* Upload */
-
-  .ticket-upload-box{
-    background: #17314d;
-    border: 2px dashed #17b8b0;
-  }
-
-  .ticket-upload-box:hover{
-    background: #1d3c5d;
-  }
-
-  .ticket-upload-content h4{
-    color: #ffffff;
-  }
-
-  .ticket-upload-content p{
-    color: #c7d8ea;
-  }
-
-  .ticket-upload-content span{
-    color: #8fa8c6;
-  }
-
-  /* Boutons */
-
-  .ticket-actions{
-    border-top: 1px solid #284566;
-  }
-
-  .ticket-btn-cancel{
-    background: #243b55;
-    color: #eef6ff;
-  }
-
-  .ticket-btn-cancel:hover{
-    background: #305071;
-  }
-
-  .ticket-btn-submit{
-    background: linear-gradient(135deg,#17b8b0,#11998e);
-  }
-
-  .ticket-btn-submit:hover{
-    box-shadow: 0 12px 25px rgba(23,184,176,.35);
-  }
-
-  /* Scrollbar */
-
-  .ticket-form::-webkit-scrollbar{
-    width: 7px;
-  }
-
-  .ticket-form::-webkit-scrollbar-track{
-    background: #10233d;
-  }
-
-  .ticket-form::-webkit-scrollbar-thumb{
-    background: #2d547b;
-    border-radius: 20px;
-  }
-
-  .ticket-form::-webkit-scrollbar-thumb:hover{
-    background: #3b6a99;
-  }
-
+body.dark-mode .besoin-aide-page{
+    background: linear-gradient(145deg,#071321,#0f2137);
 }
 
+body.dark-mode .besoin-aide-header{
+    background: linear-gradient(145deg,#071321,#0f2137);
+    border-color:#284566;
+}
+
+body.dark-mode .besoin-aide-shell{
+    background:transparent;
+}
+
+body.dark-mode .besoin-aide-categories,
+body.dark-mode .besoin-aide-faq-card,
+body.dark-mode .besoin-aide-cta-block{
+    background:#10233d;
+    border-color:#284566;
+}
+
+body.dark-mode .besoin-aide-header h1,
+body.dark-mode .besoin-aide-categories h3,
+body.dark-mode .besoin-aide-category-content h4,
+body.dark-mode .besoin-aide-faq-question,
+body.dark-mode .besoin-aide-modal-header h3{
+    color:#ffffff;
+}
+
+body.dark-mode .besoin-aide-header p,
+body.dark-mode .besoin-aide-category-count,
+body.dark-mode .besoin-aide-faq-answer,
+body.dark-mode .besoin-aide-ticket-form label{
+    color:#c6d7e8;
+}
+
+body.dark-mode .besoin-aide-category-card{
+    background:#17314d;
+    border-color:#284566;
+}
+
+body.dark-mode .besoin-aide-category-card:hover{
+    background:#1d3d5d;
+}
+
+body.dark-mode .besoin-aide-faq-question{
+    background:#10233d;
+}
+
+body.dark-mode .besoin-aide-faq-question:hover{
+    background:#17314d;
+}
+
+body.dark-mode .besoin-aide-faq-answer{
+    background:#132b44;
+    border-top-color:#284566;
+}
+
+body.dark-mode .besoin-aide-faq-card.open{
+    background:#132b44;
+}
+
+body.dark-mode .besoin-aide-btn-ghost{
+    background:#17314d;
+    color:#fff;
+    border-color:#284566;
+}
+
+body.dark-mode .besoin-aide-btn-ghost:hover{
+    background:#214263;
+}
 /* ===== GLOBAL PAGE ===== */
 .besoin-aide-page {
   background: linear-gradient(145deg, #f0f9f8 0%, #e8f4f2 100%);
