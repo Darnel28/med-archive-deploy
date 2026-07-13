@@ -284,148 +284,196 @@
   .stat-value { font-size: 1.5rem; }
   .activity-item { flex-direction: column; align-items: flex-start; }
 }
-/* =======================
-   DASHBOARD - MODE SOMBRE
-   ======================= */
+/* ==========================================
+   DASHBOARD RÉCEPTIONNISTE - MODE SOMBRE
+========================================== */
 
-body.dark .receptionniste-dashboard,
-html.dark .receptionniste-dashboard{
-    background: linear-gradient(180deg, #07111f 0%, #0c1d33 100%);
-    color: #eef6ff;
+body.dark-mode .receptionniste-dashboard{
+    background: linear-gradient(180deg,#07111f 0%,#0c1d33 100%);
+    color:#eef6ff;
 }
 
 /* Header */
 
-body.dark .dashboard-header h1,
-html.dark .dashboard-header h1{
-    color: #ffffff;
+body.dark-mode .dashboard-header h1{
+    color:#ffffff;
 }
 
-body.dark .dashboard-header .subtitle,
-html.dark .dashboard-header .subtitle{
-    color: #9db7d7;
+body.dark-mode .dashboard-header .subtitle{
+    color:#9db7d7;
 }
 
-body.dark .header-datetime,
-html.dark .header-datetime{
-    background: #10233d;
-    color: #eef6ff;
-    border: 1px solid #243f5e;
-    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+body.dark-mode .header-datetime{
+    background:#10233d;
+    border:1px solid #243f5e;
+    color:#eef6ff;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
 
-body.dark .header-datetime i,
-html.dark .header-datetime i{
-    color: #17b8b0;
+body.dark-mode .header-datetime i{
+    color:#17b8b0;
 }
 
 /* Cartes */
 
-body.dark .stat-card,
-body.dark .chart-card,
-body.dark .info-card,
-body.dark .activity-card,
-html.dark .stat-card,
-html.dark .chart-card,
-html.dark .info-card,
-html.dark .activity-card{
-    background: #10233d;
-    border: 1px solid #243f5e;
-    box-shadow: 0 15px 35px rgba(0,0,0,.35);
+body.dark-mode .stat-card,
+body.dark-mode .chart-card,
+body.dark-mode .info-card,
+body.dark-mode .activity-card{
+    background:#10233d;
+    border:1px solid #243f5e;
+    box-shadow:0 15px 35px rgba(0,0,0,.35);
 }
 
 /* Hover */
 
-body.dark .stat-card:hover,
-html.dark .stat-card:hover{
-    background: #163152;
-    box-shadow: 0 20px 40px rgba(0,0,0,.45);
+body.dark-mode .stat-card:hover{
+    background:#163152;
+    box-shadow:0 20px 40px rgba(0,0,0,.45);
 }
 
 /* Titres */
 
-body.dark .chart-card h3,
-body.dark .info-card h3,
-body.dark .activity-card h3,
-body.dark .stat-value,
-body.dark .activity-details strong,
-html.dark .chart-card h3,
-html.dark .info-card h3,
-html.dark .activity-card h3,
-html.dark .stat-value,
-html.dark .activity-details strong{
-    color: #ffffff;
+body.dark-mode .chart-card h3,
+body.dark-mode .info-card h3,
+body.dark-mode .activity-card h3,
+body.dark-mode .stat-value,
+body.dark-mode .activity-details strong{
+    color:#ffffff;
 }
 
 /* Textes */
 
-body.dark .stat-label,
-body.dark .activity-details,
-body.dark .info-card p,
-body.dark .table-meta,
-html.dark .stat-label,
-html.dark .activity-details,
-html.dark .info-card p,
-html.dark .table-meta{
-    color: #9db7d7;
+body.dark-mode .stat-label,
+body.dark-mode .activity-details,
+body.dark-mode .activity-note,
+body.dark-mode .info-card p,
+body.dark-mode .info-card span,
+body.dark-mode .activity-card p,
+body.dark-mode .activity-card span{
+    color:#b8cce4;
 }
 
 /* Icônes */
 
-body.dark .stat-icon,
-html.dark .stat-icon{
-    background: rgba(23,184,176,.15);
-    color: #17b8b0;
+body.dark-mode .stat-icon{
+    background:rgba(23,184,176,.15);
+    color:#17b8b0;
 }
 
-/* Liste activités */
-
-body.dark .activity-item,
-html.dark .activity-item{
-    border-bottom: 1px solid #243f5e;
+body.dark-mode .chart-card h3 i,
+body.dark-mode .info-card h3 i,
+body.dark-mode .activity-card h3 i{
+    color:#17b8b0;
 }
 
-body.dark .activity-time,
-html.dark .activity-time{
-    background: rgba(23,184,176,.15);
-    color: #17b8b0;
+/* Tendances */
+
+body.dark-mode .stat-trend{
+    background:#1b3858;
+    color:#d7e7ff;
 }
 
-body.dark .activity-status,
-html.dark .activity-status{
-    background: #1b3858;
-    color: #d5e8ff;
+body.dark-mode .stat-trend.up{
+    background:#173d31;
+    color:#43d889;
 }
 
-/* Barre occupation */
-
-body.dark .occupancy-bar,
-html.dark .occupancy-bar{
-    background: #1c3552;
+body.dark-mode .stat-trend.down{
+    background:#4d2229;
+    color:#ff8d97;
 }
 
-body.dark .occupancy-fill,
-html.dark .occupancy-fill{
-    background: linear-gradient(90deg,#17b8b0,#36e7d7);
+body.dark-mode .stat-trend.neutral{
+    background:#4a3918;
+    color:#ffd56d;
+}
+
+/* Activités */
+
+body.dark-mode .activity-item{
+    border-bottom:1px solid #243f5e;
+}
+
+body.dark-mode .activity-item.urgent{
+    background:rgba(231,111,81,.15);
+}
+
+body.dark-mode .activity-time{
+    background:rgba(23,184,176,.15);
+    color:#17b8b0;
+}
+
+body.dark-mode .activity-status{
+    background:#1b3858;
+    color:#d8eaff;
+}
+
+body.dark-mode .status-arrive{
+    background:#123f3d;
+    color:#45e5d9;
+}
+
+body.dark-mode .status-en-attente{
+    background:#4d3912;
+    color:#ffcb58;
+}
+
+body.dark-mode .status-termine{
+    background:#173d31;
+    color:#52dc94;
+}
+
+body.dark-mode .status-programme{
+    background:#203b5d;
+    color:#b7d5ff;
+}
+
+/* Barre */
+
+body.dark-mode .occupancy-bar{
+    background:#1c3552;
+}
+
+body.dark-mode .occupancy-fill{
+    background:linear-gradient(90deg,#17b8b0,#36e7d7);
 }
 
 /* Bouton */
 
-body.dark .btn-confirm,
-html.dark .btn-confirm{
-    background: #17b8b0;
+body.dark-mode .btn-confirm{
+    background:#17b8b0;
+    color:#fff;
 }
 
-body.dark .btn-confirm:hover,
-html.dark .btn-confirm:hover{
-    background: #12a59f;
+body.dark-mode .btn-confirm:hover{
+    background:#119f99;
 }
 
 /* Alertes */
 
-body.dark .alert-danger,
-html.dark .alert-danger{
-    background: #51232d;
-    border-color: #8a3a49;
-    color: #ffd9df;
+body.dark-mode .alert-danger{
+    background:#51232d;
+    border-color:#8a3a49;
+    color:#ffdce3;
+}
+
+/* Tous les textes généraux */
+
+body.dark-mode .receptionniste-dashboard h1,
+body.dark-mode .receptionniste-dashboard h2,
+body.dark-mode .receptionniste-dashboard h3,
+body.dark-mode .receptionniste-dashboard h4,
+body.dark-mode .receptionniste-dashboard h5,
+body.dark-mode .receptionniste-dashboard h6{
+    color:#ffffff;
+}
+
+body.dark-mode .receptionniste-dashboard p,
+body.dark-mode .receptionniste-dashboard span,
+body.dark-mode .receptionniste-dashboard label,
+body.dark-mode .receptionniste-dashboard li,
+body.dark-mode .receptionniste-dashboard td,
+body.dark-mode .receptionniste-dashboard th{
+    color:#c8d7ea;
 }

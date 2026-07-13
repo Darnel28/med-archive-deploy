@@ -48,8 +48,34 @@ body.dark-mode .besoin-aide-modal-header h3{
 }
 
 body.dark-mode .besoin-aide-header p,
-body.dark-mode .besoin-aide-category-count,
+/* ===== FAQ ===== */
 body.dark-mode .besoin-aide-faq-answer,
+body.dark-mode .besoin-aide-faq-answer p {
+    color: #e8edf5 !important;
+}
+
+body.dark-mode .besoin-aide-faq-question,
+body.dark-mode .besoin-aide-faq-question span {
+    color: #ffffff !important;
+}
+
+body.dark-mode .besoin-aide-category-content h4,
+body.dark-mode .besoin-aide-category-count,
+body.dark-mode .besoin-aide-categories h3 {
+    color: #e8edf5 !important;
+}
+
+body.dark-mode .besoin-aide-header p {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .ticket-form-group label,
+body.dark-mode .ticket-upload-content h4,
+body.dark-mode .ticket-upload-content p,
+body.dark-mode .ticket-upload-content span,
+body.dark-mode .ticket-modal-header h2 {
+    color: #e8edf5 !important;
+}
 body.dark-mode .besoin-aide-ticket-form label{
     color:#c6d7e8;
 }
