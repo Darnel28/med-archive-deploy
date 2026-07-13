@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCurrentUser } from '../../api/authApi';
 import { getAuthUser, setAuthSession } from '../../api/client';
-import { updatePatient } from '../../api/patientApi';
+import { getPatientQrCode, updatePatient } from '../../api/patientApi';
 import useAutoDismissMessage from '../../hooks/useAutoDismissMessage';
 import { patientFromUser, unwrapUser } from './patientDashboardData';
 
@@ -47,6 +47,8 @@ const Parametres = () => {
   const [formData, setFormData] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrUrl, setQrUrl] = useState('');
   const [message, setMessage] = useState('');
 
   useAutoDismissMessage(message, setMessage);
@@ -76,6 +78,30 @@ const Parametres = () => {
     loadProfile();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => () => {
+    if (qrUrl) URL.revokeObjectURL(qrUrl);
+  }, [qrUrl]);
+
+  const showQrCode = async () => {
+    if (!patientId) {
+      setMessage('Profil patient introuvable.');
+      return;
+    }
+
+    setQrLoading(true);
+    setMessage('');
+    try {
+      const response = await getPatientQrCode(patientId);
+      const nextUrl = URL.createObjectURL(response.data);
+      if (qrUrl) URL.revokeObjectURL(qrUrl);
+      setQrUrl(nextUrl);
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Impossible de generer le code QR.');
+    } finally {
+      setQrLoading(false);
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -155,6 +181,10 @@ const Parametres = () => {
             </div>
             <div className="settings-avatar-actions">
               <strong>{formData.name || 'Patient'}</strong>
+              <button className="btn btn-outline settings-qr-button" type="button" onClick={showQrCode} disabled={qrLoading || loading}>
+                <i className="fa-solid fa-qrcode" aria-hidden="true"></i>
+                {qrLoading ? 'Generation...' : 'QR'}
+              </button>
               {/* <span>{formData.email || '-'}</span> */}
             </div>
           </div>
@@ -233,6 +263,17 @@ const Parametres = () => {
           )}
         </article>
       </div>
+
+      {qrUrl ? (
+        <div className="qr-modal-backdrop" role="presentation" onClick={() => setQrUrl('')}>
+          <section className="qr-modal" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title" onClick={(event) => event.stopPropagation()}>
+            <button className="qr-modal-close" type="button" onClick={() => setQrUrl('')} aria-label="Fermer">&times;</button>
+            <h2 id="qr-modal-title">Mon code QR d'urgence</h2>
+            <p>Presentez ce code aux secours : il ouvre vos informations medicales essentielles.</p>
+            <img src={qrUrl} alt="Code QR medical du patient" className="qr-code-image" />
+          </section>
+        </div>
+      ) : null}
     </main>
   );
 };

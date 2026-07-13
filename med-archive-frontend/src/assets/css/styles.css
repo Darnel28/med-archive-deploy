@@ -1942,6 +1942,24 @@ body.dark-mode .notif-badge {
     flex-wrap: wrap;
 }
 
+.settings-qr-button { margin-left: 4px; }
+.settings-qr-button i { margin-right: 6px; }
+
+.qr-modal-backdrop { position: fixed; inset: 0; z-index: 10001; display: grid; place-items: center; padding: 20px; background: rgba(14, 30, 53, .58); }
+.qr-modal { position: relative; width: min(390px, 100%); padding: 28px; border-radius: 16px; text-align: center; background: #fff; box-shadow: 0 22px 60px rgba(0, 0, 0, .25); }
+.qr-modal h2 { margin: 0 24px 8px; color: #173967; font-size: 20px; }
+.qr-modal p { margin: 0 0 16px; color: #5d7593; line-height: 1.5; }
+.qr-modal-close { position: absolute; top: 8px; right: 12px; border: 0; background: transparent; color: #4c6687; font-size: 28px; cursor: pointer; }
+.qr-code-image { display: block; width: min(300px, 100%); margin: auto; }
+
+.emergency-page { min-height: 100vh; padding: 36px 16px; background: #eef5fa; }
+.emergency-card { width: min(780px, 100%); margin: 0 auto; padding: 28px; border-radius: 18px; background: #fff; box-shadow: 0 10px 35px rgba(30, 66, 102, .12); }
+.emergency-heading { display: flex; align-items: center; gap: 14px; padding-bottom: 20px; border-bottom: 1px solid #dce8f1; }
+.emergency-heading > span { font-size: 32px; }.emergency-heading p { margin: 0 0 3px; color: #257264; font-weight: 700; }.emergency-heading h1 { margin: 0; color: #183b63; font-size: 25px; }
+.emergency-section { margin-top: 22px; }.emergency-section h2 { margin: 0 0 12px; color: #1a4a75; font-size: 18px; }.emergency-section dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; }.emergency-section dl > div { padding: 11px 12px; border-radius: 8px; background: #f4f8fb; }.emergency-section dt { margin-bottom: 4px; color: #58738f; font-size: 12px; font-weight: 700; }.emergency-section dd { margin: 0; color: #173b61; line-height: 1.4; }.identity-section { display: flex; gap: 18px; }.identity-section > div { flex: 1; }.emergency-photo { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; }.emergency-reference { padding-top: 18px; border-top: 1px solid #dce8f1; }.emergency-error { color: #a72d2d; }
+
+@media (max-width: 560px) { .emergency-card { padding: 20px; }.emergency-section dl { grid-template-columns: 1fr; }.identity-section { align-items: flex-start; }.settings-qr-button { margin-left: 0; } }
+
 .settings-form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

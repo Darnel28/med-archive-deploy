@@ -22,7 +22,11 @@ export function getPatientByImu(imu) {
 }
 
 export function getPatientQrCode(id) {
-  return apiClient.get(`/patients/${id}/qrcode`).then((response) => response.data);
+  return apiClient.get(`/patients/${id}/qrcode`, { responseType: "blob" });
+}
+
+export function getEmergencyCardByImu(imu) {
+  return apiClient.get(`/patients/imu/${encodeURIComponent(imu)}/urgence`).then((response) => response.data);
 }
 
 export function getMesConsultations(params) {

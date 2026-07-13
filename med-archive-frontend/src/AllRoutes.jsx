@@ -89,6 +89,7 @@ import LaboratoiresAdmin from "./components/DashAdmin/LaboratoireAdmin.jsx";
 import NotificationsAdmin from "./components/DashAdmin/NotificationsAdmin.jsx";
 import ParametresAdmin from "./components/DashAdmin/ParametresAdmin.jsx";
 import ProtectedDashboard from "./components/shared/ProtectedDashboard.jsx";
+import EmergencyCard from "./components/EmergencyCard.jsx";
 
 const protect = (element, roles) => <ProtectedDashboard allowedRoles={roles}>{element}</ProtectedDashboard>;
 // Homepage component
@@ -120,6 +121,7 @@ function AllRoutes() {
             <Route path="/blog" element={<BlogFront />} />
             <Route path="/blog-detail" element={<BlogDetail />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/urgence/:imu" element={<EmergencyCard />} />
 
             {/* Dashboard with nested routes - DashPatient is the layout parent */}
             <Route path="/espacepatient" element={protect(<DashPatient />, ["patient"])}>
