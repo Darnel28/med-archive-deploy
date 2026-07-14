@@ -1,0 +1,276 @@
+/* Couche responsive commune aux tableaux, modales et espaces de travail. */
+
+html,
+body,
+#root,
+.app {
+    min-width: 0;
+    width: 100%;
+}
+
+.content,
+.patient-main,
+.doctor-main {
+    min-width: 0;
+}
+
+/* Les tableaux restent lisibles sans provoquer de défilement de toute la page. */
+.rdv-card,
+.rdv-table-wrap,
+.table-wrapper,
+.audit-table-wrapper,
+.rx-table-wrap,
+.table-responsive {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.rdv-table,
+.transfer-table,
+.audit-table,
+.exam-table,
+.table-clean,
+.mes-patients-list-table,
+.rx-table {
+    min-width: 680px;
+}
+
+/* Les modales partagent toujours les mêmes limites de viewport. */
+.app-modal-overlay,
+.modal-overlay,
+.modal-backdrop,
+.custom-modal-overlay,
+.doctor-modal-overlay,
+.security-modal-backdrop,
+.document-modal-backdrop,
+.consultation-modal-backdrop,
+.dossier-view-modal-backdrop,
+.rdvmed-modal-overlay,
+.profile-modal-backdrop,
+.ticket-modal-overlay,
+.chart-modal-backdrop,
+.qr-modal-backdrop {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+}
+
+.app-modal-panel,
+.modal-card,
+.modal-container,
+.modal-content,
+.custom-modal,
+.doctor-modal,
+.security-modal,
+.document-modal,
+.consultation-modal,
+.dossier-view-modal,
+.rdvmed-modal-container,
+.profile-modal,
+.ticket-modal,
+.chart-modal,
+.qr-modal {
+    box-sizing: border-box !important;
+    width: min(100%, 820px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: auto !important;
+}
+
+@media (max-width: 920px) {
+    .topbar {
+        gap: 10px !important;
+    }
+
+    .top-actions {
+        gap: 6px !important;
+    }
+
+    .profile-quick-menu {
+        position: fixed !important;
+        top: 82px !important;
+        right: 12px !important;
+        left: 12px !important;
+        width: auto !important;
+        max-height: calc(100dvh - 94px);
+        overflow-y: auto;
+    }
+
+    .page-title-card {
+        margin-left: -16px !important;
+        margin-right: -16px !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+
+    .patient-overview-card {
+        grid-template-columns: 140px minmax(0, 1fr) !important;
+    }
+
+    .patient-bottom-grid,
+    .upcoming-encounters-card {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .content,
+    .patient-main,
+    .doctor-main {
+        padding: 14px !important;
+    }
+
+    .topbar > div:first-child {
+        gap: 8px !important;
+        min-width: 0;
+    }
+
+    .brand {
+        font-size: 17px !important;
+        white-space: nowrap;
+    }
+
+    .top-actions .icon-btn:nth-of-type(1),
+    .top-actions .icon-btn:nth-of-type(2) {
+        display: none;
+    }
+
+    .top-actions .icon-btn,
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+
+    .patient-overview-card {
+        grid-template-columns: 1fr !important;
+        padding: 14px !important;
+    }
+
+    .patient-overview-card img {
+        width: min(180px, 100%) !important;
+        height: 110px !important;
+        margin: 0 auto;
+    }
+
+    .patient-index-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px 10px !important;
+    }
+
+    .patient-index-grid div strong {
+        font-size: 17px !important;
+        overflow-wrap: anywhere;
+    }
+
+    .patient-card h3 {
+        font-size: 19px !important;
+    }
+
+    .upcoming-encounters-card,
+    .diagnosis-panel,
+    .encounter-highlight,
+    .diagnosis-surface {
+        padding: 14px !important;
+        border-radius: 16px !important;
+    }
+
+    .table-toolbar,
+    .table-footer,
+    .heading-row,
+    .rdv-header,
+    .custom-modal-header,
+    .custom-modal-footer,
+    .modal-header,
+    .modal-footer,
+    .doctor-modal-header,
+    .doctor-modal-footer,
+    .rdvmed-modal-header,
+    .rdvmed-modal-footer {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .table-toolbar .btn,
+    .table-footer .btn,
+    .modal-actions > *,
+    .custom-modal-footer > *,
+    .doctor-modal-footer > *,
+    .rdvmed-modal-footer > * {
+        width: 100%;
+    }
+
+    .table-footer,
+    .table-pagination,
+    .modal-actions,
+    .custom-modal-footer,
+    .doctor-modal-footer,
+    .rdvmed-modal-footer {
+        flex-wrap: wrap !important;
+    }
+
+    .rdv-table,
+    .transfer-table,
+    .audit-table,
+    .exam-table,
+    .table-clean,
+    .mes-patients-list-table,
+    .rx-table {
+        min-width: 600px;
+    }
+
+    .rdv-table th,
+    .rdv-table td,
+    .transfer-table th,
+    .transfer-table td,
+    .audit-table th,
+    .audit-table td,
+    .table-clean th,
+    .table-clean td {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+
+    .app-modal-panel,
+    .modal-card,
+    .modal-container,
+    .modal-content,
+    .custom-modal,
+    .doctor-modal,
+    .security-modal,
+    .document-modal,
+    .consultation-modal,
+    .dossier-view-modal,
+    .rdvmed-modal-container,
+    .profile-modal,
+    .ticket-modal,
+    .chart-modal,
+    .qr-modal {
+        border-radius: 16px !important;
+    }
+
+    .app-modal-panel,
+    .modal-card,
+    .modal-container,
+    .modal-content,
+    .custom-modal-body,
+    .doctor-modal-body,
+    .rdvmed-modal-body,
+    .modal-body {
+        padding: 16px !important;
+    }
+
+    .app-modal-header,
+    .document-modal-header,
+    .consultation-modal-header,
+    .dossier-view-modal-header,
+    .profile-modal-header,
+    .ticket-modal-header {
+        gap: 10px !important;
+    }
+
+    .custom-modal-grid,
+    .doctor-modal-body,
+    .app-modal-summary {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
