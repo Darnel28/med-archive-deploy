@@ -102,7 +102,7 @@ export default function DashboardTopbar({
 
   return (
     <header className={`topbar ${isScrolled ? 'scrolled' : ''}`}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className="topbar-brand-group">
         <button className="icon-btn" type="button" aria-label="Ouvrir le menu" onClick={onToggleSidebar}>
           <i className="fa-solid fa-bars"></i>
         </button>

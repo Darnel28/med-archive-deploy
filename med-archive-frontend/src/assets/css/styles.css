@@ -4417,6 +4417,74 @@ body.dark-mode .settings-extra p {
 
 }
 
+/* Dashboard mobile foundation: shared by every role dashboard. */
+.topbar-brand-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    html, body, #root, .app { width: 100%; max-width: 100%; overflow-x: hidden; }
+    .content { min-width: 0; width: 100%; padding: 16px 12px; }
+    .content > * { min-width: 0; max-width: 100%; }
+
+    .table-toolbar, .heading-row, .page-title-card, .dashboard-header, .filters-row,
+    .form-actions, .modal-actions, .security-modal-actions, .appointment-modal-footer {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .table-toolbar, .heading-row, .dashboard-header { align-items: flex-start; }
+    .table-search, .table-search input { min-width: 0; width: 100%; }
+
+    /* Preserve readable columns and provide touch scrolling for dense tables. */
+    .rdv-table-wrap, .transfer-table-wrap, .table-wrapper, .audit-table-wrapper,
+    .rx-table-wrap, .mes-patients-list-table-wrap, .table-clean-wrap {
+        width: 100%; max-width: 100%; overflow-x: auto; overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    .rdv-table, .transfer-table, .table-clean, .audit-table, .exam-table,
+    .rx-table, .mes-patients-list-table { min-width: 620px; }
+    .content table.table-clean, .content table.audit-table {
+        display: block; width: 100%; max-width: 100%; overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .patient-overview-card, .patient-bottom-grid, .profile-layout, .settings-shell,
+    .docsfm-layout, .metrics-row, .bottom-cards, .dashboard-grid { grid-template-columns: 1fr; }
+    .patient-overview-card > img { width: min(180px, 55vw); margin: 0 auto; }
+    .patient-card, .rdv-card, .page-title-card, .settings-main-card, .settings-nav-card { border-radius: 14px; }
+
+    .qr-modal-backdrop, .app-modal-overlay, .security-modal-backdrop,
+    .consultation-modal-overlay, .appointment-modal-overlay, .modal-overlay,
+    .exam-modal-backdrop, .chart-modal-backdrop, .admin-modal-overlay {
+        padding: 10px !important;
+        align-items: flex-end !important;
+    }
+    .qr-modal, .app-modal-panel, .security-modal, .consultation-modal,
+    .appointment-modal, .modal-content, .exam-modal, .chart-modal,
+    .admin-modal-container {
+        width: 100% !important; max-width: 100% !important;
+        max-height: calc(100dvh - 20px) !important; overflow: auto !important;
+        border-radius: 18px !important;
+    }
+    .modal-actions > *, .security-modal-actions > *, .appointment-modal-footer > *, .form-actions > * { flex: 1 1 140px; }
+}
+
+@media (max-width: 480px) {
+    .topbar { gap: 6px; padding: 0 8px; }
+    .topbar-brand-group { gap: 8px; }
+    .top-actions { gap: 4px; }
+    .top-actions > .icon-btn:nth-child(1), .top-actions > .icon-btn:nth-child(3) { display: none; }
+    .profile { margin-left: 0; padding-left: 4px; }
+    .profile-chevron { display: none; }
+    .profile-quick-menu { position: fixed; top: 76px; right: 10px; left: 10px; width: auto; max-height: calc(100dvh - 86px); overflow: auto; }
+    .brand { font-size: 16px; }
+    .heading-row h1, .dashboard-header h1, .page-title-card h1 { font-size: 22px; }
+    .patient-index-grid { grid-template-columns: 1fr 1fr; }
+}
+
 .network-map{
 
     height:430px;

@@ -14,7 +14,7 @@ const DashExamen = () => {
 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
         const savedState = localStorage.getItem('medarchive-sidebar');
-        return savedState === 'collapsed';
+        return window.innerWidth <= 920 || savedState === 'collapsed';
     });
 
     useEffect(() => {

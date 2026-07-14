@@ -27,6 +27,13 @@ import './assets/css/dashboard-responsive.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import "tailwindcss";
 
+// QR codes use a hash URL so a static host can always return index.html. Convert
+// it before BrowserRouter starts so the existing route /urgence/:imu is used.
+const hashRoute = window.location.hash.match(/^#(\/urgence\/[^/?#]+)$/);
+if (hashRoute) {
+  window.history.replaceState(null, '', hashRoute[1]);
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
