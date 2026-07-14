@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Header from "./components/Header.jsx";
 import AllRoutes from "./AllRoutes.jsx";
 import Footer from "./components/Footer.jsx";
@@ -6,7 +7,7 @@ import Load from "./components/load.jsx";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const { pathname: currentPath } = useLocation();
 
   // Loader on initial page load
   useEffect(() => {
@@ -21,21 +22,6 @@ function App() {
 
     return () => window.removeEventListener("load", finishLoading);
   }, []);
-
-  // Loader on route changes
-  useEffect(() => {
-    const handlePopState = () => {
-      const newPath = window.location.pathname;
-      if (newPath !== currentPath) {
-        setCurrentPath(newPath);
-        setIsLoading(true);
-        setTimeout(() => setIsLoading(false), 500);
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [currentPath]);
 
   if (isLoading) {
     return (

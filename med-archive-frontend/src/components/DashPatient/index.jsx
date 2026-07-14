@@ -20,6 +20,8 @@ const DashPatient = () => {
     useEffect(() => {
         document.body.classList.toggle('dark-mode', isDarkMode);
         localStorage.setItem('medarchive-theme', isDarkMode ? 'dark' : 'light');
+
+        return () => document.body.classList.remove('dark-mode');
     }, [isDarkMode]);
 
     const toggleDarkMode = () => {

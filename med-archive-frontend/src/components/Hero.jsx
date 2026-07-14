@@ -51,11 +51,11 @@ function Hero() {
                                 </h1>
 
                                 <p>
-                                    Accédez à votre historique médical partout au Bénin grâce à votre NPI.
+                                    Accédez à votre historique médical partout au Bénin grâce à votre IMU.
                                     Sécurisé, rapide et gratuit.
                                 </p>
 
-                              <NavLink to="/connexion" className="btn hero-btn">
+                              <NavLink to="/espacepatient/dossier-medical" className="btn hero-btn">
     Mon Dossier <i className="ti-arrow-right"></i>
 </NavLink>
                                 
