@@ -502,47 +502,12 @@ class PatientController extends Controller
 
     public function generateQrCode($id)
     {
-        $patient = Patient::with([
-            'user:id,name,date_naissance,sexe',
-            'dossier.serviceProprietaire.etablissement:id,name',
-        ])->findOrFail($id);
+        $patient = Patient::findOrFail($id);
 
-        $user = $patient->user;
-        $dossier = $patient->dossier;
-        $service = $dossier?->serviceProprietaire;
-        $nameParts = preg_split('/\s+/', trim($user?->name ?? ''), 2);
-        $nom = $nameParts[0] ?? 'Non renseigné';
-        $prenom = $nameParts[1] ?? 'Non renseigné';
-        $valeur = static fn ($value) => filled($value) ? $value : 'Non renseigné';
-
-        // Le QR est volontairement une fiche texte : tout lecteur QR peut ainsi
-        // afficher les informations essentielles sans ouvrir une application.
-        $qrText = implode("\n", [
-            'RESUME MEDICAL',
-            '',
-            'Informations d’identité',
-            'Nom : ' . $nom,
-            'Prénom : ' . $prenom,
-            'Sexe : ' . $valeur($user?->sexe),
-            'Date de naissance : ' . $valeur($user?->date_naissance),
-            // 'Photo du patient (facultatif) : Non disponible dans le QR',
-            '',
-            ' Informations médicales critiques',
-            'Groupe sanguin : ' . $valeur($patient->groupe_sanguin),
-            'Allergies : ' . $valeur($patient->allergies),
-            'Antécédents médicaux importants  : ' . $valeur($patient->antecedents_medicaux),
-            'Maladies chroniques : ' . $valeur($dossier?->diagnostics_principaux),
-            'Médicaments actuellement pris : ' . $valeur($dossier?->traitements_en_cours),
-            // 'Implants ou dispositifs médicaux (pacemaker...) : Non renseigné',
-            '',
-            ' Contact d’urgence',
-            'Nom de la personne à prévenir : ' . $valeur($patient->personne_contact),
-            // 'Lien de parenté : Non renseigné',
-            'Numéro de téléphone : ' . $valeur($patient->telephone_contact),
-            '',
-            'IMU (Identifiant Médical Unique) : ' . $patient->imu,
-            'Dernier établissement fréquenté : ' . $valeur($service?->etablissement?->name ?? $service?->nom),
-        ]);
+        // A standard QR scanner opens a single compact URL reliably. This public
+        // route displays only the emergency information intended for responders.
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'https://med-archive-projet.onrender.com'), '/');
+        $qrText = $frontendUrl . '/urgence/' . rawurlencode($patient->imu);
 
         $builder = new Builder(
             writer: new SvgWriter(),
