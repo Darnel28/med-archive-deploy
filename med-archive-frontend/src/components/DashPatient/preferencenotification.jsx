@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-
+import NavLink from 'react-router-dom';
+import { FiUser, FiSettings, FiLock, FiBell } from 'react-icons/fi';
 const PreferencesNotifications = () => {
   // État des toggles
   const [notifications, setNotifications] = useState({
@@ -21,25 +22,50 @@ const PreferencesNotifications = () => {
       <div className="settings-shell">
         {/* Menu latéral */}
         <aside className="settings-nav-card">
-          <h2>Configuration</h2>
-          <a className="settings-nav-item" href="/espacepatient/profil">
-            <i className="fa-regular fa-user"></i><span>Profil</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/parametres">
-            <i className="fa-regular fa-user"></i><span>Paramètres du profil</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/securite-compte">
-            <i className="fa-solid fa-lock"></i><span>Sécurité du compte</span>
-          </a>
-          <a className="settings-nav-item active" href="/espacepatient/preferences-notifications">
-            <i className="fa-regular fa-bell"></i><span>Notifications</span>
-          </a>
-          <a className="settings-nav-item" href="/espacepatient/contacts-medicaux">
-            <i className="fa-regular fa-circle-check"></i><span>Contacts médicaux</span>
-          </a>
+         <h2>Configuration</h2>
+
+<NavLink
+  to="/espacepatient/profil"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiUser />
+  <span>Profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacepatient/parametres"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiSettings />
+  <span>Paramètres du profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacepatient/securite-compte"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiLock />
+  <span>Sécurité du compte</span>
+</NavLink>
+
+<NavLink
+  to="/espacepatient/preferences-notifications"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiBell />
+  <span>Notifications</span>
+</NavLink>
         </aside>
 
-        {/* Panneau principal */}
+       
         <article className="settings-main-card">
           <section className="settings-extra settings-extra-first">
             <h3>Préférences de notifications</h3>
