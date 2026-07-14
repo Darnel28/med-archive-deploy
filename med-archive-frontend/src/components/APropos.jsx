@@ -32,7 +32,7 @@ function APropos() {
                     <div className="about-title">
 
                         <span className="about-badge">
-                            Bienvenue sur MedArchive
+                            A propos de MedArchive
                         </span>
 
                         <h2>
