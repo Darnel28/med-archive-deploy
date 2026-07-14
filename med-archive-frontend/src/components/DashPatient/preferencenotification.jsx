@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import NavLink from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FiUser, FiSettings, FiLock, FiBell } from 'react-icons/fi';
 const PreferencesNotifications = () => {
   // État des toggles
