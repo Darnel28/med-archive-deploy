@@ -507,7 +507,9 @@ class PatientController extends Controller
         // A standard QR scanner opens a single compact URL reliably. This public
         // route displays only the emergency information intended for responders.
         $frontendUrl = rtrim(env('FRONTEND_URL', 'https://med-archive-projet.onrender.com'), '/');
-        $qrText = $frontendUrl . '/urgence/' . rawurlencode($patient->imu);
+        // The hash keeps the request on the static site's existing root page.
+        // It avoids a server-side 404 before React can render the emergency card.
+        $qrText = $frontendUrl . '/#/urgence/' . rawurlencode($patient->imu);
 
         $builder = new Builder(
             writer: new SvgWriter(),
