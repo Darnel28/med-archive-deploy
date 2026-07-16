@@ -1950,7 +1950,7 @@ body.dark-mode .notif-badge {
     border: none;
     border-radius: 8px;
     background: #31b2a2;
-    color: #fff;
+    color: #fff !important;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
