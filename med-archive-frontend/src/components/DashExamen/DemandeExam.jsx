@@ -170,7 +170,7 @@ const DemandeExamLabo = () => {
       {resultModal && (
         <div className="modal-backdrop" onClick={() => { setResultModal(null); setResultFile(null); }}>
           <div className="modal-card modal-result" onClick={(e) => e.stopPropagation()}>
-            {/* Bouton de fermeture */}
+         
             <button
               type="button"
               className="modal-close"

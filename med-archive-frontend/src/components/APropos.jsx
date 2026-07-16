@@ -222,9 +222,9 @@ function APropos() {
                                             ✔ Contrôle des accès
                                         </li>
 
-                                        <li>
+                                        {/* <li>
                                             ✔ Autorisations du patient
-                                        </li>
+                                        </li> */}
 
                                         <li>
                                             ✔ Traçabilité complète

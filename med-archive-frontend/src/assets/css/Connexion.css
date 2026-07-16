@@ -343,8 +343,10 @@
 }
 
 .connexion-submit {
-    width: 160px;
+    width: auto;
+     min-width: 220px;
     height: 48px;
+    padding: 0 24px;
     border: 0;
     border-radius: 14px;
     background: #31b2a2;
@@ -356,6 +358,7 @@
     box-shadow: 0 10px 24px rgba(49, 178, 162, 0.28);
     cursor: pointer;
     transition: filter 0.2s ease, transform 0.2s ease;
+     white-space: nowrap;
 }
 
 .connexion-submit:hover {

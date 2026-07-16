@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { FiBell, FiCheckCircle, FiChrome, FiLock, FiMonitor, FiSettings, FiSmartphone, FiTablet, FiUser, FiX } from 'react-icons/fi';
 import { apiClient, getAuthUser } from '../../api/client';
 import useAutoDismissMessage from '../../hooks/useAutoDismissMessage';
+import { NavLink } from 'react-router-dom';
 
 const detectDevice = () => {
   const ua = navigator.userAgent || '';
@@ -108,11 +109,56 @@ const SecuriteCompteMed = () => {
       <div className="settings-shell">
         <aside className="settings-nav-card">
           <h2>Configuration</h2>
-          <a className="settings-nav-item" href="/espacepatient/profil"><FiUser /><span>Profil</span></a>
-          <a className="settings-nav-item" href="/espacepatient/parametres"><FiSettings /><span>Parametres du profil</span></a>
-          <a className="settings-nav-item active" href="/espacepatient/securite-compte"><FiLock /><span>Securite du compte</span></a>
-          <a className="settings-nav-item" href="/espacepatient/preferences-notifications"><FiBell /><span>Notifications</span></a>
-          <a className="settings-nav-item" href="/espacepatient/contacts-medicaux"><FiCheckCircle /><span>Contacts medicaux</span></a>
+
+<NavLink
+  to="/espacemedecin/profil"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiUser />
+  <span>Profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacemedecin/parametres"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiSettings />
+  <span>Paramètres du profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacemedecin/securite-compte"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiLock />
+  <span>Sécurité du compte</span>
+</NavLink>
+
+<NavLink
+  to="/espacemdecin/preferences-notifications"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiBell />
+  <span>Notifications</span>
+</NavLink>
+
+{/* <NavLink
+  to="/espacemedecin/contacts-medicaux"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiCheckCircle />
+  <span>Contacts médicaux</span>
+</NavLink> */}
         </aside>
 
         <article className="settings-main-card">

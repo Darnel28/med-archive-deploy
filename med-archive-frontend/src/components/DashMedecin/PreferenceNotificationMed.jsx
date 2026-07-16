@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import { FiUser, FiSettings, FiLock, FiBell } from 'react-icons/fi';
 
 const PreferencesNotificationsMed = () => {
   // État des toggles
@@ -21,22 +23,47 @@ const PreferencesNotificationsMed = () => {
       <div className="settings-shell">
         {/* Menu latéral */}
         <aside className="settings-nav-card">
-          <h2>Configuration</h2>
-          <a className="settings-nav-item" href="/espacemedecin/profil">
-            <i className="fa-regular fa-user"></i><span>Profil</span>
-          </a>
-          {/* <a className="settings-nav-item" href="/espacemedecin/parametres">
-            <i className="fa-regular fa-user"></i><span>Paramètres du profil</span>
-          </a> */}
-          <a className="settings-nav-item" href="/espacemedecin/securite-compte">
-            <i className="fa-solid fa-lock"></i><span>Sécurité du compte</span>
-          </a>
-          <a className="settings-nav-item active" href="/espacemedecin/preferences-notifications">
-            <i className="fa-regular fa-bell"></i><span>Notifications</span>
-          </a>
-          <a className="settings-nav-item" href="/espacemedecin/contacts-medicaux">
-            <i className="fa-regular fa-circle-check"></i><span>Contacts médicaux</span>
-          </a>
+         <h2>Configuration</h2>
+
+<NavLink
+  to="/espacemedecin/profil"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiUser />
+  <span>Profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacemedecin/parametres"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiSettings />
+  <span>Paramètres du profil</span>
+</NavLink>
+
+<NavLink
+  to="/espacemedecin/securite-compte"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiLock />
+  <span>Sécurité du compte</span>
+</NavLink>
+
+<NavLink
+  to="/espacemdecin/preferences-notifications"
+  className={({ isActive }) =>
+    `settings-nav-item${isActive ? " active" : ""}`
+  }
+>
+  <FiBell />
+  <span>Notifications</span>
+</NavLink>
         </aside>
 
         {/* Panneau principal */}

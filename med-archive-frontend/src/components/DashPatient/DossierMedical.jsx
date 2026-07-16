@@ -130,7 +130,7 @@ const DocumentsMedicaux = () => {
 
       <section className="docsfm-layout">
         <div className="docsfm-main">
-          <h2 className="docsfm-title">Dossiers</h2>
+          {/* <h2 className="docsfm-title">Dossiers</h2> */}
           <div className="docsfm-folder-grid">
             {folders.map((folder) => (
               <article className="docsfm-folder-card" key={folder.label}>
