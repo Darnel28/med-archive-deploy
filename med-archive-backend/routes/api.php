@@ -117,7 +117,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/notifications/{id}/read', [SystemNotificationController::class, 'markRead']);
     Route::patch('/notifications/read-all', [SystemNotificationController::class, 'markAllRead']);
 
-    // Chat: messages are stored as isolated chat_message notifications.
+    // Chat
     Route::get('/chat/contacts', [ChatController::class, 'contacts']);
     Route::get('/chat/messages/{contact}', [ChatController::class, 'messages']);
     Route::post('/chat/messages/{contact}', [ChatController::class, 'send']);

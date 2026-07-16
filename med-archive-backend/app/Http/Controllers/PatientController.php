@@ -212,7 +212,7 @@ class PatientController extends Controller
         ]);
     }
 
-    /** Public emergency card opened by a patient's QR code. */
+    /**  patient QR code. */
     public function emergencyCardByImu($imu)
     {
         $patient = Patient::where('imu', $imu)->with([
@@ -237,7 +237,7 @@ class PatientController extends Controller
                 'allergies' => $patient->allergies,
                 'antecedents_medicaux' => $patient->antecedents_medicaux,
                 'maladies_chroniques' => null,
-                'medicaments_actuels' => $patient->dossier?->traitements_en_cours,
+                'medicaments_actuels' => $patient->dossier?->medicaments,
                 'implants_dispositifs' => null,
                 'personne_contact' => $patient->personne_contact,
                 'lien_parente' => null,
@@ -499,16 +499,16 @@ class PatientController extends Controller
             ]
         ]);
     }
-
+// le coede qr du patient 
     public function generateQrCode($id)
     {
         $patient = Patient::findOrFail($id);
 
-        // A standard QR scanner opens a single compact URL reliably. This public
-        // route displays only the emergency information intended for responders.
+ 
+        // route public.
         $frontendUrl = rtrim(env('FRONTEND_URL', 'https://med-archive-projet.onrender.com'), '/');
-        // The hash keeps the request on the static site's existing root page.
-        // It avoids a server-side 404 before React can render the emergency card.
+       
+       
         $qrText = $frontendUrl . '/#/urgence/' . rawurlencode($patient->imu);
 
         $builder = new Builder(
