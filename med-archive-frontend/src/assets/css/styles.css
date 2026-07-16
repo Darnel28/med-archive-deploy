@@ -1944,9 +1944,23 @@ body.dark-mode .notif-badge {
     gap: 8px;
     flex-wrap: wrap;
 }
+.settings-qr-button {
+    margin-left: auto;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #31b2a2;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-.settings-qr-button { min-width: auto; margin-left: auto; padding: 8px 14px; border: 1px solid #0f766e; border-radius: 8px; background: #fff; color: #0f766e; font-size: 13px; line-height: 1.2; box-shadow: none; }
-.settings-qr-button:hover { background: #0f766e; color: #fff; box-shadow: none; transform: none; }
+.settings-qr-button:hover {
+    background: #28998c;
+    transform: translateY(-1px);
+}
 
 
 .qr-modal-backdrop { position: fixed; inset: 0; z-index: 10001; display: grid; place-items: center; padding: 20px; background: rgba(14, 30, 53, .58); }
