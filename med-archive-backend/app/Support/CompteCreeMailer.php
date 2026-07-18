@@ -22,44 +22,80 @@ class CompteCreeMailer
             'mail' => $mailConfig,
         ]);
 
-        if (! blank(config('services.resend.key'))) {
-            try {
-                self::sendViaResend(
-                    $user,
-                    $plainPassword,
-                    $loginUrl ?? 'https://med-archive-projet.onrender.com/connexion'
-                );
+        // if (! blank(config('services.resend.key'))) {
+        //     try {
+        //         self::sendViaResend(
+        //             $user,
+        //             $plainPassword,
+        //             $loginUrl ?? 'https://med-archive-projet.onrender.com/connexion'
+        //         );
 
-                Log::info('account_credentials_mail_sent', [
-                    'context' => $context,
-                    'user_id' => $user->id,
-                    'recipient' => $user->email,
-                    'provider' => 'resend',
-                    'mail' => $mailConfig,
-                ]);
+        //         Log::info('account_credentials_mail_sent', [
+        //             'context' => $context,
+        //             'user_id' => $user->id,
+        //             'recipient' => $user->email,
+        //             'provider' => 'resend',
+        //             'mail' => $mailConfig,
+        //         ]);
 
-                return null;
-            } catch (\Throwable $resendException) {
-                $resendMessage = $resendException->getMessage();
+        //         return null;
+        //     } catch (\Throwable $resendException) {
+        //         $resendMessage = $resendException->getMessage();
 
-                Log::error('account_credentials_mail_failed', [
-                    'context' => $context,
-                    'user_id' => $user->id,
-                    'recipient' => $user->email,
-                    'provider' => 'resend',
-                    'exception_class' => $resendException::class,
-                    'exception_message' => $resendMessage,
-                    'exception_code' => $resendException->getCode(),
-                    'mail' => $mailConfig,
-                ]);
+        //         Log::error('account_credentials_mail_failed', [
+        //             'context' => $context,
+        //             'user_id' => $user->id,
+        //             'recipient' => $user->email,
+        //             'provider' => 'resend',
+        //             'exception_class' => $resendException::class,
+        //             'exception_message' => $resendMessage,
+        //             'exception_code' => $resendException->getCode(),
+        //             'mail' => $mailConfig,
+        //         ]);
 
-                if (str_contains($resendMessage, 'You can only send testing emails to your own email address')) {
-                    return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
-                }
+        //         if (str_contains($resendMessage, 'You can only send testing emails to your own email address')) {
+        //             return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
+        //         }
 
-                return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
-            }
-        }
+        //         return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
+        //     }
+        // }
+        if (! blank(config('services.brevo.key'))) {
+    try {
+        self::sendViaBrevo(
+            $user,
+            $plainPassword,
+            $loginUrl ?? 'https://med-archive-projet.onrender.com/connexion'
+        );
+
+        Log::info('account_credentials_mail_sent', [
+            'context' => $context,
+            'user_id' => $user->id,
+            'recipient' => $user->email,
+            'provider' => 'brevo',
+            'mail' => $mailConfig,
+        ]);
+
+        return null;
+
+    } catch (\Throwable $brevoException) {
+
+        $brevoMessage = $brevoException->getMessage();
+
+        Log::error('account_credentials_mail_failed', [
+            'context' => $context,
+            'user_id' => $user->id,
+            'recipient' => $user->email,
+            'provider' => 'brevo',
+            'exception_class' => $brevoException::class,
+            'exception_message' => $brevoMessage,
+            'exception_code' => $brevoException->getCode(),
+            'mail' => $mailConfig,
+        ]);
+
+        return ucfirst($context) . ' cree, mais les identifiants ne sont pas envoyés.';
+    }
+}
 
         if (in_array(config('mail.default'), ['log', 'array'], true)) {
             $warning = ucfirst($context) . ' cree. Le mailer est configure en mode log/array, donc les identifiants ne sont pas envoyes dans une boite mail.';
@@ -121,8 +157,8 @@ class CompteCreeMailer
 
         return [
             'default' => config('mail.default'),
-            'resend_key_set' => filled(config('services.resend.key')),
-            'resend_from' => config('services.resend.from'),
+           'brevo_key_set' => filled(config('services.brevo.key')),
+           'brevo_from' => config('services.brevo.from'),
             'smtp_host' => $smtp['host'] ?? null,
             'smtp_port' => $smtp['port'] ?? null,
             'smtp_scheme' => $smtp['scheme'] ?? null,
@@ -133,34 +169,51 @@ class CompteCreeMailer
         ];
     }
 
-    private static function sendViaResend(User $user, string $plainPassword, string $loginUrl): void
-    {
-        $fromAddress = config('services.resend.from');
+   private static function sendViaBrevo(User $user, string $plainPassword, string $loginUrl): void
+{
+    $fromAddress = config('services.brevo.from');
 
-        if (blank($fromAddress)) {
-            throw new RuntimeException('RESEND_FROM_ADDRESS or MAIL_FROM_ADDRESS is required.');
-        }
-
-        $response = Http::withToken(config('services.resend.key'))
-            ->acceptJson()
-            ->asJson()
-            ->timeout(20)
-            ->post('https://api.resend.com/emails', [
-                'from' => self::formatFromAddress($fromAddress),
-                'to' => [$user->email],
-                'subject' => 'Bienvenue sur Med-Archive',
-                'html' => view('emails.compte-cree', [
-                    'user' => $user,
-                    'password' => $plainPassword,
-                    'loginUrl' => $loginUrl,
-                ])->render(),
-            ]);
-
-        if ($response->failed()) {
-            throw new RuntimeException('Resend API error ' . $response->status() . ': ' . $response->body());
-        }
+    if (blank($fromAddress)) {
+        throw new RuntimeException('MAIL_FROM_ADDRESS is required.');
     }
 
+    $response = Http::withHeaders([
+        'api-key' => config('services.brevo.key'),
+        'accept' => 'application/json',
+        'content-type' => 'application/json',
+    ])
+    ->timeout(20)
+    ->post('https://api.brevo.com/v3/smtp/email', [
+
+        'sender' => [
+            'name' => config('mail.from.name'),
+            'email' => $fromAddress,
+        ],
+
+        'to' => [
+            [
+                'email' => $user->email,
+                'name' => $user->name,
+            ]
+        ],
+
+        'subject' => 'Bienvenue sur Med-Archive',
+
+        'htmlContent' => view('emails.compte-cree', [
+            'user' => $user,
+            'password' => $plainPassword,
+            'loginUrl' => $loginUrl,
+        ])->render(),
+
+    ]);
+
+
+    if ($response->failed()) {
+        throw new RuntimeException(
+            'Brevo API error '.$response->status().' : '.$response->body()
+        );
+    }
+}
     private static function formatFromAddress(string $address): string
     {
         if (str_contains($address, '<')) {

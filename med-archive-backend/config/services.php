@@ -18,10 +18,14 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
-    'resend' => [
-        'key' => env('RESEND_API_KEY'),
-        'from' => env('RESEND_FROM_ADDRESS', env('MAIL_FROM_ADDRESS')),
-    ],
+    // 'resend' => [
+    //     'key' => env('RESEND_API_KEY'),
+    //     'from' => env('RESEND_FROM_ADDRESS', env('MAIL_FROM_ADDRESS')),
+    // ],
+    'brevo' => [
+    'key' => env('BREVO_KEY'),
+    'from' => env('MAIL_FROM_ADDRESS'),
+],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
