@@ -165,11 +165,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/dossiers/{id}/transferer', [DossierController::class, 'transferer'])->middleware('role:Medecin,Administrateur');
 });
 
-Route::get('/mail-config-test', function () {
+Route::get('/test-config', function () {
     return [
-        'host' => config('mail.mailers.smtp.host'),
-        'port' => config('mail.mailers.smtp.port'),
-        'scheme' => config('mail.mailers.smtp.scheme'),
-        'username' => config('mail.mailers.smtp.username'),
+        'mailer' => config('mail.default'),
+        'from' => config('mail.from.address'),
+        'brevo_key' => config('services.brevo.key') ? 'OK' : 'VIDE',
     ];
 });
