@@ -172,3 +172,10 @@ Route::get('/test-config', function () {
         'brevo_key' => config('services.brevo.key') ? 'OK' : 'VIDE',
     ];
 });
+Route::get('/test-brevo-config', function () {
+    return [
+        'mail_from' => config('mail.from.address'),
+        'brevo_from' => config('services.brevo.from'),
+        'brevo_key' => config('services.brevo.key') ? 'OK' : 'VIDE',
+    ];
+});
