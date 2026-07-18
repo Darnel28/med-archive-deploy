@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Document;
 use App\Models\Consultation;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+// use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class DocumentController extends Controller
 {
@@ -48,94 +49,115 @@ class DocumentController extends Controller
     /**
      * Uploader un nouveau document
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'consultation_id' => 'required|exists:consultations,id',
-            'type_document_id' => 'required|exists:type_documents,id',
-            'titre' => 'required|string|max:255',
-            'fichier' => 'required|file|mimes:pdf,jpeg,png,jpg,doc,docx|max:10240', // 10MB max
-            'description' => 'nullable|string'
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'consultation_id' => 'required|exists:consultations,id',
+        'type_document_id' => 'required|exists:type_documents,id',
+        'titre' => 'required|string|max:255',
+        'fichier' => 'required|file|mimes:pdf,jpeg,png,jpg,doc,docx|max:10240',
+        'description' => 'nullable|string'
+    ]);
 
-        $consultation = Consultation::find($validated['consultation_id']);
+    $consultation = Consultation::findOrFail($validated['consultation_id']);
 
-        // Upload du fichier
-        $path = $request->file('fichier')->store('documents', 'public');
+    // Upload vers Cloudinary
+    $uploadedFile = Cloudinary::upload(
+        $request->file('fichier')->getRealPath(),
+        [
+            'folder' => 'med-archive/documents',
+            'resource_type' => 'auto'
+        ]
+    );
 
-        // Taille en Ko
-        $taille = round($request->file('fichier')->getSize() / 1024, 2);
+    $url = $uploadedFile->getSecurePath();
 
-        $document = Document::create([
-            'consultation_id' => $validated['consultation_id'],
-            'type_document_id' => $validated['type_document_id'],
-            'titre' => $validated['titre'],
-            'chemin_fichier' => $path,
-            'mime_type' => $request->file('fichier')->getMimeType(),
-            'taille' => $taille,
-            'description' => $validated['description'] ?? null
-        ]);
+    $taille = round($request->file('fichier')->getSize() / 1024, 2);
 
-        // Mettre à jour les stats du dossier
-        $consultation->dossier->updateStatistiques();
+    $document = Document::create([
+        'consultation_id' => $validated['consultation_id'],
+        'type_document_id' => $validated['type_document_id'],
+        'titre' => $validated['titre'],
+        'chemin_fichier' => $url,
+        'mime_type' => $request->file('fichier')->getMimeType(),
+        'taille' => $taille,
+        'description' => $validated['description'] ?? null
+    ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Document uploadé avec succès',
-            'data' => $document->load(['typeDocument', 'consultation.dossier.patient.user'])
-        ], 201);
-    }
+    $consultation->dossier->updateStatistiques();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Document uploadé avec succès',
+        'data' => $document->load([
+            'typeDocument',
+            'consultation.dossier.patient.user'
+        ])
+    ], 201);
+}
 
     /**
      * Télécharger un document
      */
-    public function download($id)
-    {
-        $document = Document::find($id);
+    // public function download($id)
+    // {
+    //     $document = Document::find($id);
 
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document non trouvé'
-            ], 404);
-        }
+    //     if (!$document) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Document non trouvé'
+    //         ], 404);
+    //     }
 
-        if (!Storage::disk('public')->exists($document->chemin_fichier)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Fichier non trouvé sur le serveur'
-            ], 404);
-        }
+    //     if (!Storage::disk('public')->exists($document->chemin_fichier)) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Fichier non trouvé sur le serveur'
+    //         ], 404);
+    //     }
 
-        return response()->download(
-            storage_path('app/public/' . $document->chemin_fichier),
-            $document->titre . '.' . pathinfo($document->chemin_fichier, PATHINFO_EXTENSION)
-        );
-    }
+    //     return response()->download(
+    //         storage_path('app/public/' . $document->chemin_fichier),
+    //         $document->titre . '.' . pathinfo($document->chemin_fichier, PATHINFO_EXTENSION)
+    //     );
+    // }
+ public function download($id)
+{
+    $document = Document::findOrFail($id);
+
+    return redirect()->away($document->chemin_fichier);
+}
 
     /**
      * Voir un document (sans téléchargement)
      */
-    public function view($id)
-    {
-        $document = Document::find($id);
+    // public function view($id)
+    // {
+    //     $document = Document::find($id);
 
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document non trouvé'
-            ], 404);
-        }
+    //     if (!$document) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Document non trouvé'
+    //         ], 404);
+    //     }
 
-        if (!Storage::disk('public')->exists($document->chemin_fichier)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Fichier non trouvé sur le serveur'
-            ], 404);
-        }
+    //     if (!Storage::disk('public')->exists($document->chemin_fichier)) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Fichier non trouvé sur le serveur'
+    //         ], 404);
+    //     }
 
-        return response()->file(storage_path('app/public/' . $document->chemin_fichier));
-    }
+    //     return response()->file(storage_path('app/public/' . $document->chemin_fichier));
+    // }
+public function view($id)
+{
+    $document = Document::findOrFail($id);
+
+    return redirect()->away($document->chemin_fichier);
+}
 
     /**
      * Mettre à jour les informations d'un document
@@ -170,32 +192,27 @@ class DocumentController extends Controller
      * Supprimer un document
      */
     public function destroy($id)
-    {
-        $document = Document::find($id);
+{
+    $document = Document::find($id);
 
-        if (!$document) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Document non trouvé'
-            ], 404);
-        }
-
-        // Supprimer le fichier physique
-        if (Storage::disk('public')->exists($document->chemin_fichier)) {
-            Storage::disk('public')->delete($document->chemin_fichier);
-        }
-
-        $dossier = $document->consultation->dossier;
-        $document->delete();
-
-        // Mettre à jour les stats du dossier
-        $dossier->updateStatistiques();
-
+    if (!$document) {
         return response()->json([
-            'success' => true,
-            'message' => 'Document supprimé avec succès'
-        ]);
+            'success' => false,
+            'message' => 'Document non trouvé'
+        ], 404);
     }
+
+    $dossier = $document->consultation->dossier;
+
+    $document->delete();
+
+    $dossier->updateStatistiques();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Document supprimé avec succès'
+    ]);
+}
 
     /**
      * Statistiques des documents

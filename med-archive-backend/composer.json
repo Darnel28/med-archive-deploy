@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "cloudinary-labs/cloudinary-laravel": "^3.0",
         "endroid/qr-code": "^6.0",
         "fedapay/fedapay-php": "^0.4.8",
         "laravel/framework": "^12.0",
