@@ -468,6 +468,11 @@ export default function DossierVoirMedecin() {
                 <div><span>Motif</span><strong>{viewModal.data.motif || "-"}</strong></div>
                 <div className="detail-wide"><span>Diagnostic</span><strong>{viewModal.data.diagnostic || "-"}</strong></div>
                 <div className="detail-wide"><span>Observations</span><strong>{viewModal.data.observations || viewModal.data.notes || "-"}</strong></div>
+                <div className="detail-wide"><span>Traitement</span><strong>{[
+                  displayList(viewModal.data.ordonnance?.medicaments),
+                  displayList(viewModal.data.ordonnance?.posologie),
+                  displayList(viewModal.data.ordonnance?.instructions),
+                ].filter((value) => value && value !== "-").join(" — ") || "-"}</strong></div>
               </div>
             )}
 

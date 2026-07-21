@@ -312,6 +312,7 @@ useEffect(() => {
         diagnostic: formData.diagnostic,
         observations: formData.notesMedicales || formData.autresObs,
         statut: 'termine',
+        prochain_rdv: formData.consultProchainRdv || null,
         constantes: {
           tension_arterielle: formData.tension || null,
           temperature: formData.temperature || null,

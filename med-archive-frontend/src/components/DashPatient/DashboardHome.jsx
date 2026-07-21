@@ -24,6 +24,12 @@ const DashboardHome = () => {
     .sort((a, b) => new Date(a.date_consultation) - new Date(b.date_consultation)), [data]);
   const latestConsultation = latestByDate(data?.consultations || [], 'date_consultation');
   const latestOrdonnance = latestByDate(data?.ordonnances || [], 'created_at');
+  const latestConstantes = latestByDate(
+    (data?.consultations || [])
+      .filter((consultation) => consultation?.constantes)
+      .map((consultation) => ({ ...consultation.constantes, date_consultation: consultation.date_consultation })),
+    'date_consultation',
+  );
 
   if (state.loading) {
     return <section className="page-title-card"><h1>Chargement du dashboard patient...</h1></section>;
@@ -42,7 +48,7 @@ const DashboardHome = () => {
           <div className="patient-index-grid">
             <div><span>Sexe</span><strong>{user?.sexe || '-'}</strong></div>
             <div><span>Age</span><strong>{ageFromDate(user?.date_naissance)}</strong></div>
-            <div><span>Taille</span><strong>{user?.taille || '-'}</strong></div>
+            <div><span>Taille</span><strong>{latestConstantes?.taille ? `${latestConstantes.taille} cm` : '-'}</strong></div>
             <div><span>Ville</span><strong>{user?.ville || '-'}</strong></div>
             <div><span>Groupe sanguin</span><strong>{patient?.groupe_sanguin || '-'}</strong></div>
             <div><span>IMU</span><strong>{patient?.imu || '-'}</strong></div>

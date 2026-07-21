@@ -698,7 +698,13 @@ export default function DossierDuPatient({ currentPatient = false }) {
               <div><span>Motif</span><strong>{selectedConsultation.motif || "-"}</strong></div>
               <div><span>Diagnostic</span><strong>{selectedConsultation.diagnostic || "-"}</strong></div>
               <div className="detail-wide"><span>Observations</span><strong>{selectedConsultation.observations || selectedConsultation.notes || "-"}</strong></div>
-              <div className="detail-wide"><span>Traitement</span><strong>{selectedConsultation.traitement || selectedConsultation.recommandations || "-"}</strong></div>
+              <div className="detail-wide"><span>Traitement</span><strong>{[
+                Array.isArray(selectedConsultation.ordonnance?.medicaments)
+                  ? selectedConsultation.ordonnance.medicaments.join(", ")
+                  : selectedConsultation.ordonnance?.medicaments,
+                selectedConsultation.ordonnance?.posologie,
+                selectedConsultation.ordonnance?.instructions,
+              ].filter(Boolean).join(" — ") || "-"}</strong></div>
             </div>
           </div>
         </div>

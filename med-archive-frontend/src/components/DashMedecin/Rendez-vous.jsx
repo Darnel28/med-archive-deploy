@@ -196,7 +196,7 @@ setAppointments(
       const response = await fetch(`${API_URL}/consultations/${appointment.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAuthToken()}`, Accept: 'application/json' },
-        body: JSON.stringify({ statut: 'en_cours' }),
+        body: JSON.stringify({ statut: 'en_cours', date_consultation: new Date().toISOString() }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data?.message || 'Impossible de commencer la consultation');

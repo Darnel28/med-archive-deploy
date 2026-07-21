@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getEmergencyCardByImu } from '../api/patientApi';
 
-const valueOrFallback = (value) => value || 'Non renseigne';
+const valueOrFallback = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean).join(', ') || 'Non renseigne';
+  return value || 'Non renseigne';
+};
 
 const EmergencyCard = () => {
   const { imu } = useParams();
