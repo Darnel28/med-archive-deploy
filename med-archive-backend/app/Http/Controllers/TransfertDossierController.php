@@ -53,6 +53,7 @@ class TransfertDossierController extends Controller
 
         return false;
     }
+    // qui peut supprimer un transfert
 
     private function canManageSentTransfer(Request $request, TransfertDossier $transfert): bool
     {
@@ -76,6 +77,7 @@ class TransfertDossierController extends Controller
 
         return $user?->isMedecin() && (int) $transfert->demandeur_id === (int) $user->id;
     }
+    // fltre l'affichage selon selui qui est connecte
 
     private function scopeForUser(Request $request)
     {

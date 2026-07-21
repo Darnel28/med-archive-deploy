@@ -26,15 +26,16 @@ class ChatController extends Controller
             $dossier = $user->patient->dossier;
             $contacts->push($dossier->medecinReferent?->user, $dossier->serviceProprietaire?->user, $dossier->serviceProprietaire?->etablissement);
         } elseif ($user->isMedecin() && $user->medecin) {
+            $etablissementId = $user->medecin->etablissement_id;
             $contacts->push($user->medecin->etablissement);
-            $contacts = $contacts->merge($user->medecin->patients()->get());
+            $contacts = $contacts->merge($this->contactsForEtablissement($etablissementId));
         } elseif ($user->isService() && $user->service) {
             $contacts->push($user->service->etablissement);
             $contacts = $contacts->merge(
                 User::whereHas('patient.dossier', fn ($q) => $q->where('service_proprietaire_id', $user->service->id))->get()
             );
         } elseif ($user->isEtablissement()) {
-            $contacts = User::where('etablissement_id', $user->id)->get();
+            $contacts = $this->contactsForEtablissement($user->id);
         }
 
         return response()->json([
@@ -93,11 +94,27 @@ class ChatController extends Controller
             return in_array($contactId, array_filter([$dossier?->medecinReferent?->user_id, $dossier?->serviceProprietaire?->user_id, $dossier?->serviceProprietaire?->etablissement_id]));
         }
         if ($user->isMedecin() && $user->medecin) {
-            return $contactId === (int) $user->medecin->etablissement_id || $user->medecin->patients()->where('users.id', $contactId)->exists();
+            return $contactId === (int) $user->medecin->etablissement_id
+                || $this->contactsForEtablissement($user->medecin->etablissement_id)->contains('id', $contactId);
         }
         if ($user->isService() && $user->service) {
             return $contactId === (int) $user->service->etablissement_id || User::where('id', $contactId)->whereHas('patient.dossier', fn ($q) => $q->where('service_proprietaire_id', $user->service->id))->exists();
         }
-        return $user->isEtablissement() && User::where('id', $contactId)->where('etablissement_id', $user->id)->exists();
+        return $user->isEtablissement()
+            && $this->contactsForEtablissement($user->id)->contains('id', $contactId);
+    }
+
+    /** Tous les utilisateurs et services rattachés à un même hôpital. */
+    private function contactsForEtablissement(int $etablissementId)
+    {
+        return User::query()
+            ->where(function ($query) use ($etablissementId) {
+                $query->where('etablissement_id', $etablissementId)
+                    ->orWhereHas('service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $etablissementId))
+                    ->orWhereHas('patient.service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $etablissementId))
+                    ->orWhereHas('patient.dossier.serviceProprietaire', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $etablissementId));
+            })
+            ->with('role')
+            ->get();
     }
 }

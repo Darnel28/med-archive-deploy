@@ -36,7 +36,7 @@ class ConsultationController extends Controller
 
         // Filtre par patient
         if ($request->has('patient_id')) {
-            $query->whereHas('dossier', function($q) use ($request) {
+            $query->whereHas('dossier', function($q) use ($request) {   // fait d'abord le lien avec le dossier pour ensuite filtrer par patient_id
                 $q->where('patient_id', $request->patient_id);
             });
         }
@@ -60,7 +60,7 @@ class ConsultationController extends Controller
                 $hospitalQuery->whereHas('service', fn ($serviceQuery) => $serviceQuery->where('etablissement_id', $etablissementId))
                     ->orWhereHas('medecin', fn ($medecinQuery) => $medecinQuery->where('etablissement_id', $etablissementId));
             });
-            $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {
+            $query->whereDoesntHave('dossier.transferts', function ($transferQuery) use ($request) {   // l'ancien hopital ne voit plus les nouvellles consultaions 
                 $transferQuery->where('statut', 'accepte')
                     ->where('etablissement_source_id', $request->user()->id)
                     ->whereColumn('date_approbation', '<', 'consultations.date_consultation');
