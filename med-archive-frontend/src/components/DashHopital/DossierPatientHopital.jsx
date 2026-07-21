@@ -4,7 +4,7 @@ import { getPatientDossierComplet } from "../../api/patientApi";
 import { getMesPatientsService } from "../../api/serviceApi";
 import AvatarInitials from "../AvatarInitials.jsx"; // Import du composant
 
-// Fonctions utilitaires reprises du code original
+
 function rowsFromPaginated(response) {
   const payload = response?.data ?? response;
   return Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
@@ -372,7 +372,7 @@ export default function DossierPatientHopital() {
             </article>
           </div>
 
-          {/* Colonne droite : Documents médicaux */}
+      
           <div className="stacked-grid">
             <article className="dossier-panel">
               <h3>6. Documents médicaux</h3>
@@ -412,7 +412,7 @@ export default function DossierPatientHopital() {
         </section>
       </section>
 
-      {/* Styles CSS (inchangés) */}
+    
       <style>{`
         /* ========== CONTENEUR PRINCIPAL AÉRÉ ========== */
         .patient-dossier {

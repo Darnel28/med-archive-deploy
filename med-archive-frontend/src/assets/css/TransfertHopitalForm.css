@@ -170,6 +170,66 @@
     margin-top: 30px;
 }
 
+/* Actions du bon de transfert : le composant utilise ces classes. */
+.tp-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(40, 56, 92, 0.12);
+}
+
+.tp-btn-cancel,
+.tp-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 132px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.tp-btn-cancel {
+    border: 1px solid #cbd7e8;
+    background: #f5f8fc;
+    color: #34445d;
+    box-shadow: 0 8px 18px rgba(31, 44, 72, 0.08);
+}
+
+.tp-btn-submit {
+    border: 1px solid #175fcf;
+    background: linear-gradient(135deg, #1d6dff, #174ea6);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(29, 109, 255, 0.28);
+}
+
+.tp-btn-cancel:hover:not(:disabled),
+.tp-btn-submit:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.tp-btn-cancel:hover:not(:disabled) {
+    background: #eaf1fb;
+    box-shadow: 0 11px 22px rgba(31, 44, 72, 0.12);
+}
+
+.tp-btn-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, #155edb, #103f8f);
+    box-shadow: 0 13px 26px rgba(29, 109, 255, 0.35);
+}
+
+.tp-btn-submit:disabled {
+    opacity: 0.62;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .hopital-transfer-form-back {
     display: inline-flex;
     align-items: center;
@@ -264,6 +324,16 @@ body.dark-mode .hopital-transfer-form-back:hover {
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
+body.dark-mode .tp-buttons {
+    border-top-color: rgba(160, 182, 228, 0.12);
+}
+
+body.dark-mode .tp-btn-cancel {
+    background: rgba(24, 31, 44, 0.96);
+    border-color: rgba(160, 182, 228, 0.2);
+    color: #dbe5f8;
+}
+
 @media (max-width: 992px) {
     .hopital-transfer-form-hero {
         flex-direction: column;
@@ -295,6 +365,16 @@ body.dark-mode .hopital-transfer-form-back:hover {
 
     .hopital-transfer-form-actions {
         justify-content: stretch;
+    }
+
+    .tp-buttons {
+        justify-content: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .tp-btn-cancel,
+    .tp-btn-submit {
+        width: 100%;
     }
 
     .hopital-transfer-form-back {

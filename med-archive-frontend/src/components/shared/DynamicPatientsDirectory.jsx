@@ -177,7 +177,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
   }
 
   async function handleCreatePatient(event) {
-    event.preventDefault();
+    event.preventDefault();  // empeche le rechargement de la page
     setModalSaving(true);
     setModalError('');
     setModalMessage('');
@@ -190,7 +190,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
     if (!payload.service_id) delete payload.service_id;
 
     try {
-      const response = await createPatient(payload);
+      const response = await createPatient(payload);   
       setModalMessage(response?.warning || response?.message || 'Patient cree avec succes.');
       await loadPatients();
       setTimeout(() => setShowAddModal(false), 900);
