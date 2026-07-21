@@ -350,6 +350,7 @@ class ConsultationController extends Controller
             'observations' => 'nullable|string',
             'statut' => 'nullable|in:en_attente,en_cours,termine,absent',
             'date_consultation' => 'nullable|date',
+            'prochain_rdv' => 'nullable|date|after:now',
             'constantes' => 'nullable|array',
             'constantes.tension_arterielle' => 'nullable|string',
             'constantes.temperature' => 'nullable|numeric|between:35,42',
@@ -458,6 +459,37 @@ class ConsultationController extends Controller
 
                     $analyse->update(['facture_id' => $facture->id]);
                 }
+            }
+
+            if (!empty($validated['prochain_rdv'])) {
+                $prochainRdv = Consultation::create([
+                    'dossier_id' => $consultation->dossier_id,
+                    'medecin_id' => $consultation->medecin_id,
+                    'service_id' => $consultation->service_id,
+                    'date_consultation' => $validated['prochain_rdv'],
+                    'motif' => 'Rendez-vous de suivi : ' . ($consultation->motif ?: 'consultation médicale'),
+                    'statut' => 'en_attente',
+                    'est_urgence' => false,
+                ]);
+
+                $service = $consultation->service_id ? Service::find($consultation->service_id) : null;
+                $montant = $service?->tarif_patient_simple ?? 5000;
+                $latestId = Facture::max('id') ?? 0;
+                $numero = 'FAC-' . now()->format('Ymd') . '-' . str_pad($latestId + 1, 4, '0', STR_PAD_LEFT);
+
+                Facture::create([
+                    'numero' => $numero,
+                    'patient_id' => $consultation->dossier->patient_id,
+                    'consultation_id' => $prochainRdv->id,
+                    'type' => 'consultation',
+                    'montant_total' => $montant,
+                    'montant_paye' => 0,
+                    'montant_restant' => $montant,
+                    'statut' => 'non_payee',
+                    'created_by' => $request->user()->id,
+                ]);
+
+                $prochainRdv->update(['montant_consultation' => $montant]);
             }
 
             $consultation->dossier?->updateStatistiques();

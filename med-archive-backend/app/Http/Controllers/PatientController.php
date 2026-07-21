@@ -218,6 +218,7 @@ class PatientController extends Controller
         $patient = Patient::where('imu', $imu)->with([
             'user:id,name,telephone,date_naissance,sexe',
             'dossier.serviceProprietaire.etablissement:id,name',
+            'dossier.ordonnances' => fn ($query) => $query->latest('ordonnances.created_at'),
         ])->first();
 
         if (!$patient) {
@@ -226,6 +227,12 @@ class PatientController extends Controller
 
         $user = $patient->user;
         $service = $patient->dossier?->serviceProprietaire;
+        $medicamentsActuels = ($patient->dossier?->ordonnances ?? collect())
+            ->flatMap(fn ($ordonnance) => is_array($ordonnance->medicaments) ? $ordonnance->medicaments : [$ordonnance->medicaments])
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
         return response()->json([
             'success' => true,
             'data' => [
@@ -237,8 +244,8 @@ class PatientController extends Controller
                 'allergies' => $patient->allergies,
                 'antecedents_medicaux' => $patient->antecedents_medicaux,
                 'maladies_chroniques' => null,
-                'medicaments_actuels' => $patient->dossier?->medicaments,
-                'implants_dispositifs' => null,
+                'medicaments_actuels' => $medicamentsActuels,
+                // 'implants_dispositifs' => null,
                 'personne_contact' => $patient->personne_contact,
                 'lien_parente' => null,
                 'telephone_contact' => $patient->telephone_contact,
