@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { deleteTransfertDossier, getCurrentUser, getServices, getTransfertDossiers, updateTransfertDossier } from "../../api";
 import { NavLink } from "react-router-dom";
 
@@ -322,7 +322,11 @@ const TransfertHopital = () => {
                             </span>
                           </td>
                           <td>{item.medecinReferent}</td>
-                          <td>{item.motif}</td>
+                        <td>
+  {item.motif?.length > 30
+    ? `${item.motif.substring(0, 30)}...`
+    : item.motif}
+</td>
                           <td className="table-nowrap">{item.dateDemande}</td>
                           <td className="transfer-actions table-actions-compact">
                             <button className="action-icon" title="Voir" type="button" onClick={() => openView(item)}>
