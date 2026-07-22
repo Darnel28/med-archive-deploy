@@ -382,7 +382,12 @@ class PatientController extends Controller
         }
 
         $ordonnances = $patient->dossier->ordonnances()
-            ->with(['consultation.medecin.user', 'consultation.medecin.specialite'])
+            ->with([
+                'consultation.medecin.user',
+                'consultation.medecin.etablissement',
+                'consultation.medecin.specialite',
+                'consultation.service.etablissement',
+            ])
             ->latest('ordonnances.created_at')
             ->paginate($request->get('per_page', 15));
 

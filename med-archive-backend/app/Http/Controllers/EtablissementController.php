@@ -106,6 +106,7 @@ class EtablissementController extends Controller
             ->with([
                 'patient.service',
                 'patient.dossier.medecinReferent.user',
+                'patient.dossier.medecinReferent.service',
                 'patient.dossier.serviceProprietaire',
                 'patient.dossier.transferts',
             ])

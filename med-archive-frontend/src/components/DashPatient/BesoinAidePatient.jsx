@@ -9,7 +9,7 @@ const categories = [
     items: [
       {
         q: 'Objectif de connexion',
-        a: "L'objectif est de vous permettre d'accéder à votre espace sécurisé pour gérer rendez-vous, publications et dossiers patients."
+        a: "L'objectif est de vous permettre d'accéder à votre espace sécurisé pour gérer rendez-vous et votre dossier medicales."
       },
       {
         q: 'Quelles sont les options de connexion ?',
@@ -21,11 +21,11 @@ const categories = [
       },
       {
         q: 'Comment changer le mot de passe ?',
-        a: "Dans 'Sécurité du compte' cliquez sur 'Changer le mot de passe' et suivez le formulaire — le changement se fait sans créer de ticket."
+        a: "Dans 'Sécurité du compte' cliquez sur 'Changer le mot de passe' et suivez le formulaire ."
       },
       {
         q: "D'où je peux me déconnecter ?",
-        a: "Le bouton Déconnexion est disponible dans le menu utilisateur en haut à droite de l'interface."
+        a: "Le bouton Déconnexion est disponible dans le menu utilisateur en haut à gauche  de l'interface."
       }
     ]
   },
@@ -45,22 +45,28 @@ const categories = [
     name: 'Facturation',
     icon: 'fa-credit-card',
     items: [
-      { q: 'Comment voir mes factures ?', a: 'Les factures sont accessibles depuis l’espace facturation de votre profil.' },
+      { q: 'Comment voir mes factures ?', a: 'Les factures sont accessibles depuis le menu mes rendez-vous.' },
       { q: 'Puis-je télécharger un reçu ?', a: 'Oui, chaque facture validée pourra être téléchargée en PDF.' },
       { q: 'Comment changer de plan ?', a: 'Contactez l’administration de votre établissement pour toute modification d’abonnement.' }
     ]
   },
   {
     id: 4,
-    name: 'Intégrations',
+    name: 'Importants',
     icon: 'fa-plug',
     items: [
-      { q: 'Quels outils peuvent être connectés ?', a: 'La plateforme pourra se connecter aux outils de laboratoire, d’imagerie et aux solutions de messagerie.' },
-      { q: 'Peut-on intégrer un ERP externe ?', a: 'Oui, selon le niveau d’intégration autorisé par votre installation et vos accès techniques.' },
-      { q: 'Comment activer une intégration ?', a: 'L’activation se fait depuis les paramètres d’intégration avec validation de l’administrateur.' },
-      { q: 'Les API sont-elles disponibles ?', a: 'Une API peut être exposée selon le périmètre de votre déploiement et les permissions accordées.' },
-      { q: 'Peut-on synchroniser des données automatiquement ?', a: 'Oui, certaines synchronisations peuvent être programmées avec les connecteurs compatibles.' },
-      { q: 'Quel support pour les webhooks ?', a: 'Les webhooks peuvent être configurés sur les intégrations qui les prennent en charge.' }
+      // { q: 'Quels outils peuvent être connectés ?', a: 'La plateforme pourra se connecter aux outils de laboratoire, d’imagerie et aux solutions de messagerie.' },
+      // { q: 'Peut-on intégrer un ERP externe ?', a: 'Oui, selon le niveau d’intégration autorisé par votre installation et vos accès techniques.' },
+      {
+  q: 'Comment accéder à mon dossier médical ?',
+  a: 'Depuis votre tableau de bord, ouvrez la rubrique "Dossier médical" pour consulter vos consultations, ordonnances, examens et autres documents médicaux .'
+},
+    {vs
+  q: 'Mes informations personnelles sont-elles sécurisées ?',
+  a: 'Oui. Toutes vos données médicales et personnelles sont protégées et accessibles uniquement aux professionnels de santé autorisés ainsi qu’à vous-même.'
+},
+      // { q: 'Peut-on synchroniser des données automatiquement ?', a: 'Oui, certaines synchronisations peuvent être programmées avec les connecteurs compatibles.' },
+      // { q: 'Quel support pour les webhooks ?', a: 'Les webhooks peuvent être configurés sur les intégrations qui les prennent en charge.' }
     ]
   }
 ];

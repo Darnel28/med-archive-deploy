@@ -15,7 +15,11 @@ class ChatController extends Controller
         $user = $request->user()->loadMissing([
             'patient.dossier.serviceProprietaire.user',
             'patient.dossier.serviceProprietaire.etablissement',
+            'patient.dossier.serviceProprietaire.medecins.user',
             'patient.dossier.medecinReferent.user',
+            'patient.service.user',
+            'patient.service.etablissement',
+            'patient.service.medecins.user',
             'medecin.etablissement',
             'medecin.patients',
             'service.etablissement',
@@ -23,8 +27,7 @@ class ChatController extends Controller
 
         $contacts = collect();
         if ($user->isPatient() && $user->patient?->dossier) {
-            $dossier = $user->patient->dossier;
-            $contacts->push($dossier->medecinReferent?->user, $dossier->serviceProprietaire?->user, $dossier->serviceProprietaire?->etablissement);
+            $contacts = $this->patientContacts($user);
         } elseif ($user->isMedecin() && $user->medecin) {
             $etablissementId = $user->medecin->etablissement_id;
             $contacts->push($user->medecin->etablissement);
@@ -90,8 +93,7 @@ class ChatController extends Controller
     private function isAllowedContact(User $user, int $contactId): bool
     {
         if ($user->isPatient()) {
-            $dossier = $user->patient?->dossier;
-            return in_array($contactId, array_filter([$dossier?->medecinReferent?->user_id, $dossier?->serviceProprietaire?->user_id, $dossier?->serviceProprietaire?->etablissement_id]));
+            return $this->patientContacts($user)->contains('id', $contactId);
         }
         if ($user->isMedecin() && $user->medecin) {
             return $contactId === (int) $user->medecin->etablissement_id
@@ -116,5 +118,20 @@ class ChatController extends Controller
             })
             ->with('role')
             ->get();
+    }
+
+    /** Contacts attached to the patient's active service and establishment. */
+    private function patientContacts(User $user)
+    {
+        $patient = $user->patient;
+        $dossier = $patient?->dossier;
+        $service = $dossier?->serviceProprietaire ?? $patient?->service;
+
+        return collect([
+            $dossier?->medecinReferent?->user,
+            $service?->user,
+            $service?->etablissement,
+        ])->merge($service?->medecins?->pluck('user') ?? collect())
+            ->filter();
     }
 }

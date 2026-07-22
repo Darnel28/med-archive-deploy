@@ -21,7 +21,7 @@ const categories = [
       },
       {
         q: 'Comment changer le mot de passe ?',
-        a: "Dans 'Sécurité du compte' cliquez sur 'Changer le mot de passe' et suivez le formulaire — le changement se fait sans créer de ticket."
+        a: "Dans 'Sécurité du compte' cliquez sur 'Changer le mot de passe' et suivez le formulaire "
       },
       {
         q: "D'où je peux me déconnecter ?",

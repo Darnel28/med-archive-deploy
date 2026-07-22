@@ -56,6 +56,10 @@ const buildPrescriptionPdf = (prescription) => {
   // Récupération des données
   const medicaments = normalizeMedicaments(prescription.medicaments);
   const medecin = prescription.consultation?.medecin?.user?.name || 'Médecin';
+  const etablissement = prescription.consultation?.service?.etablissement?.name
+    || prescription.consultation?.medecin?.etablissement?.name
+    || prescription.consultation?.medecin?.user?.etablissement?.name
+    || 'Etablissement de sante';
   const patient = getConnectedPatientName() || prescription.consultation?.dossier?.patient?.user?.name || 'Patient';
   const date = formatDate(prescription.created_at);
   const dateValidite = Array.isArray(prescription.date_validite)
@@ -69,7 +73,7 @@ const buildPrescriptionPdf = (prescription) => {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
   doc.setTextColor(...primaryColor);
-  doc.text('Med-Archive', margin, 22);
+  doc.text(etablissement, margin, 22);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);

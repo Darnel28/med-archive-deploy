@@ -25,8 +25,8 @@ function patientFromHospitalRow(row) {
     birthDate: row.date_naissance || patient.user?.date_naissance || "",
     phone: row.telephone || patient.user?.telephone || "",
     sex: row.sexe || patient.user?.sexe || "",
-    serviceId: patient.service_id || patient.service?.id || dossier.service_proprietaire_id || dossier.service_proprietaire?.id || "",
-    serviceName: patient.service?.nom || dossier.service_proprietaire?.nom || "",
+    serviceId: patient.service_id || patient.service?.id || dossier.service_proprietaire_id || dossier.service_proprietaire?.id || dossier.medecin_referent?.service_id || dossier.medecin_referent?.service?.id || "",
+    serviceName: patient.service?.nom || dossier.service_proprietaire?.nom || dossier.medecin_referent?.service?.nom || "",
     medecinId: dossier.medecin_referent_id || dossier.medecin_referent?.id || "",
     medecinName: dossier.medecin_referent?.user?.name || dossier.medecin_traitant || "",
   };
