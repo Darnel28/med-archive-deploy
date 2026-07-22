@@ -111,7 +111,7 @@ class EtablissementController extends Controller
                 'patient.dossier.transferts',
             ])
             ->paginate($request->get('per_page', 15));
-             dd($patients->first());
+            
             
 
         return response()->json([
