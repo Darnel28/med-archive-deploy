@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Preferences notifications</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div><strong>John Doe</strong><span>IMU: 24P-001</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+                <a class="menu-item active" href="parametres.html"><i
+                        class="fa-solid fa-gear"></i><span>Parametres</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Notifications</h1>
+            </section>
+            <section class="settings-shell">
+                <aside class="settings-nav-card">
+                    <h2>Configuration</h2>
+                    <a class="settings-nav-item" href="profil.html"><i
+                            class="fa-regular fa-user"></i><span>Profil</span></a>
+                    <a class="settings-nav-item" href="parametres.html"><i
+                            class="fa-regular fa-user"></i><span>Parametres du profil</span></a>
+                    <a class="settings-nav-item" href="securite-compte.html"><i
+                            class="fa-solid fa-lock"></i><span>Sécurité du compte</span></a>
+                    <a class="settings-nav-item active" href="preferences-notifications.html"><i
+                            class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                    <a class="settings-nav-item" href="contacts-medicaux.html"><i
+                            class="fa-regular fa-circle-check"></i><span>Contacts médicaux</span></a>
+                </aside>
+
+                <article class="settings-main-card">
+                    <section class="settings-extra settings-extra-first">
+                        <h3>Préférences de notifications</h3>
+                        <p>Le patient peut choisir les notifications.</p>
+                        <div class="settings-toggle-list">
+                            <label class="settings-toggle-row">
+                                <span>résultats d’analyses</span>
+                                <span class="switch-control"><input type="checkbox" checked><span
+                                        class="switch-slider"></span></span>
+                            </label>
+                            <label class="settings-toggle-row">
+                                <span>nouveaux documents</span>
+                                <span class="switch-control"><input type="checkbox" checked><span
+                                        class="switch-slider"></span></span>
+                            </label>
+                            <label class="settings-toggle-row">
+                                <span>rappel de rendez-vous</span>
+                                <span class="switch-control"><input type="checkbox"><span
+                                        class="switch-slider"></span></span>
+                            </label>
+                        </div>
+                    </section>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+    </script>
+</body>
+
+</html>

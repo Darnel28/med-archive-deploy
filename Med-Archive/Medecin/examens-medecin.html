@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Examens Medecin</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .btn-add-exam {
+            border-radius: 999px;
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte"><i class="fa-regular fa-bell"></i><span
+                    class="badge">3</span></button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashMedecin.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="rendez-vous-medecin.html"><i class="fa-regular fa-calendar"></i><span>Mes
+                        rendez-vous</span></a>
+                <a class="menu-item" href="patients-medecin.html"><i class="fa-solid fa-users"></i><span>Mes
+                        patients</span></a>
+                <a class="menu-item" href="consultation-medecin.html"><i
+                        class="fa-solid fa-stethoscope"></i><span>Consultation</span></a>
+                <a class="menu-item active" href="examens-medecin.html"><i
+                        class="fa-solid fa-flask"></i><span>Examens</span></a>
+            </div>
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="publications.html"><i
+                        class="fa-regular fa-newspaper"></i><span>Publications</span></a>
+
+                <a class="menu-item" href="../patient/notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="../patient/profil.html"><i
+                        class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+
+            <div class="sidebar-profile">
+                <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice">
+                <div>
+                    <strong>Dr. Alice</strong>
+                    <span>ID: MED-24-007</span>
+                </div>
+                <a class="settings-link" href="parametre.html" aria-label="Ouvrir les parametres">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+
+            <a class="sidebar-help" href="#">
+                <i class="fa-solid fa-headset"></i>
+                <span>Besoin d'aide ? Contacter le support</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Examens</h1>
+            </section>
+            <section class="table-toolbar">
+                <label class="table-search" aria-label="Recherche patient">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="patientSearch" placeholder="Rechercher ou saisir le nom du patient..."
+                        oninput="filterExamRows()">
+                </label>
+                <button class="btn btn-solid btn-add-exam" type="button" onclick="requestExam()"><i
+                        class="fa-solid fa-plus"></i>
+                    Ajouter une demande</button>
+            </section>
+
+            <section class="rdv-section">
+                <article class="rdv-card">
+                    <div class="rdv-table-wrap">
+                        <table class="rdv-table" aria-label="Demandes d examens">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Demande</th>
+                                    <th>Laboratoire</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="examTableBody">
+                                <tr>
+                                    <td>Jean A.</td>
+                                    <td>Analyse de sang</td>
+                                    <td>CNHU Labo</td>
+                                    <td><span class="rdv-status pending">En attente</span></td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <span class="table-meta" id="examCount">1 demande</span>
+                        <div class="table-pagination">
+                            <span class="table-page">Precedent</span>
+                            <span class="table-page active">1</span>
+                            <span class="table-page">Suivant</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        function updateExamCount() {
+            const count = document.querySelectorAll("#examTableBody tr").length;
+            const examCount = document.getElementById("examCount");
+            if (examCount) examCount.textContent = count > 1 ? `${count} demandes` : "1 demande";
+        }
+
+        function requestExam() {
+            const patientSearch = document.getElementById("patientSearch");
+            const examTableBody = document.getElementById("examTableBody");
+            if (!patientSearch || !examTableBody) return;
+
+            const patientName = (patientSearch.value || "").trim();
+            if (!patientName) {
+                patientSearch.focus();
+                return;
+            }
+
+            const row = document.createElement("tr");
+            row.innerHTML = `<td>${patientName}</td><td>Analyse de sang</td><td>CNHU Labo</td><td><span class="rdv-status pending">En attente</span></td><td class="rdv-actions"><button class="icon-action" title="Voir"><i class="fa-regular fa-eye"></i></button></td>`;
+            examTableBody.prepend(row);
+            patientSearch.value = "";
+            updateExamCount();
+        }
+
+        function filterExamRows() {
+            const query = (document.getElementById("patientSearch")?.value || "").toLowerCase();
+            const rows = document.querySelectorAll("#examTableBody tr");
+            rows.forEach((row) => {
+                row.style.display = row.textContent.toLowerCase().includes(query) ? "" : "none";
+            });
+        }
+    </script>
+</body>
+
+</html>

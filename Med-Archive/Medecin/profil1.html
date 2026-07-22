@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil Médecin</title>
+
+<style>
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f5f7fb;
+    margin: 0;
+    color: #2c3e50;
+}
+
+/* HEADER */
+.header {
+    background: white;
+    margin: 20px;
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+}
+
+.profile img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.profile h2 {
+    margin: 0;
+}
+
+.profile p {
+    margin: 5px 0;
+    color: gray;
+}
+
+.actions button {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.edit {
+    background: #00b894;
+    color: white;
+}
+
+.share {
+    background: #ecf0f1;
+}
+
+/* STATS */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 15px;
+    margin: 20px;
+}
+
+.stat {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* MAIN GRID */
+.main {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    margin: 20px;
+}
+
+/* CARD */
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+/* ABOUT */
+.about p {
+    line-height: 1.6;
+}
+
+/* CONTACT */
+.contact div {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* TAGS */
+.tags span {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 5px;
+    background: #e6f7f5;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+/* TIMELINE */
+.timeline-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.timeline-item strong {
+    display: block;
+}
+
+/* PROJECT */
+.project {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+}
+
+.green { background: #d4edda; }
+.blue { background: #cce5ff; }
+.orange { background: #ffeeba; }
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="profile">
+        <img src="https://via.placeholder.com/90">
+        <div>
+            <h2>Dr. Jean Dupont</h2>
+            <p>Médecin Généraliste</p>
+            <p>Cotonou, Bénin • 12 ans d’expérience • Inscrit en 2023</p>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="edit">Modifier</button>
+        <button class="share">Partager</button>
+    </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat">
+        <strong>Patients suivis</strong>
+        <p>540</p>
+    </div>
+    <div class="stat">
+        <strong>Consultations</strong>
+        <p>2 130</p>
+    </div>
+    <div class="stat">
+        <strong>Note moyenne</strong>
+        <p>4.9 ⭐</p>
+    </div>
+    <div class="stat">
+        <strong>Équipe</strong>
+        <p>8</p>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- LEFT -->
+    <div>
+
+        <!-- ABOUT -->
+        <div class="card about">
+            <h3>À propos</h3>
+            <p>
+                Médecin généraliste expérimenté spécialisé dans la prise en charge 
+                des maladies courantes et le suivi des patients. Forte capacité 
+                d’analyse, diagnostic rapide et accompagnement personnalisé des patients.
+                Engagement dans l’amélioration de la qualité des soins et l’utilisation 
+                des technologies numériques en santé.
+            </p>
+
+            <div class="contact">
+                <div>Email : jean.dupont@medarchive.com</div>
+                <div>Téléphone : +229 90 00 00 00</div>
+                <div>Hôpital : Centre Médical Cotonou</div>
+            </div>
+        </div>
+
+        <!-- SKILLS -->
+        <div class="card">
+            <h3>Compétences</h3>
+            <div class="tags">
+                <span>Diagnostic médical</span>
+                <span>Urgences</span>
+                <span>Suivi patient</span>
+                <span>Prescriptions</span>
+                <span>Analyse clinique</span>
+                <span>Télémédecine</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+
+        <!-- TIMELINE -->
+        <div class="card">
+            <h3>Activité récente</h3>
+
+            <div class="timeline-item">
+                <strong>Consultation - Paludisme</strong>
+                <small>Aujourd’hui, 09:30</small>
+            </div>
+
+            <div class="timeline-item">
+                <strong>Prescription analyse sanguine</strong>
+                <small>Hier, 14:20</small>
+            </div>
+
+            <div class="timeline-item">
+                <strong>Suivi patient diabétique</strong>
+                <small>Lundi, 11:00</small>
+            </div>
+
+        </div>
+
+        <!-- PATIENTS -->
+        <div class="card">
+            <h3>Patients récents</h3>
+
+            <div class="project">
+                <span>Patient Koffi</span>
+                <span class="badge green">Traité</span>
+            </div>
+
+            <div class="project">
+                <span>Patient Amina</span>
+                <span class="badge blue">En cours</span>
+            </div>
+
+            <div class="project">
+                <span>Patient Serge</span>
+                <span class="badge orange">En attente</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

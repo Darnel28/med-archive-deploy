@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Accueil Medecin</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .doctor-main {
+            display: grid;
+            gap: 16px;
+        }
+
+        .doctor-card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 252, 0.96));
+            border: 1px solid rgba(21, 74, 99, 0.1);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 12px 28px rgba(17, 56, 77, 0.06);
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .dashboard-copy {
+            display: grid;
+            gap: 6px;
+        }
+
+        .dashboard-kicker {
+            margin: 0;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #5c7a92;
+        }
+
+        .dashboard-copy h2 {
+            margin: 0;
+            font-size: 1.85rem;
+            line-height: 1.15;
+            color: #12335a;
+        }
+
+        .dashboard-copy p {
+            margin: 0;
+            font-size: 0.98rem;
+            color: #587086;
+        }
+
+        .dashboard-date {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(21, 74, 99, 0.1);
+            background: rgba(244, 248, 250, 0.92);
+            color: #4f697b;
+            font-size: 0.88rem;
+            white-space: nowrap;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        .quick-stat {
+            border: 1px solid rgba(21, 74, 99, 0.08);
+            background: #fff;
+            border-radius: 16px;
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+            min-height: 128px;
+        }
+
+        .quick-stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .quick-stat-label {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #5f7689;
+            line-height: 1.4;
+        }
+
+        .quick-stat-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #f2f7fb;
+            color: #315c88;
+            font-size: 1rem;
+        }
+
+        .quick-stat strong {
+            font-size: 1.9rem;
+            line-height: 1;
+            color: #12335a;
+            font-weight: 700;
+        }
+
+        .quick-stat-meta {
+            margin: 0;
+            font-size: 0.82rem;
+            color: #7a8f9f;
+        }
+
+        @media (max-width: 760px) {
+            .dashboard-header {
+                flex-direction: column;
+            }
+
+            .doctor-card {
+                padding: 18px;
+            }
+
+            .dashboard-copy h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .widgets-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+
+        .widget {
+            background: #fff;
+            border-radius: 16px;
+            border: 1px solid rgba(21, 74, 99, 0.08);
+            padding: 18px;
+        }
+
+        .widget h3 {
+            margin-bottom: 14px;
+            font-size: 1.1rem;
+            color: #12335a;
+        }
+
+        .appointment {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eef3f7;
+        }
+
+        .appointment:last-child {
+            border: none;
+        }
+
+        .appointment-time {
+            font-weight: 600;
+            color: #315c88;
+        }
+
+        .patient-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .patient-mini img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+
+        .alert-box {
+            background: #fff4f4;
+            border-left: 4px solid #ff5b5b;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chart-box {
+            height: 200px;
+        }
+
+        .switch {
+            font-size: 12px;
+            position: relative;
+            display: inline-block;
+            width: 3.2em;
+            height: 1.8em;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            --background: #12335a;
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--background);
+            transition: .5s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.15em;
+            width: 1.15em;
+            border-radius: 50%;
+            left: 11%;
+            bottom: 16%;
+            box-shadow: inset 8px -4px 0px 0px #fff000;
+            background: var(--background);
+            transition: .5s;
+        }
+
+        input:checked+.slider {
+            background-color: #2f7fbe;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(100%);
+            box-shadow: inset 15px -4px 0px 15px #fff000;
+        }
+
+        body.dark-mode .doctor-card {
+            background: linear-gradient(180deg, rgba(24, 33, 48, 0.96), rgba(17, 25, 38, 0.96));
+            border-color: rgba(120, 150, 185, 0.22);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        body.dark-mode .dashboard-kicker {
+            color: #90a9c1;
+        }
+
+        body.dark-mode .dashboard-copy h2,
+        body.dark-mode .dashboard-copy p,
+        body.dark-mode .widget h3,
+        body.dark-mode .appointment strong,
+        body.dark-mode .patient-mini span,
+        body.dark-mode .alert-box,
+        body.dark-mode .quick-stat strong,
+        body.dark-mode .quick-stat-label,
+        body.dark-mode .quick-stat-meta {
+            color: #e7eef9;
+        }
+
+        body.dark-mode .dashboard-date {
+            background: rgba(39, 56, 78, 0.9);
+            border-color: rgba(121, 154, 192, 0.32);
+            color: #d2e0ef;
+        }
+
+        body.dark-mode .quick-stat {
+            background: #1f2d42;
+            border-color: rgba(121, 154, 192, 0.24);
+        }
+
+        body.dark-mode .quick-stat-icon {
+            background: #2a3d58;
+            color: #9fc5f0;
+        }
+
+        body.dark-mode .widget {
+            background: #1f2d42;
+            border-color: rgba(121, 154, 192, 0.24);
+        }
+
+        body.dark-mode .appointment {
+            border-bottom-color: rgba(121, 154, 192, 0.2);
+        }
+
+        body.dark-mode .appointment-time {
+            color: #9cc6ee;
+        }
+
+        body.dark-mode .alert-box {
+            background: rgba(255, 91, 91, 0.16);
+            border-left-color: #ff7c7c;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" aria-label="Langue"><i class="fa-solid fa-flag-usa"></i></button>
+            <label class="switch" aria-label="Mode nuit">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </label>
+            <button class="icon-btn has-badge" id="messageButton" aria-label="Notifications messages">
+                <i class="fa-regular fa-envelope"></i>
+                <span class="badge">2</span>
+            </button>
+            <button class="icon-btn has-badge" aria-label="Alertes resultats">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=32" alt="Profil medecin">
+                <div>
+                    <strong>Dr. Alice</strong>
+                    <span>ID: MED-24-007</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+                <button class="sidebar-user-toggle" id="sidebarUserToggle" aria-label="Ouvrir profil"
+                    aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-panel" id="sidebarUserPanel" aria-hidden="true">
+                <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice">
+                <strong>Dr. Alice</strong>
+                <span>Service: Medecine generale</span>
+            </div>
+
+            <div class="menu-block">
+                <a class="menu-item active" href="DashMedecin.html"><i
+                        class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="rendez-vous-medecin.html"><i class="fa-regular fa-calendar"></i><span>Mes
+                        rendez-vous</span></a>
+                <a class="menu-item" href="patients-medecin.html"><i class="fa-solid fa-users"></i><span>Mes
+                        patients</span></a>
+                <a class="menu-item" href="consultation-medecin.html"><i
+                        class="fa-solid fa-stethoscope"></i><span>Consultation</span></a>
+                <a class="menu-item" href="examens-medecin.html"><i
+                        class="fa-solid fa-flask"></i><span>Examens</span></a>
+
+
+                <h4>Gestion du compte</h4>
+                <div class="menu-block">
+                    <a class="menu-item" href="publications.html"><i
+                            class="fa-regular fa-newspaper"></i><span>Publications</span></a>
+
+                    <a class="menu-item" href="notifications.html"><i
+                            class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                    <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+                </div>
+
+                <div class="sidebar-profile">
+                    <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice">
+                    <div>
+                        <strong>Dr. Alice</strong>
+                        <span>ID: MED-24-007</span>
+                    </div>
+                    <a class="settings-link" href="parametre.html" aria-label="Ouvrir les parametres">
+                        <i class="fa-solid fa-gear"></i>
+                    </a>
+                </div>
+
+                <a class="sidebar-help" href="#">
+                    <i class="fa-solid fa-headset"></i>
+                    <span>Besoin d'aide ? Contacter le support</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+        </aside>
+
+        <main class="content doctor-main">
+            <section class="doctor-card">
+                <div class="dashboard-header">
+                    <div class="dashboard-copy">
+                        <p class="dashboard-kicker">Vue d'ensemble</p>
+
+                        <p>Suivi synthétique de l'activité médicale du jour.</p>
+                    </div>
+                    <div class="dashboard-date"><i class="fa-regular fa-calendar"></i> 12 mars 2026</div>
+                </div>
+                <div class="quick-stats">
+                    <article class="quick-stat">
+                        <div class="quick-stat-top">
+                            <p class="quick-stat-label">Patients suivis</p>
+                            <span class="quick-stat-icon"><i class="fa-solid fa-user-group"></i></span>
+                        </div>
+                        <strong>120</strong>
+                        <p class="quick-stat-meta">Dossiers actifs sous votre suivi</p>
+                    </article>
+                    <article class="quick-stat">
+                        <div class="quick-stat-top">
+                            <p class="quick-stat-label">Rendez-vous aujourd'hui</p>
+                            <span class="quick-stat-icon"><i class="fa-regular fa-calendar-check"></i></span>
+                        </div>
+                        <strong>8</strong>
+                        <p class="quick-stat-meta">Consultations programmées pour la journée</p>
+                    </article>
+                    <article class="quick-stat">
+                        <div class="quick-stat-top">
+                            <p class="quick-stat-label">Examens en attente</p>
+                            <span class="quick-stat-icon"><i class="fa-solid fa-flask"></i></span>
+                        </div>
+                        <strong>3</strong>
+                        <p class="quick-stat-meta">Demandes en cours de traitement laboratoire</p>
+                    </article>
+                    <article class="quick-stat">
+                        <div class="quick-stat-top">
+                            <p class="quick-stat-label">Alertes résultats disponibles</p>
+                            <span class="quick-stat-icon"><i class="fa-regular fa-bell"></i></span>
+                        </div>
+                        <strong>2</strong>
+                        <p class="quick-stat-meta">Résultats à consulter dans la file d'attente</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="widgets-grid">
+
+                <!-- Rendez-vous -->
+                <div class="widget">
+                    <h3><i class="fa-regular fa-calendar"></i> Prochains rendez-vous</h3>
+
+                    <div class="appointment">
+                        <div>
+                            <strong>Jean Dupont</strong><br>
+                            Consultation générale
+                        </div>
+                        <div class="appointment-time">09:30</div>
+                    </div>
+
+                    <div class="appointment">
+                        <div>
+                            <strong>Amina Bello</strong><br>
+                            Suivi hypertension
+                        </div>
+                        <div class="appointment-time">11:00</div>
+                    </div>
+
+                    <div class="appointment">
+                        <div>
+                            <strong>Paul Koffi</strong><br>
+                            Résultats examens
+                        </div>
+                        <div class="appointment-time">14:00</div>
+                    </div>
+
+                </div>
+
+
+                <!-- Alertes -->
+                <div class="widget">
+                    <h3><i class="fa-solid fa-bell"></i> Alertes médicales</h3>
+
+                    <div class="alert-box">
+                        Résultat laboratoire disponible pour <strong>Jean Dupont</strong>
+                    </div>
+
+                    <div class="alert-box">
+                        Patient <strong>Amina Bello</strong> - tension élevée
+                    </div>
+
+                </div>
+
+
+                <!-- Patients récents -->
+                <div class="widget">
+                    <h3><i class="fa-solid fa-user"></i> Patients récents</h3>
+
+                    <div class="patient-mini">
+                        <img src="https://i.pravatar.cc/40?img=15">
+                        <span>Jean Dupont</span>
+                    </div>
+
+                    <div class="patient-mini">
+                        <img src="https://i.pravatar.cc/40?img=21">
+                        <span>Amina Bello</span>
+                    </div>
+
+                    <div class="patient-mini">
+                        <img src="https://i.pravatar.cc/40?img=33">
+                        <span>Paul Koffi</span>
+                    </div>
+
+                </div>
+
+
+                <!-- Activité -->
+                <div class="widget">
+                    <h3><i class="fa-solid fa-chart-line"></i> Activité de la semaine</h3>
+                    <canvas id="activityChart" class="chart-box"></canvas>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const topbar = document.querySelector(".topbar");
+        const mainContent = document.querySelector(".content");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.querySelector(".sidebar");
+        const layout = document.querySelector(".layout");
+        const messageButton = document.getElementById("messageButton");
+        const sidebarUserToggle = document.getElementById("sidebarUserToggle");
+        const sidebarUserPanel = document.getElementById("sidebarUserPanel");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.checked = isDark;
+        };
+
+        const savedTheme = localStorage.getItem("medarchive-theme");
+        applyTheme(savedTheme === "dark");
+
+        darkModeToggle.addEventListener("change", () => {
+            const isDark = darkModeToggle.checked;
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        if (mainContent) {
+            mainContent.addEventListener("scroll", () => {
+                if (mainContent.scrollTop > 20) {
+                    topbar.classList.add("scrolled");
+                } else {
+                    topbar.classList.remove("scrolled");
+                }
+            });
+        }
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+
+            const sidebarState = localStorage.getItem("medarchive-sidebar");
+            layout.classList.toggle("sidebar-collapsed", sidebarState === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            const isCollapsed = layout.classList.contains("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", isCollapsed ? "collapsed" : "expanded");
+        });
+
+        layout.addEventListener("click", (event) => {
+            if (!mobileSidebarQuery.matches || layout.classList.contains("sidebar-collapsed")) {
+                return;
+            }
+
+            const clickedInsideSidebar = sidebar.contains(event.target);
+            const clickedToggle = sidebarToggle.contains(event.target);
+
+            if (!clickedInsideSidebar && !clickedToggle) {
+                layout.classList.add("sidebar-collapsed");
+            }
+        });
+
+        if (sidebarUserToggle && sidebarUserPanel) {
+            sidebarUserToggle.addEventListener("click", () => {
+                const isOpen = sidebarUserPanel.classList.toggle("open");
+                sidebarUserToggle.setAttribute("aria-expanded", String(isOpen));
+                sidebarUserPanel.setAttribute("aria-hidden", String(!isOpen));
+            });
+        }
+
+        if (messageButton) {
+            messageButton.addEventListener("click", () => {
+                window.location.href = "../chat.html";
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const ctx = document.getElementById('activityChart');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                datasets: [{
+                    label: 'Consultations',
+                    data: [5, 8, 6, 9, 7, 4],
+                    borderColor: '#2c7be5',
+                    backgroundColor: 'rgba(44,123,229,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

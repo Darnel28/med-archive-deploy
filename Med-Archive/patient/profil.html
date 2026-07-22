@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Profil patient</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div><strong>John Doe</strong><span>IMU: 24P-001</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon dossier medical</span><i
+                        class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item active" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Profil patient</h1>
+            </section>
+
+            <section class="profile-layout">
+                <article class="profile-card profile-identity-card">
+                    <img src="https://i.pravatar.cc/300?img=5" alt="Photo de profil" class="profile-avatar-large">
+                    <h2>Doe</h2>
+                    <h3>John</h3>
+                    <a href="tel:+22900000000" class="profile-contact-link">+229 00 00 00 00</a>
+                    <a href="mailto:john.doe@email.com" class="profile-contact-sub">john.doe@email.com</a>
+                </article>
+
+                <article class="profile-card">
+                    <div class="profile-card-head">
+                        <h2>Informations de base du patient</h2>
+                        <i class="fa-solid fa-pen"></i>
+                    </div>
+                    <div class="profile-kv-grid">
+                        <div class="profile-kv-row"><span>Nom:</span><span class="profile-kv-value">Doe</span></div>
+                        <div class="profile-kv-row"><span>Prenom:</span><span class="profile-kv-value">John</span></div>
+                        <div class="profile-kv-row"><span>Date de naissance:</span><span
+                                class="profile-kv-value">23/07/1994</span></div>
+                        <div class="profile-kv-row"><span>Sexe:</span><span class="profile-kv-value">Masculin</span>
+                        </div>
+                        <div class="profile-kv-row"><span>Telephone:</span><span class="profile-kv-value">+229 00 00 00
+                                00</span></div>
+                        <div class="profile-kv-row"><span>Email:</span><span
+                                class="profile-kv-value">john.doe@email.com</span></div>
+                        <div class="profile-kv-row"><span>Adresse / Ville:</span><span class="profile-kv-value">Zogbo,
+                                Cotonou Rue 123</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="profile-card">
+                    <div class="profile-card-head">
+                        <h2>Informations importantes</h2>
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <div class="profile-kv-grid">
+                        <div class="profile-kv-row"><span>Groupe sanguin:</span><span class="profile-kv-value">A+</span>
+                        </div>
+                        <div class="profile-kv-row"><span>Allergies:</span><span class="profile-kv-value">Noix,
+                                pollen</span></div>
+                        <div class="profile-kv-row"><span>Maladies chroniques:</span><span
+                                class="profile-kv-value">Asthme</span></div>
+                        <div class="profile-kv-row"><span>Antecedents medicaux:</span><span
+                                class="profile-kv-value">COVID-19 (2022), fracture radius (2018)</span></div>
+                    </div>
+                </article>
+
+                <article class="profile-card profile-visits-card">
+                    <div class="profile-visits-tabs">
+                        <button class="active" type="button">Visites futures (2)</button>
+                        <button type="button">Visites passees (15)</button>
+                        <button type="button">Traitements prevus</button>
+                    </div>
+
+                    <div class="profile-visit-row purple">
+                        <div class="profile-visit-time">
+                            <span>11:00-12:30</span>
+                            <span class="profile-visit-value">26 Fev 2023</span>
+                        </div>
+                        <div class="profile-visit-col">
+                            <span>Service:</span>
+                            <span class="profile-visit-value">Traitement et nettoyage des canaux</span>
+                        </div>
+                        <div class="profile-visit-col">
+                            <span>Medecin:</span>
+                            <span class="profile-visit-value">Oksana Maxime</span>
+                        </div>
+                        <div class="profile-visit-status">
+                            <span>Statut:</span>
+                            <em>Programme</em>
+                        </div>
+                    </div>
+
+                    <div class="profile-visit-row cyan">
+                        <div class="profile-visit-time">
+                            <span>11:00-12:30</span>
+                            <span class="profile-visit-value">27 Fev 2023</span>
+                        </div>
+                        <div class="profile-visit-col">
+                            <span>Service:</span>
+                            <span class="profile-visit-value">Blanchiment des dents</span>
+                        </div>
+                        <div class="profile-visit-col">
+                            <span>Medecin:</span>
+                            <span class="profile-visit-value">Max Oched</span>
+                        </div>
+                        <div class="profile-visit-status">
+                            <span>Statut:</span>
+                            <em>Programme</em>
+                        </div>
+                    </div>
+                </article>
+
+                <aside class="profile-side-stack">
+                    <article class="profile-card profile-file-card">
+                        <div class="profile-card-head profile-mini-head">
+                            <h2>Fichiers</h2>
+                            <button class="btn btn-outline btn-sm">Telecharger</button>
+                        </div>
+                        <ul class="profile-mini-list">
+                            <li><i class="fa-regular fa-file-lines"></i><span>Bilan de controle.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                            <li><i class="fa-regular fa-file-lines"></i><span>Compte rendu de visite.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                            <li><i class="fa-regular fa-file-lines"></i><span>Ordonnance medicale.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                            <li><i class="fa-regular fa-file-lines"></i><span>Resultat laboratoire.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                        </ul>
+                    </article>
+
+                    <article class="profile-card profile-file-card">
+                        <div class="profile-card-head profile-mini-head">
+                            <h2>Notes</h2>
+                            <button class="btn btn-outline btn-sm">Telecharger</button>
+                        </div>
+                        <ul class="profile-mini-list">
+                            <li><i class="fa-regular fa-note-sticky"></i><span>Note 31.06.23.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                            <li><i class="fa-regular fa-note-sticky"></i><span>Note 23.06.23.pdf</span><span
+                                    class="profile-file-size">123kb</span></li>
+                        </ul>
+                    </article>
+                </aside>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+    </script>
+</body>
+
+</html>

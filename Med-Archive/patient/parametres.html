@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Parametres</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div><strong>John Doe</strong><span>IMU: 24P-001</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+                <button class="sidebar-user-toggle" id="sidebarUserToggle" aria-label="Ouvrir profil"
+                    aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-panel" id="sidebarUserPanel" aria-hidden="true">
+                <img src="https://i.pravatar.cc/200?img=12" alt="John Doe">
+                <strong>John Doe</strong>
+                <span>IMU: 24P-001</span>
+            </div>
+
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon dossier medical</span><i
+                        class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+
+            <div class="sidebar-profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="John Doe">
+                <div>
+                    <strong>John Doe</strong>
+                    <span>IMU: 24P-001</span>
+                </div>
+                <a class="settings-link active" href="parametres.html" aria-label="Ouvrir les parametres"
+                    aria-current="page">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+
+            <a class="sidebar-help" href="#">
+                <i class="fa-solid fa-headset"></i>
+                <span>Besoin d'aide ? Contacter le support</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Parametres du compte</h1>
+            </section>
+
+            <section class="settings-shell">
+                <aside class="settings-nav-card">
+                    <h2>Configuration</h2>
+                    <a class="settings-nav-item" href="profil.html"><i
+                            class="fa-regular fa-user"></i><span>Profil</span></a>
+                    <a class="settings-nav-item active" href="parametres.html"><i
+                            class="fa-regular fa-user"></i><span>Parametres du profil</span></a>
+                    <a class="settings-nav-item" href="securite-compte.html"><i
+                            class="fa-solid fa-lock"></i><span>Sécurité du compte
+                        </span></a>
+                    <a class="settings-nav-item" href="preferences-notifications.html"><i
+                            class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                    <a class="settings-nav-item" href="contacts-medicaux.html"><i
+                            class="fa-regular fa-circle-check"></i><span>Contacts médicaux</span></a>
+                </aside>
+
+                <article class="settings-main-card">
+                    <div class="settings-profile-head">
+                        <div class="settings-avatar-wrap">
+                            <img src="https://i.pravatar.cc/300?img=12" alt="Avatar" class="settings-avatar">
+                            <button class="settings-avatar-camera" type="button" title="Modifier la photo"><i
+                                    class="fa-solid fa-camera"></i></button>
+                        </div>
+                        <div class="settings-avatar-actions">
+                            <button class="btn btn-solid" type="button">Televerser une photo</button>
+                            <button class="btn btn-outline" type="button">Supprimer avatar</button>
+                        </div>
+                    </div>
+
+                    <form class="settings-form-grid" action="#" method="post" onsubmit="return false;">
+                        <label class="settings-field">
+                            <span>Prenom</span>
+                            <input type="text" value="John" placeholder="Prenom">
+                        </label>
+                        <label class="settings-field">
+                            <span>Nom</span>
+                            <input type="text" value="Doe" placeholder="Nom">
+                        </label>
+
+                        <label class="settings-field">
+                            <span>Email</span>
+                            <input type="email" value="john.doe@email.com" placeholder="Email">
+                        </label>
+                        <label class="settings-field">
+                            <span>Numero de telephone</span>
+                            <input type="tel" value="+229 00 00 00 00" placeholder="Telephone">
+                        </label>
+
+                        <label class="settings-field">
+                            <span>Sexe</span>
+                            <div class="settings-radio-group">
+                                <label><input type="radio" name="sexe" checked> Homme</label>
+                                <label><input type="radio" name="sexe"> Femme</label>
+                            </div>
+                        </label>
+                        <label class="settings-field">
+                            <span>Date de naissance</span>
+                            <input type="date" value="1994-07-23">
+                        </label>
+
+                        <label class="settings-field settings-field-full">
+                            <span>Adresse / Ville</span>
+                            <textarea rows="3" placeholder="Saisir votre adresse">Zogbo, Cotonou Rue 123</textarea>
+                        </label>
+
+                        <div class="settings-submit-wrap settings-field-full">
+                            <button class="btn btn-solid" type="submit">Enregistrer les modifications</button>
+                            <a class="btn btn-outline" href="profil.html">Voir le profil</a>
+                        </div>
+                    </form>
+
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const sidebar = document.querySelector(".sidebar");
+        const sidebarUserToggle = document.getElementById("sidebarUserToggle");
+        const sidebarUserPanel = document.getElementById("sidebarUserPanel");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        // Close mobile sidebar when clicking outside of it.
+        layout.addEventListener("click", (event) => {
+            if (!mobileSidebarQuery.matches) {
+                return;
+            }
+            if (layout.classList.contains("sidebar-collapsed")) {
+                return;
+            }
+
+            const clickedInsideSidebar = sidebar.contains(event.target);
+            const clickedToggle = sidebarToggle.contains(event.target);
+
+            if (!clickedInsideSidebar && !clickedToggle) {
+                layout.classList.add("sidebar-collapsed");
+            }
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+
+        if (sidebarUserToggle && sidebarUserPanel) {
+            sidebarUserToggle.addEventListener("click", () => {
+                const isOpen = sidebarUserPanel.classList.toggle("open");
+                sidebarUserToggle.setAttribute("aria-expanded", String(isOpen));
+                sidebarUserPanel.setAttribute("aria-hidden", String(!isOpen));
+            });
+        }
+    </script>
+</body>
+
+</html>

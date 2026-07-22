@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Inscription - Med-Archive</title>
+    <style>
+        :root {
+            --turquoise: #1fb6b3;
+            --deep: #13746a;
+            --muted: #6b7b7a
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+            background: url('assets/img/inscription1.png') right center / cover no-repeat;
+            padding: 30px;
+            margin: 0;
+            color: #000
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 28px auto
+        }
+
+        .split {
+            display: flex;
+            align-items: stretch;
+            background: transparent;
+            border-radius: 0;
+            overflow: visible;
+            box-shadow: none;
+        }
+
+        .left {
+            width: 48%;
+            background: transparent;
+            padding: 28px 30px 36px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 560px;
+            margin-left: -22px;
+        }
+
+        .card-head {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .logo-img {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            object-fit: cover
+        }
+
+        .right {
+            width: 52%;
+            position: relative;
+            background: none;
+            overflow: hidden;
+            min-height: 560px;
+        }
+
+        .hero {
+            display: none
+        }
+
+        .hero-img {
+            display: none
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px
+        }
+
+        .full {
+            grid-column: 1/-1
+        }
+
+        .field-reduced {
+            width: 100%;
+            justify-self: start
+        }
+
+        .field-tight {
+            width: 100%;
+            justify-self: start
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: #000;
+            margin-bottom: 6px
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #bddedd;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 14px;
+            color: #000;
+            outline: none
+        }
+
+        input::placeholder {
+            color: #000;
+            opacity: 1
+        }
+
+        input:focus,
+        select:focus {
+            box-shadow: 0 0 0 3px rgba(31, 182, 179, 0.15);
+            border-color: var(--turquoise)
+        }
+
+        .small {
+            font-size: 12px;
+            color: #000;
+            margin-top: 8px
+        }
+
+        h1,
+        .lead {
+            color: #000
+        }
+
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            background: var(--turquoise);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer
+        }
+
+        .btn.secondary {
+            background: #eefafa;
+            color: var(--deep);
+            border: 1px solid rgba(31, 182, 179, 0.12)
+        }
+
+        .right {
+            width: 52%;
+            position: relative;
+            background: none;
+            overflow: hidden
+        }
+
+        .hero {
+            position: absolute;
+            inset: 0;
+            background-image: url('assets/img/inscription1.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            filter: none
+        }
+
+        .hero-overlay {
+            position: absolute;
+            right: 6%;
+            top: 10%;
+            width: 72%;
+            height: 80%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.9));
+            border-radius: 18px;
+            box-shadow: 0 14px 40px rgba(7, 22, 22, 0.08);
+            overflow: hidden;
+            z-index: 1
+        }
+
+        .hero-overlay .decor {
+            position: absolute;
+            left: -40px;
+            top: -40px;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle at 30% 30%, rgba(31, 182, 179, 0.12), rgba(31, 182, 179, 0));
+            transform: rotate(12deg)
+        }
+
+        .hero-card {
+            position: relative;
+            padding: 30px
+        }
+
+        .hero-card h2 {
+            margin: 0;
+            color: var(--deep);
+            font-size: 18px
+        }
+
+        .hero-card p {
+            color: #275a58;
+            margin-top: 8px
+        }
+
+        /* @media(max-width:900px) {
+            .split {
+                flex-direction: column
+            }
+
+            .left,
+            .right {
+                width: 100%
+            }
+
+            .right {
+                height: 300px
+            }
+
+            .hero-overlay {
+                display: none
+            }
+
+            .field-reduced {
+                width: 100%
+            }
+
+            .field-tight {
+                width: 100%
+            }
+        } */
+        /* TABLETTE */
+        @media (max-width: 1024px) {
+
+            .container {
+                padding: 20px;
+            }
+
+            .split {
+                flex-direction: column;
+            }
+
+            .left,
+            .right {
+                width: 100%;
+            }
+
+            .left {
+                margin-left: 0;
+                padding: 30px 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .field-reduced,
+            .field-tight {
+                width: 100%;
+            }
+
+            .right {
+                height: 350px;
+                margin-top: 20px;
+            }
+
+            .hero {
+                background-position: right center;
+            }
+
+        }
+
+
+        /* MOBILE */
+        @media (max-width: 600px) {
+
+            body {
+                padding: 10px;
+                background-position: center;
+            }
+
+            .container {
+                margin: 0 auto;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .left {
+                padding: 20px 15px;
+                min-height: auto;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .lead {
+                font-size: 14px;
+            }
+
+            input,
+            select {
+                font-size: 14px;
+                padding: 11px;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .right {
+                height: 260px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="split" role="region" aria-label="Inscription Med-Archive">
+            <div class="left">
+                <div class="card-head">
+                    <!-- <img src="assets/img/logo10.png" alt="Med-Archive" class="logo-img"> -->
+                    <div>
+                        <h1>Créer un compte</h1>
+                        <p class="lead">Inscrivez-vous pour accéder aux ressources et services
+                        </p>
+                    </div>
+                </div>
+
+                <form aria-label="Formulaire d'inscription Med-Archive">
+                    <div class="grid">
+                        <div>
+                            <label for="nom">Nom</label>
+                            <input id="nom" name="nom" type="text" placeholder="Entrez votre nom" required>
+                        </div>
+
+                        <div class="field-tight">
+                            <label for="prenom">Prénom</label>
+                            <input id="prenom" name="prenom" type="text" placeholder="Entrez votre prénom" required>
+                        </div>
+
+                        <div>
+                            <label for="sexe">Sexe</label>
+                            <select id="sexe" name="sexe" required>
+                                <option value="">Sélectionnez</option>
+                                <option value="f">Femme</option>
+                                <option value="m">Homme</option>
+
+                            </select>
+                        </div>
+
+                        <div class="field-tight">
+                            <label for="ville">Ville</label>
+                            <input id="ville" name="ville" type="text" placeholder="Ex: Cotonou" required>
+                        </div>
+
+                        <div>
+                            <label for="adresse">Adresse</label>
+                            <input id="adresse" name="adresse" type="text" placeholder="Rue, numéro, quartier" required>
+                        </div>
+
+                        <div class="field-reduced">
+                            <label for="npi">NPI</label>
+                            <input id="npi" name="npi" type="text" placeholder="Entrez votre NPI" required>
+                        </div>
+
+                        <div>
+                            <label for="email">Email</label>
+                            <input id="email" name="email" type="email" placeholder="votre@email.com" required>
+                        </div>
+
+                        <div>
+                            <label for="password">Mot de passe</label>
+                            <input id="password" name="password" type="password" required
+                                placeholder="Choisissez un mot de passe">
+                        </div>
+
+                        <div class="full">
+                            <label for="etablissement">Établissement</label>
+                            <select id="etablissement" name="etablissement" required>
+                                <option value="">Sélectionnez un établissement</option>
+                                <option>Hôpital Central</option>
+                                <option>Hôpital Saint-Luc</option>
+                                <option>Clinique Sainte-Marie</option>
+                                <option>Centre Médical Universitaire</option>
+                                <option>Clinique du Lac</option>
+                                <option>Autre</option>
+                            </select>
+                            <p class="small">Choisissez l'hôpital ou la clinique correspondant(e) à votre établissement.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn secondary">Annuler</button>
+                        <button type="submit" class="btn">S'inscrire</button>
+                    </div>
+                </form>
+            </div>
+            <div class="right" aria-hidden="true">
+                <div class="hero" aria-hidden="true">
+                    <img src="assets/img/inscription1.png" alt="Fond formulaire" class="hero-img">
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

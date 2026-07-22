@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - DashboardPatient</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" aria-label="Langue"><i class="fa-solid fa-flag-usa"></i></button>
+            <!-- <button class="icon-btn" aria-label="Applications"><i class="fa-solid fa-grip"></i></button> -->
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications messages">
+                <i class="fa-regular fa-envelope"></i>
+                <span class="badge">5</span>
+            </button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">4</span>
+            </button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div>
+                    <strong>John Doe</strong>
+                    <span>IMU: 24P-001</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+                <button class="sidebar-user-toggle" id="sidebarUserToggle" aria-label="Ouvrir profil"
+                    aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-panel" id="sidebarUserPanel" aria-hidden="true">
+                <img src="https://i.pravatar.cc/200?img=12" alt="John Doe">
+                <strong>Dr. Alice</strong>
+                <span>IMU: 24P-001</span>
+            </div>
+
+            <div class="menu-block">
+                <a class="menu-item active" href="#dashboard"><i
+                        class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon
+                        dossier
+                        médical</span><i class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+
+            <div class="sidebar-profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="John Doe">
+                <div>
+                    <strong>John Doe</strong>
+                    <span>IMU: 24P-001</span>
+                </div>
+                <a class="settings-link" href="parametres.html" aria-label="Ouvrir les parametres">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+
+            <a class="sidebar-help" href="#">
+                <i class="fa-solid fa-headset"></i>
+                <span>Besoin d'aide ? Contacter le support</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </aside>
+
+        <main class="content patient-main">
+            <section class="patient-overview-card">
+                <img src="../assets\img\télécharger (1).jpeg" alt="Illustration patient">
+                <div class="patient-overview-content">
+                    <h2>Bonjour John Doe</h2>
+                    <div class="patient-index-grid">
+                        <div><span>Sexe</span><strong>Homme</strong></div>
+                        <div><span>Age</span><strong>19 ans</strong></div>
+                        <div><span>Taille</span><strong>168 cm</strong></div>
+                        <div><span>Poids</span><strong>52 kg</strong></div>
+                        <div><span>Groupe sanguin</span><strong>B+</strong></div>
+                        <div><span>IMU</span><strong>BJ-24P-001</strong></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="patient-bottom-grid">
+                <article class="patient-card upcoming-encounters-card">
+                    <h3>Consultations a venir</h3>
+                    <div class="encounters-surface">
+                        <div class="encounters-date-block">
+                            <strong>23 novembre 2026</strong>
+                            <span>Aujourd'hui</span>
+                        </div>
+
+                        <div class="encounter-highlight">
+                            <h4>Consultation dermatologique</h4>
+                            <div class="encounter-meta">
+                                <p><i class="fa-regular fa-calendar"></i> 23 nov. 2026 - 18:30</p>
+                                <p>CNHU Cotonou, batiment B, salle 24</p>
+                            </div>
+                        </div>
+
+                        <ul class="encounters-notes">
+                            <li><i class="fa-solid fa-capsules"></i>N'oubliez pas votre prise de Nasonex Aerosol
+                                aujourd'hui.</li>
+                            <li><i class="fa-regular fa-circle-check"></i>Vaccin antitetanique a renouveler: planifiez
+                                un rendez-vous.</li>
+                        </ul>
+
+                        <a class="btn btn-outline btn-sm" href="consultations.html">Voir toutes les consultations</a>
+                    </div>
+
+                    <div class="calendar-surface">
+                        <div class="calendar-head">
+                            <button type="button" aria-label="Mois précédent"><i
+                                    class="fa-solid fa-chevron-left"></i></button>
+                            <strong>Novembre 2026</strong>
+                            <button type="button" aria-label="Mois suivant"><i
+                                    class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-grid weekdays">
+                            <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+                        </div>
+                        <div class="calendar-grid days">
+                            <span class="mute">26</span><span class="mute">27</span><span class="mute">28</span><span
+                                class="mute">29</span><span class="mute">30</span><span>1</span><span>2</span>
+                            <span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                            <span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span>
+                            <span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span
+                                class="active-day">23</span>
+                            <span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span>
+                        </div>
+                    </div>
+                </article>
+
+                <aside class="patient-card diagnosis-panel">
+                    <h3>Diagnostic actuel</h3>
+                    <div class="diagnosis-surface">
+                        <div class="diagnosis-head">
+                            <h4>Sinusite</h4>
+                            <span>11 oct. 2026</span>
+                        </div>
+                        <p>Inflammation des sinus avec gene respiratoire legere, en cours de suivi dans votre dossier
+                            medical Med-Archive.</p>
+
+                        <div class="doctor-row">
+                            <span>Medecin referent</span>
+                            <div>
+                                <img src="https://i.pravatar.cc/40?img=21" alt="Medecin">
+                                <strong>Dr. Sarah Simpson</strong>
+                            </div>
+                        </div>
+
+                        <div class="receipt-row">
+                            <span>Ordonnance active</span>
+                            <div>
+                                <strong>Nasonex Aerosol</strong>
+                                <p>3 a 4 prises par jour pendant 7 jours en cas de gene respiratoire.</p>
+                            </div>
+                        </div>
+
+                        <a class="btn btn-outline btn-sm" href="dossier-medical.html">Ouvrir le dossier medical</a>
+                    </div>
+                </aside>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const topbar = document.querySelector(".topbar");
+        const mainContent = document.querySelector(".content");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) {
+                icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+            }
+        };
+
+        const savedTheme = localStorage.getItem("medarchive-theme");
+        applyTheme(savedTheme === "dark");
+
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        // Détection du scroll pour changer la couleur du topbar
+        if (mainContent) {
+            mainContent.addEventListener("scroll", () => {
+                if (mainContent.scrollTop > 20) {
+                    topbar.classList.add("scrolled");
+                } else {
+                    topbar.classList.remove("scrolled");
+                }
+            });
+        }
+
+        // Toggle sidebar
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.querySelector(".sidebar");
+        const layout = document.querySelector(".layout");
+        const sidebarUserToggle = document.getElementById("sidebarUserToggle");
+        const sidebarUserPanel = document.getElementById("sidebarUserPanel");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                // On mobile, keep the sidebar hidden by default and open via hamburger button.
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+
+            const sidebarState = localStorage.getItem("medarchive-sidebar");
+            layout.classList.toggle("sidebar-collapsed", sidebarState === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            const isCollapsed = layout.classList.contains("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", isCollapsed ? "collapsed" : "expanded");
+        });
+
+        // Close mobile sidebar when clicking outside of it.
+        layout.addEventListener("click", (event) => {
+            if (!mobileSidebarQuery.matches) {
+                return;
+            }
+            if (layout.classList.contains("sidebar-collapsed")) {
+                return;
+            }
+
+            const clickedInsideSidebar = sidebar.contains(event.target);
+            const clickedToggle = sidebarToggle.contains(event.target);
+
+            if (!clickedInsideSidebar && !clickedToggle) {
+                layout.classList.add("sidebar-collapsed");
+            }
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+
+        if (sidebarUserToggle && sidebarUserPanel) {
+            sidebarUserToggle.addEventListener("click", () => {
+                const isOpen = sidebarUserPanel.classList.toggle("open");
+                sidebarUserToggle.setAttribute("aria-expanded", String(isOpen));
+                sidebarUserPanel.setAttribute("aria-hidden", String(!isOpen));
+            });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedArchive - Messagerie</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --bg: #edf1f6;
+            --panel: #ffffff;
+            --panel-soft: #f5f8fb;
+            --line: #dbe3ec;
+            --text-strong: #203244;
+            --text-body: #5d7084;
+            --text-soft: #8da0b2;
+            --primary: #18a7ad;
+            --primary-dark: #128c92;
+            --bubble-in: #eef3f8;
+            --bubble-out: #18a7ad;
+            --online: #1eb45a;
+            --alert: #18a7ad;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            font-family: "Manrope", sans-serif;
+            background: linear-gradient(180deg, #f3f6fa 0%, #e8edf4 100%);
+            color: var(--text-strong);
+        }
+
+        .chat-shell {
+            height: 100vh;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            background: var(--panel);
+            border: 1px solid #cfd8e3;
+        }
+
+        .chat-shell.info-open {
+            grid-template-columns: 360px 1fr 370px;
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--line);
+            display: grid;
+            grid-template-rows: auto auto auto 1fr;
+            background: #fbfdff;
+        }
+
+        .sidebar-title {
+            margin: 0;
+            padding: 20px 24px 14px;
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .search-box {
+            padding: 0 24px 16px;
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 40px;
+            top: 13px;
+            font-size: 18px;
+            color: #9fb0c2;
+        }
+
+        .search-box input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            height: 48px;
+            padding: 0 14px 0 44px;
+            font-size: 15px;
+            color: var(--text-body);
+            background: #f0f4f9;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: #a5b5c5;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            padding: 0 24px 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .tab-btn {
+            border: none;
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-body);
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: #dfeef0;
+            color: #0c8e94;
+        }
+
+        .unread-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 23px;
+            height: 23px;
+            border-radius: 999px;
+            background: var(--alert);
+            color: #fff;
+            font-size: 13px;
+            margin-left: 6px;
+            padding: 0 6px;
+        }
+
+        .contact-list {
+            list-style: none;
+            margin: 0;
+            padding: 8px 0 14px;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            border: none;
+            width: 100%;
+            text-align: left;
+            display: grid;
+            grid-template-columns: 56px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            cursor: pointer;
+            background: transparent;
+            border-left: 4px solid transparent;
+        }
+
+        .contact-item:hover {
+            background: #f3f7fb;
+        }
+
+        .contact-item.active {
+            background: #edf4f6;
+            border-left-color: var(--primary);
+        }
+
+        .contact-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e7f0;
+        }
+
+        .avatar-wrap {
+            position: relative;
+            width: fit-content;
+            flex-shrink: 0;
+        }
+
+        .avatar-presence {
+            position: absolute;
+            right: 1px;
+            bottom: 1px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #f7fbff;
+            background: #9eb0c3;
+        }
+
+        .avatar-presence.online {
+            background: #20b159;
+        }
+
+        .avatar-presence.offline {
+            background: #a8b8c8;
+        }
+
+        .contact-main {
+            min-width: 0;
+        }
+
+        .contact-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .contact-name {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: #172839;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-time {
+            font-size: 13px;
+            color: var(--text-soft);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .contact-subline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-body);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .contact-preview {
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #b9c7d5;
+            flex-shrink: 0;
+        }
+
+        .dot.online {
+            background: var(--online);
+        }
+
+        .badge {
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--alert);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .conversation {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-width: 0;
+            background: #f8fafc;
+        }
+
+        .conv-header {
+            border-bottom: 1px solid var(--line);
+            background: #f5f8fb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 22px;
+        }
+
+        .conv-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .back-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: #e7edf4;
+            color: #4c647d;
+            font-size: 15px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .conv-avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 2px solid #d9e4ef;
+        }
+
+        .header-avatar-wrap .avatar-presence {
+            right: 2px;
+            bottom: 2px;
+        }
+
+        .conv-title {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conv-status {
+            margin-top: 4px;
+            color: #17aa52;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .conv-actions {
+            display: flex;
+            gap: 12px;
+            position: relative;
+        }
+
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: none;
+            background: #e7edf4;
+            color: #667f96;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .chat-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 258px;
+            border: 1px solid #cfd9e5;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 16px 30px rgba(14, 34, 58, 0.15);
+            padding: 12px 0;
+            z-index: 8;
+            display: none;
+        }
+
+        .chat-menu.open {
+            display: block;
+        }
+
+        .chat-menu-group {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat-menu-group+.chat-menu-group {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #dbe4ee;
+        }
+
+        .chat-menu-item {
+            width: 100%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #2f4053;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .chat-menu-item:hover {
+            background: #f3f7fb;
+        }
+
+        .chat-menu-item i {
+            width: 22px;
+            text-align: center;
+            color: #7c90a6;
+            font-size: 20px;
+        }
+
+        .chat-menu-item.danger {
+            color: #ec3636;
+        }
+
+        .chat-menu-item.danger i {
+            color: #ec3636;
+        }
+
+        .messages {
+            overflow-y: auto;
+            padding: 14px 0 14px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f7f9fc;
+        }
+
+        .day-separator {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #8ea0b2;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 4px 0 10px;
+        }
+
+        .day-separator::before,
+        .day-separator::after {
+            content: "";
+            height: 1px;
+            background: #d9e3ee;
+            flex: 1;
+        }
+
+        .msg-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0;
+        }
+
+        .msg-row>div {
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .msg-row.out {
+            justify-content: flex-end;
+        }
+
+        .msg-row.out>div {
+            align-items: flex-end;
+        }
+
+        .msg-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #deE6ef;
+        }
+
+        .msg-bubble {
+            display: inline-block;
+            max-width: min(780px, 88%);
+            border-radius: 14px;
+            padding: 12px 14px;
+            line-height: 1.5;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .msg-text {
+            max-width: 62ch;
+            word-break: break-word;
+        }
+
+        .msg-meta {
+            margin-top: 4px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 4px;
+            line-height: 1;
+        }
+
+        .msg-time-inline {
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        .msg-check {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .msg-row.in .msg-bubble {
+            background: var(--bubble-in);
+            color: #23374b;
+            border-top-left-radius: 6px;
+        }
+
+        .msg-row.in .msg-time-inline {
+            color: #6f8092;
+        }
+
+        .msg-row.out .msg-bubble {
+            background: var(--bubble-out);
+            color: #fff;
+            border-top-right-radius: 6px;
+        }
+
+        .msg-row.out .msg-time-inline,
+        .msg-row.out .msg-check {
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .msg-time {
+            font-size: 12px;
+            margin-top: 6px;
+            color: #8a9caf;
+            font-weight: 600;
+        }
+
+        .msg-row.out .msg-time {
+            text-align: right;
+            color: #84b2b5;
+        }
+
+        .file-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #eef2f7;
+            border: 1px solid #d6e0eb;
+            border-radius: 14px;
+            padding: 12px 14px;
+            min-width: 260px;
+            max-width: 420px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: #d9edf0;
+            color: #169ea4;
+            font-size: 20px;
+        }
+
+        .file-meta {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .file-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #23384d;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: #7f93a7;
+            font-weight: 600;
+        }
+
+        .file-footer {
+            margin-top: 4px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            color: #7c90a5;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .file-seen {
+            color: #1b9fa6;
+        }
+
+        .download-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid #ccd8e5;
+            color: #8ca0b4;
+            background: #f8fbff;
+            cursor: pointer;
+        }
+
+        .composer {
+            border-top: 1px solid var(--line);
+            background: #f3f6fb;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .attach-btn {
+            border: none;
+            background: transparent;
+            color: #748ca3;
+            font-size: 19px;
+            width: 34px;
+            height: 34px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .attach-btn:hover {
+            background: #e5edf5;
+        }
+
+        #message-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            color: #35516b;
+            outline: none;
+        }
+
+        #message-input::placeholder {
+            color: #9fb0c0;
+        }
+
+        .composer-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: transparent;
+            color: #7088a0;
+            font-size: 19px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--primary);
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(24, 167, 173, 0.25);
+        }
+
+        .send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .empty-list {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-soft);
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .contact-info {
+            border-left: 1px solid var(--line);
+            background: #fbfdff;
+            display: none;
+            grid-template-rows: auto 1fr;
+            min-width: 0;
+        }
+
+        .chat-shell.info-open .contact-info {
+            display: grid;
+        }
+
+        .contact-info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .contact-info-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .close-info-btn {
+            border: none;
+            background: transparent;
+            color: #758da4;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px;
+        }
+
+        .contact-info-body {
+            overflow-y: auto;
+            padding: 18px 20px 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .contact-hero {
+            display: grid;
+            justify-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .contact-hero img {
+            width: 98px;
+            height: 98px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e0e8f1;
+        }
+
+        .contact-hero h4 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            color: #14273a;
+        }
+
+        .contact-role {
+            margin: 0;
+            color: #617890;
+            font-size: 18px;
+        }
+
+        .section-label {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #5f7691;
+        }
+
+        .details-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 14px;
+        }
+
+        .details-list li {
+            display: grid;
+            grid-template-columns: 26px 1fr;
+            gap: 10px;
+            align-items: center;
+            color: #1f3348;
+            font-size: 17px;
+        }
+
+        .details-list i {
+            color: #6d87a2;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .media-grid img {
+            width: 100%;
+            height: 96px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #d8e3ee;
+        }
+
+        .shared-files {
+            display: grid;
+            gap: 12px;
+        }
+
+        .shared-file-item {
+            border: 1px solid #d3deeb;
+            border-radius: 16px;
+            background: #f2f6fb;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 56px 1fr 42px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .shared-file-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: #d8edf0;
+            color: #1499a0;
+            font-size: 24px;
+        }
+
+        .shared-file-meta {
+            min-width: 0;
+        }
+
+        .shared-file-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #11263a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .shared-file-size {
+            margin-top: 2px;
+            font-size: 14px;
+            color: #6f859d;
+            font-weight: 600;
+        }
+
+        .shared-download {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 1px solid #c9d7e5;
+            background: #f8fbff;
+            color: #7c91a7;
+            cursor: pointer;
+        }
+
+        .seen {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 700;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 980px) {
+            .chat-shell {
+                grid-template-columns: 1fr;
+                height: 100dvh;
+                border: none;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .sidebar {
+                height: 100dvh;
+                max-height: none;
+                border-right: none;
+                border-bottom: none;
+                display: grid;
+            }
+
+            .conversation {
+                height: 100dvh;
+                display: none;
+            }
+
+            .chat-shell.mobile-chat-open .sidebar {
+                display: none;
+            }
+
+            .chat-shell.mobile-chat-open .conversation {
+                display: grid;
+            }
+
+            .contact-info {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: min(360px, 100vw);
+                height: 100%;
+                z-index: 5;
+                box-shadow: -10px 0 24px rgba(15, 34, 55, 0.18);
+            }
+
+            .chat-shell.info-open .contact-info {
+                display: grid;
+            }
+
+            .contact-item {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+
+            .contact-avatar {
+                width: 42px;
+                height: 42px;
+            }
+
+            .contact-name {
+                font-size: 18px;
+            }
+
+            .contact-subline {
+                font-size: 14px;
+            }
+
+            .conv-title {
+                font-size: 16px;
+            }
+
+            .conv-status {
+                font-size: 12px;
+            }
+
+            .msg-bubble {
+                max-width: 90%;
+                font-size: 14px;
+            }
+
+            .msg-time-inline,
+            .msg-check {
+                font-size: 11px;
+            }
+
+            .messages {
+                padding: 12px 0 12px 8px;
+                gap: 8px;
+            }
+
+            .msg-time {
+                font-size: 11px;
+            }
+
+            .file-name {
+                font-size: 15px;
+            }
+
+            .file-size,
+            .msg-time {
+                font-size: 12px;
+            }
+
+            .file-card {
+                width: min(100%, 360px);
+                max-width: 100%;
+                min-width: 0;
+                gap: 10px;
+            }
+
+            #message-input {
+                font-size: 16px;
+            }
+
+            .sidebar-title {
+                font-size: 28px;
+            }
+
+            .search-box input {
+                font-size: 16px;
+            }
+
+            .conv-header {
+                padding: 10px 12px;
+            }
+
+            .back-btn {
+                display: inline-flex;
+            }
+
+            .conv-actions {
+                gap: 8px;
+            }
+
+            .icon-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+
+            .composer {
+                padding: 10px 10px;
+                gap: 8px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            }
+
+            .send-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 17px;
+            }
+
+            .chat-menu {
+                width: min(258px, calc(100vw - 20px));
+                right: -2px;
+            }
+
+            .contact-info-header h3 {
+                font-size: 36px;
+            }
+
+            .contact-hero h4 {
+                font-size: 46px;
+            }
+
+            .contact-role {
+                font-size: 20px;
+            }
+
+            .section-label {
+                font-size: 34px;
+            }
+
+            .details-list li {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .search-box {
+                padding: 0 14px 12px;
+            }
+
+            .tabs {
+                padding: 0 14px 10px;
+            }
+
+            .conv-user {
+                gap: 8px;
+            }
+
+            .conv-avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .messages {
+                padding: 10px 0 10px 6px;
+            }
+
+            .msg-avatar {
+                width: 32px;
+                height: 32px;
+            }
+
+            .msg-bubble {
+                border-radius: 12px;
+                padding: 10px 12px;
+                max-width: 94%;
+            }
+
+            .msg-time-inline,
+            .msg-check {
+                font-size: 10px;
+            }
+
+            .file-card {
+                border-radius: 12px;
+                padding: 10px 10px;
+            }
+
+            .file-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
+            }
+
+            .download-btn {
+                width: 34px;
+                height: 34px;
+            }
+
+            .conv-actions .icon-btn:nth-child(2),
+            .conv-actions .icon-btn:nth-child(4) {
+                display: none;
+            }
+
+            .contact-info-header h3 {
+                font-size: 34px;
+            }
+
+            .contact-hero h4 {
+                font-size: 40px;
+            }
+
+            .section-label {
+                font-size: 30px;
+            }
+
+            .media-grid img {
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="chat-shell">
+        <aside class="sidebar">
+            <h1 class="sidebar-title">Messages</h1>
+
+            <label class="search-box" for="search-input">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="search-input" type="text" placeholder="Rechercher une conversation..." />
+            </label>
+
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="all" type="button">Tous</button>
+                <button class="tab-btn" data-tab="unread" type="button">Non lus <span class="unread-count"
+                        id="total-unread">0</span></button>
+                <button class="tab-btn" data-tab="groups" type="button">Groupes</button>
+            </div>
+
+            <ul class="contact-list" id="contact-list"></ul>
+        </aside>
+
+        <section class="conversation">
+            <header class="conv-header">
+                <div class="conv-user">
+                    <button id="mobile-back-btn" class="back-btn" type="button" aria-label="Retour aux discussions"><i
+                            class="fa-solid fa-arrow-left"></i></button>
+                    <div class="avatar-wrap header-avatar-wrap">
+                        <img id="header-avatar" class="conv-avatar" src="" alt="Avatar du contact" />
+                        <span id="header-presence" class="avatar-presence online"></span>
+                    </div>
+                    <div>
+                        <h2 class="conv-title" id="header-name"></h2>
+                        <div class="conv-status"><span class="dot online"></span><span id="header-status">En
+                                ligne</span></div>
+                    </div>
+                </div>
+
+                <div class="conv-actions">
+                    <button class="icon-btn" type="button" aria-label="Appel vocal"><i
+                            class="fa-solid fa-phone"></i></button>
+                    <button class="icon-btn" type="button" aria-label="Visioconference"><i
+                            class="fa-solid fa-video"></i></button>
+                    <button class="icon-btn" id="open-contact-info" type="button" aria-label="Informations"><i
+                            class="fa-solid fa-circle-info"></i></button>
+                    <button class="icon-btn" id="open-chat-menu" type="button" aria-label="Plus d'options"
+                        aria-haspopup="menu" aria-expanded="false"><i
+                            class="fa-solid fa-ellipsis-vertical"></i></button>
+
+                    <div class="chat-menu" id="chat-menu" role="menu" aria-label="Options de conversation">
+                        <ul class="chat-menu-group">
+                            <li><button class="chat-menu-item" type="button" role="menuitem"><i
+                                        class="fa-solid fa-magnifying-glass"></i> Rechercher</button></li>
+                            <li><button class="chat-menu-item" type="button" role="menuitem"><i
+                                        class="fa-regular fa-bell-slash"></i> Silencieux</button></li>
+                            <li><button class="chat-menu-item" type="button" role="menuitem"><i
+                                        class="fa-solid fa-thumbtack"></i> Epinglé</button></li>
+                        </ul>
+                        <ul class="chat-menu-group">
+                            <li><button class="chat-menu-item" type="button" role="menuitem"><i
+                                        class="bi bi-archive"></i> Archivé</button></li>
+                            <li><button class="chat-menu-item danger" type="button" role="menuitem"><i
+                                        class="fa-regular fa-trash-can"></i> Supprimer</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </header>
+
+            <div class="messages" id="messages"></div>
+
+            <footer class="composer">
+                <button class="attach-btn" type="button" aria-label="Joindre un fichier"><i
+                        class="fa-solid fa-paperclip"></i></button>
+                <button class="attach-btn" type="button" aria-label="Ajouter une image"><i
+                        class="fa-regular fa-image"></i></button>
+
+                <input id="message-input" type="text" placeholder="Tapez un message..." />
+
+                <div class="composer-right">
+                    <button class="emoji-btn" type="button" aria-label="Emoticones"><i
+                            class="fa-regular fa-face-smile"></i></button>
+                    <button class="send-btn" id="send-btn" type="button" aria-label="Envoyer"><i
+                            class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </footer>
+        </section>
+
+        <aside class="contact-info" id="contact-info-panel" aria-hidden="true">
+            <div class="contact-info-header">
+                <h3>Contact Info</h3>
+                <button class="close-info-btn" id="close-contact-info" type="button"
+                    aria-label="Fermer panneau info">×</button>
+            </div>
+
+            <div class="contact-info-body">
+                <div class="contact-hero">
+                    <img id="info-avatar" src="" alt="Photo du contact">
+                    <h4 id="info-name"></h4>
+                    <p class="contact-role" id="info-role"></p>
+                </div>
+
+                <p class="section-label">Contact Details</p>
+                <ul class="details-list">
+                    <li><i class="fa-regular fa-envelope"></i><span id="info-email"></span></li>
+                    <li><i class="fa-solid fa-phone"></i><span id="info-phone"></span></li>
+                    <li><i class="fa-solid fa-location-dot"></i><span id="info-location"></span></li>
+                </ul>
+
+                <p class="section-label">Shared Media</p>
+                <div class="media-grid">
+                    <img src="assets/img/gallery/gallery1.png" alt="Media 1">
+                    <img src="assets/img/gallery/gallery2.png" alt="Media 2">
+                    <img src="assets/img/gallery/gallery3.png" alt="Media 3">
+                    <img src="assets/img/gallery/gallery4.png" alt="Media 4">
+                    <img src="assets/img/gallery/gallery5.png" alt="Media 5">
+                    <img src="assets/img/gallery/gallery6.png" alt="Media 6">
+                </div>
+
+                <p class="section-label">Shared Files</p>
+                <div class="shared-files">
+                    <article class="shared-file-item">
+                        <span class="shared-file-icon"><i class="fa-regular fa-file-pdf"></i></span>
+                        <div class="shared-file-meta">
+                            <div class="shared-file-name">Dashboard-Design.pdf</div>
+                            <div class="shared-file-size">2.4 MB</div>
+                        </div>
+                        <button class="shared-download" type="button" aria-label="Telecharger Dashboard-Design.pdf"><i
+                                class="fa-solid fa-download"></i></button>
+                    </article>
+
+                    <article class="shared-file-item">
+                        <span class="shared-file-icon"><i class="fa-regular fa-file-zipper"></i></span>
+                        <div class="shared-file-meta">
+                            <div class="shared-file-name">Assets.zip</div>
+                            <div class="shared-file-size">15.8 MB</div>
+                        </div>
+                        <button class="shared-download" type="button" aria-label="Telecharger Assets.zip"><i
+                                class="fa-solid fa-download"></i></button>
+                    </article>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        (function () {
+            const contacts = [
+                {
+                    id: "sarah",
+                    name: "Patient Amina Diallo",
+                    avatar: "https://i.pravatar.cc/100?img=47",
+                    role: "Patiente suivie",
+                    email: "amina.diallo@example.com",
+                    phone: "+229 01 55 12 34 56",
+                    location: "Cotonou, Benin",
+                    online: true,
+                    group: false,
+                    time: "Il y a 2 min",
+                    unread: 0,
+                    preview: "Oui Docteur, j'ai bien recu le plan de traitement.",
+                    messages: [
+                        { from: "in", text: "Bonjour Docteur, j'ai encore une douleur legere au thorax ce matin.", time: "09:30" },
+                        { from: "out", text: "Bonjour Amina. J'ai consulte votre dossier sur DashMedecin: continuez le traitement et surveillez la tension aujourd'hui.", time: "09:32" },
+                        { from: "in", text: "D'accord. Est-ce que je peux reprendre mes activites sportives ?", time: "09:35" },
+                        { from: "out", text: "Pas encore. Repos 48h, puis reprise progressive selon vos constantes.", time: "09:37" },
+                        { from: "out", file: true, filename: "Ordonnance-Amina-Diallo.pdf", size: "1.2 MB", time: "09:37", seen: true }
+                    ]
+                },
+                {
+                    id: "mike",
+                    name: "Patient M. Johnson",
+                    avatar: "https://i.pravatar.cc/100?img=12",
+                    role: "Patient suivi",
+                    email: "m.johnson@example.com",
+                    phone: "+229 01 60 45 12 10",
+                    location: "Porto-Novo, Benin",
+                    online: false,
+                    group: false,
+                    time: "Il y a 15 min",
+                    unread: 2,
+                    preview: "Docteur, j'ai televerse mes analyses sanguines.",
+                    messages: [
+                        { from: "in", text: "Docteur, j'ai televerse mes analyses sanguines.", time: "08:50" },
+                        { from: "out", text: "Bien recu. Je vous fais un retour dans l'apres-midi.", time: "08:57" }
+                    ]
+                },
+                {
+                    id: "emily",
+                    name: "Patient Emily Davis",
+                    avatar: "https://i.pravatar.cc/100?img=32",
+                    role: "Patiente suivie",
+                    email: "emily.davis@example.com",
+                    phone: "+229 01 72 88 43 20",
+                    location: "Abomey-Calavi, Benin",
+                    online: true,
+                    group: false,
+                    time: "Il y a 1 h",
+                    unread: 1,
+                    preview: "Docteur, j'ai oublie ma dose d'hier soir.",
+                    messages: [
+                        { from: "in", text: "Docteur, j'ai oublie ma dose d'hier soir. Je fais quoi aujourd'hui ?", time: "08:04" }
+                    ]
+                },
+                {
+                    id: "team",
+                    name: "Equipe soignante",
+                    avatar: "https://i.pravatar.cc/100?img=68",
+                    role: "Coordination clinique",
+                    email: "equipe.soins@medarchive.bj",
+                    phone: "+229 01 90 00 00 00",
+                    location: "Clinique MedArchive, Cotonou",
+                    online: true,
+                    group: true,
+                    time: "Il y a 2 h",
+                    unread: 0,
+                    preview: "Infirmier Alex : Tension patient Amina stable.",
+                    messages: [
+                        { from: "in", text: "Infirmier Alex : Tension patient Amina stable.", time: "07:21" },
+                        { from: "out", text: "Parfait. On maintient le protocole et on reevalue ce soir.", time: "07:30" }
+                    ]
+                },
+                {
+                    id: "david",
+                    name: "Patient David Brown",
+                    avatar: "https://i.pravatar.cc/100?img=20",
+                    role: "Patient suivi",
+                    email: "david.brown@example.com",
+                    phone: "+229 01 33 10 15 90",
+                    location: "Parakou, Benin",
+                    online: false,
+                    group: false,
+                    time: "Hier",
+                    unread: 0,
+                    preview: "Merci Docteur, la douleur a diminue.",
+                    messages: [
+                        { from: "in", text: "Merci Docteur, la douleur a diminue depuis hier.", time: "Hier" }
+                    ]
+                },
+                {
+                    id: "lisa",
+                    name: "Patient Lisa Anderson",
+                    avatar: "https://i.pravatar.cc/100?img=16",
+                    role: "Patiente suivie",
+                    email: "lisa.anderson@example.com",
+                    phone: "+229 01 44 28 90 02",
+                    location: "Ouidah, Benin",
+                    online: false,
+                    group: false,
+                    time: "Hier",
+                    unread: 0,
+                    preview: "Je confirme mon rendez-vous de suivi lundi.",
+                    messages: [
+                        { from: "in", text: "Je confirme mon rendez-vous de suivi lundi.", time: "Hier" }
+                    ]
+                }
+            ];
+
+            const autoReplies = [
+                "Parfait, je mets a jour votre dossier dans DashMedecin.",
+                "Bien recu. Continuez le traitement et surveillez les symptomes.",
+                "Merci, je viens de consulter vos derniers resultats.",
+                "Entendu, je vous envoie une consigne medicale detaillee.",
+                "Tres bien, on fait un point lors du prochain controle."
+            ];
+
+            const state = {
+                activeTab: "all",
+                query: "",
+                activeContactId: "sarah",
+                mobileChatOpen: false,
+                infoOpen: false
+            };
+
+            const contactList = document.getElementById("contact-list");
+            const messagesRoot = document.getElementById("messages");
+            const searchInput = document.getElementById("search-input");
+            const sendBtn = document.getElementById("send-btn");
+            const input = document.getElementById("message-input");
+            const totalUnread = document.getElementById("total-unread");
+            const headerAvatar = document.getElementById("header-avatar");
+            const headerName = document.getElementById("header-name");
+            const headerStatus = document.getElementById("header-status");
+            const headerPresence = document.getElementById("header-presence");
+            const shell = document.querySelector(".chat-shell");
+            const backBtn = document.getElementById("mobile-back-btn");
+            const tabs = Array.from(document.querySelectorAll(".tab-btn"));
+            const infoToggleBtn = document.getElementById("open-contact-info");
+            const infoCloseBtn = document.getElementById("close-contact-info");
+            const infoPanel = document.getElementById("contact-info-panel");
+            const infoAvatar = document.getElementById("info-avatar");
+            const infoName = document.getElementById("info-name");
+            const infoRole = document.getElementById("info-role");
+            const infoEmail = document.getElementById("info-email");
+            const infoPhone = document.getElementById("info-phone");
+            const infoLocation = document.getElementById("info-location");
+            const chatMenuToggleBtn = document.getElementById("open-chat-menu");
+            const chatMenu = document.getElementById("chat-menu");
+
+            function isMobileView() {
+                return window.matchMedia("(max-width: 980px)").matches;
+            }
+
+            function syncMobileLayout() {
+                if (!shell) return;
+
+                if (isMobileView()) {
+                    shell.classList.toggle("mobile-chat-open", state.mobileChatOpen);
+                } else {
+                    shell.classList.remove("mobile-chat-open");
+                }
+
+                shell.classList.toggle("info-open", !!state.infoOpen);
+                if (infoPanel) infoPanel.setAttribute("aria-hidden", String(!state.infoOpen));
+            }
+
+            function totalUnreadCount() {
+                return contacts.reduce((sum, c) => sum + (c.unread || 0), 0);
+            }
+
+            function activeContact() {
+                return contacts.find((c) => c.id === state.activeContactId) || contacts[0];
+            }
+
+            function filteredContacts() {
+                const q = state.query.trim().toLowerCase();
+
+                return contacts.filter((c) => {
+                    const tabPass =
+                        state.activeTab === "all" ||
+                        (state.activeTab === "unread" && c.unread > 0) ||
+                        (state.activeTab === "groups" && c.group);
+
+                    const searchPass = !q || c.name.toLowerCase().includes(q) || c.preview.toLowerCase().includes(q);
+                    return tabPass && searchPass;
+                });
+            }
+
+            function contactItemHtml(contact) {
+                const activeClass = contact.id === state.activeContactId ? "active" : "";
+                const presenceClass = contact.online ? "online" : "offline";
+                const unread = contact.unread > 0 ? `<span class="badge">${contact.unread}</span>` : "";
+
+                return `
+                    <li>
+                        <button class="contact-item ${activeClass}" data-id="${contact.id}" type="button">
+                            <div class="avatar-wrap">
+                                <img class="contact-avatar" src="${contact.avatar}" alt="Avatar de ${contact.name}" />
+                                <span class="avatar-presence ${presenceClass}"></span>
+                            </div>
+                            <div class="contact-main">
+                                <div class="contact-top">
+                                    <h3 class="contact-name">${contact.name}</h3>
+                                    <span class="contact-time">${contact.time}</span>
+                                </div>
+                                <div class="contact-subline">
+                                    <span class="contact-preview">${contact.preview}</span>
+                                </div>
+                            </div>
+                            ${unread}
+                        </button>
+                    </li>
+                `;
+            }
+
+            function messageHtml(msg, contact) {
+                if (msg.file) {
+                    return `
+                        <div class="msg-row out">
+                            <div>
+                                <div class="file-card">
+                                    <span class="file-icon"><i class="fa-regular fa-file-pdf"></i></span>
+                                    <div class="file-meta">
+                                        <div class="file-name">${msg.filename}</div>
+                                        <div class="file-size">${msg.size}</div>
+                                        <div class="file-footer">
+                                            <span>${msg.time}</span>
+                                            ${msg.seen ? '<span class="file-seen"><i class="fa-solid fa-check"></i> Vu</span>' : ""}
+                                        </div>
+                                    </div>
+                                    <button class="download-btn" type="button" aria-label="Telecharger ${msg.filename}"><i class="fa-solid fa-download"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (msg.from === "out") {
+                    return `
+                        <div class="msg-row out">
+                            <div>
+                                <div class="msg-bubble">
+                                    <div class="msg-text">${formatMessageText(msg.text)}</div>
+                                    <div class="msg-meta">
+                                        <span class="msg-time-inline">${msg.time}</span>
+                                        <i class="fa-solid fa-check msg-check" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="msg-row in">
+                        <img class="msg-avatar" src="${contact.avatar}" alt="Avatar de ${contact.name}" />
+                        <div>
+                            <div class="msg-bubble">
+                                <div class="msg-text">${formatMessageText(msg.text)}</div>
+                                <div class="msg-meta">
+                                    <span class="msg-time-inline">${msg.time}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function escapeHtml(value) {
+                return String(value || "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function formatMessageText(text) {
+                const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+                if (!words.length) return "";
+
+                const lines = [];
+                for (let i = 0; i < words.length; i += 12) {
+                    const chunk = words.slice(i, i + 12).join(" ");
+                    lines.push(escapeHtml(chunk));
+                }
+
+                return lines.join("<br>");
+            }
+
+            function renderContacts() {
+                const items = filteredContacts();
+                if (!items.length) {
+                    contactList.innerHTML = '<li class="empty-list">Aucune conversation trouvee</li>';
+                    return;
+                }
+
+                contactList.innerHTML = items.map(contactItemHtml).join("");
+            }
+
+            function renderHeader() {
+                const contact = activeContact();
+                headerAvatar.src = contact.avatar;
+                headerName.textContent = contact.name;
+                headerStatus.textContent = contact.online ? "En ligne" : "Hors ligne";
+                if (headerPresence) {
+                    headerPresence.classList.toggle("online", !!contact.online);
+                    headerPresence.classList.toggle("offline", !contact.online);
+                }
+            }
+
+            function renderContactInfo() {
+                const contact = activeContact();
+                if (!contact) return;
+
+                if (infoAvatar) {
+                    infoAvatar.src = contact.avatar;
+                    infoAvatar.alt = `Photo de ${contact.name}`;
+                }
+                if (infoName) infoName.textContent = contact.name;
+                if (infoRole) infoRole.textContent = contact.role || "Contact";
+                if (infoEmail) infoEmail.textContent = contact.email || "-";
+                if (infoPhone) infoPhone.textContent = contact.phone || "-";
+                if (infoLocation) infoLocation.textContent = contact.location || "-";
+            }
+
+            function setInfoOpen(open) {
+                state.infoOpen = !!open;
+                if (infoToggleBtn) infoToggleBtn.setAttribute("aria-pressed", String(state.infoOpen));
+                syncMobileLayout();
+            }
+
+            function setChatMenuOpen(open) {
+                const isOpen = !!open;
+                if (chatMenu) chatMenu.classList.toggle("open", isOpen);
+                if (chatMenuToggleBtn) chatMenuToggleBtn.setAttribute("aria-expanded", String(isOpen));
+            }
+
+            function renderMessages() {
+                const contact = activeContact();
+                const rows = [
+                    '<div class="day-separator">Aujourd\'hui</div>',
+                    ...contact.messages.map((msg) => messageHtml(msg, contact))
+                ];
+
+                messagesRoot.innerHTML = rows.join("");
+                messagesRoot.scrollTop = messagesRoot.scrollHeight;
+            }
+
+            function randomReply() {
+                return autoReplies[Math.floor(Math.random() * autoReplies.length)];
+            }
+
+            function nowTime() {
+                return new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+            }
+
+            function updateUnreadTotal() {
+                totalUnread.textContent = String(totalUnreadCount());
+            }
+
+            function markAsRead(contactId) {
+                const contact = contacts.find((c) => c.id === contactId);
+                if (!contact || contact.unread === 0) return;
+                contact.unread = 0;
+                updateUnreadTotal();
+            }
+
+            function setActiveContact(contactId) {
+                state.activeContactId = contactId;
+                markAsRead(contactId);
+                renderContacts();
+                renderHeader();
+                renderContactInfo();
+                renderMessages();
+
+                if (isMobileView()) {
+                    state.mobileChatOpen = true;
+                    syncMobileLayout();
+                }
+            }
+
+            function sendMessage() {
+                const text = (input.value || "").trim();
+                if (!text) return;
+
+                const contact = activeContact();
+                contact.messages.push({ from: "out", text: text, time: nowTime() });
+                contact.preview = text;
+                contact.time = "A l'instant";
+                input.value = "";
+                renderContacts();
+                renderMessages();
+
+                setTimeout(() => {
+                    contact.messages.push({ from: "in", text: randomReply(), time: nowTime() });
+                    contact.preview = contact.messages[contact.messages.length - 1].text;
+                    renderContacts();
+                    renderMessages();
+                }, 700);
+            }
+
+            tabs.forEach((tab) => {
+                tab.addEventListener("click", () => {
+                    tabs.forEach((t) => t.classList.remove("active"));
+                    tab.classList.add("active");
+                    state.activeTab = tab.dataset.tab || "all";
+                    renderContacts();
+                });
+            });
+
+            contactList.addEventListener("click", (event) => {
+                const button = event.target.closest(".contact-item");
+                if (!button) return;
+                setActiveContact(button.dataset.id);
+            });
+
+            backBtn.addEventListener("click", () => {
+                state.mobileChatOpen = false;
+                setInfoOpen(false);
+                setChatMenuOpen(false);
+                syncMobileLayout();
+            });
+
+            if (infoToggleBtn) {
+                infoToggleBtn.addEventListener("click", () => {
+                    if (!state.mobileChatOpen && isMobileView()) {
+                        state.mobileChatOpen = true;
+                    }
+                    setChatMenuOpen(false);
+                    setInfoOpen(!state.infoOpen);
+                });
+            }
+
+            if (infoCloseBtn) {
+                infoCloseBtn.addEventListener("click", () => {
+                    setInfoOpen(false);
+                });
+            }
+
+            if (chatMenuToggleBtn) {
+                chatMenuToggleBtn.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    const shouldOpen = !(chatMenu && chatMenu.classList.contains("open"));
+                    setChatMenuOpen(shouldOpen);
+                });
+            }
+
+            if (chatMenu) {
+                chatMenu.addEventListener("click", (event) => {
+                    const action = event.target.closest(".chat-menu-item");
+                    if (!action) return;
+                    setChatMenuOpen(false);
+                });
+            }
+
+            document.addEventListener("click", (event) => {
+                if (!chatMenu || !chatMenu.classList.contains("open")) return;
+                const clickedInsideMenu = chatMenu.contains(event.target);
+                const clickedToggle = chatMenuToggleBtn && chatMenuToggleBtn.contains(event.target);
+                if (!clickedInsideMenu && !clickedToggle) {
+                    setChatMenuOpen(false);
+                }
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") {
+                    setChatMenuOpen(false);
+                }
+            });
+
+            searchInput.addEventListener("input", () => {
+                state.query = searchInput.value || "";
+                renderContacts();
+            });
+
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendBtn.addEventListener("click", sendMessage);
+
+            window.addEventListener("resize", () => {
+                if (!isMobileView()) {
+                    state.mobileChatOpen = true;
+                }
+                setChatMenuOpen(false);
+                syncMobileLayout();
+            });
+
+            updateUnreadTotal();
+            renderContacts();
+            renderHeader();
+            renderContactInfo();
+            renderMessages();
+            state.mobileChatOpen = !isMobileView();
+            state.infoOpen = false;
+            setChatMenuOpen(false);
+            syncMobileLayout();
+        })();
+    </script>
+</body>
+
+</html>

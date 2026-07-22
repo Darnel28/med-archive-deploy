@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Consultation Medecin</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sheet-wrap {
+            display: block;
+            padding: 12px;
+            background: #edf3f4;
+        }
+
+        .medical-sheet {
+            overflow: hidden;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #d7e4e5;
+            box-shadow: 0 8px 22px rgba(22, 55, 60, 0.1);
+        }
+
+        .sheet-top {
+            background: linear-gradient(90deg, #0f8b82, #1ab2a6);
+            color: #fff;
+            padding: 28px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sheet-brand {
+            display: grid;
+            gap: 4px;
+            font-size: 0.95rem;
+        }
+
+        .sheet-brand strong {
+            font-size: 2rem;
+            letter-spacing: 0.02em;
+        }
+
+        .sheet-date {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .sheet-form {
+            padding: 24px 30px 30px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .sheet-title {
+            margin: 0 0 2px;
+            color: #0a6d67;
+            font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: 0.015em;
+            text-transform: uppercase;
+        }
+
+        .sheet-section {
+            background: #fbfdfd;
+            border: 1px solid #d8e7e8;
+            border-radius: 14px;
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .sheet-section h3 {
+            margin: 0;
+            color: #0a7a72;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .section-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .btn-add-row {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #0f8b82;
+            border-radius: 8px;
+            background: #eef8f7;
+            color: #0a7a72;
+            font-size: 1.15rem;
+            line-height: 1;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-add-row:hover {
+            background: #dff2ef;
+        }
+
+        .line-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .line-grid.three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .line-field {
+            display: grid;
+            gap: 6px;
+            font-size: 0.95rem;
+            color: #183e42;
+        }
+
+        .line-field label {
+            font-weight: 700;
+        }
+
+        .line-field input,
+        .line-field select,
+        .line-field textarea {
+            width: 100%;
+            border: 1px solid #b5cccf;
+            border-radius: 8px;
+            padding: 9px 10px;
+            background: #ffffff;
+            color: #17363a;
+            font: inherit;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .line-field textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .line-field input:focus,
+        .line-field select:focus,
+        .line-field textarea:focus,
+        .rx-table input:focus {
+            border-color: #0f8b82;
+            box-shadow: 0 0 0 3px rgba(15, 139, 130, 0.13);
+        }
+
+        .check-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            color: #18383b;
+            font-size: 0.94rem;
+        }
+
+        .check-row label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .rx-table-wrap {
+            overflow-x: auto;
+        }
+
+        .rx-table {
+            width: 100%;
+            min-width: 560px;
+            border-collapse: collapse;
+            font-size: 0.93rem;
+        }
+
+        .rx-table th,
+        .rx-table td {
+            border-bottom: 1px solid #dbe8ea;
+            text-align: left;
+            padding: 10px 8px;
+            color: #18393d;
+        }
+
+        .rx-table th {
+            color: #0a7a72;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: #f1f8f8;
+        }
+
+        .rx-table input {
+            width: 100%;
+            border: 1px solid #b5cccf;
+            border-radius: 7px;
+            background: #fff;
+            padding: 7px 8px;
+            font: inherit;
+            color: #17363a;
+        }
+
+        .sheet-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .btn-validate {
+            border: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #0f8b82, #159e93);
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            padding: 12px 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(10, 109, 103, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-validate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(10, 109, 103, 0.3);
+        }
+
+        .sheet-result {
+            margin: 2px 0 0;
+            color: #0a6d67;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: #e8f7f4;
+            border: 1px solid #bde2dc;
+            display: none;
+        }
+
+        body.dark-mode .sheet-wrap {
+            background: #0b2435;
+        }
+
+        body.dark-mode .medical-sheet {
+            background: #102b3d;
+            border-color: #1a4b65;
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        body.dark-mode .sheet-top {
+            background: linear-gradient(90deg, #0c5f6b, #0f7a7f);
+        }
+
+        body.dark-mode .sheet-title,
+        body.dark-mode .sheet-section h3,
+        body.dark-mode .line-field,
+        body.dark-mode .rx-table td,
+        body.dark-mode .rx-table th,
+        body.dark-mode .sheet-result {
+            color: #e4f0fb;
+        }
+
+        body.dark-mode .sheet-section {
+            background: #123246;
+            border-color: #21536d;
+        }
+
+        body.dark-mode .line-field input,
+        body.dark-mode .line-field select,
+        body.dark-mode .line-field textarea,
+        body.dark-mode .rx-table input {
+            border-color: #2b607b;
+            background: #16364c;
+            color: #dbeaf7;
+        }
+
+        body.dark-mode .line-field input::placeholder,
+        body.dark-mode .line-field textarea::placeholder,
+        body.dark-mode .rx-table input::placeholder {
+            color: #96b7cf;
+        }
+
+        body.dark-mode .line-field input:focus,
+        body.dark-mode .line-field select:focus,
+        body.dark-mode .line-field textarea:focus,
+        body.dark-mode .rx-table input:focus {
+            border-color: #2dd4c8;
+            box-shadow: 0 0 0 3px rgba(45, 212, 200, 0.16);
+        }
+
+        body.dark-mode .line-field select,
+        body.dark-mode .line-field input[type="date"],
+        body.dark-mode .line-field input[type="time"],
+        body.dark-mode .line-field input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
+        body.dark-mode .check-row {
+            color: #b9d2e5;
+        }
+
+        body.dark-mode .check-row input[type="checkbox"] {
+            accent-color: #2dd4c8;
+        }
+
+        body.dark-mode .btn-add-row {
+            border-color: #2dd4c8;
+            background: #194358;
+            color: #d9f5f2;
+        }
+
+        body.dark-mode .btn-add-row:hover {
+            background: #1f5168;
+        }
+
+        body.dark-mode .rx-table th,
+        body.dark-mode .rx-table td {
+            border-bottom-color: #1e4f68;
+        }
+
+        body.dark-mode .rx-table th {
+            background: #173b51;
+            color: #b9d2e5;
+        }
+
+        body.dark-mode .btn-validate {
+            background: linear-gradient(90deg, #0f7a7f, #19a598);
+            box-shadow: 0 10px 20px rgba(8, 64, 70, 0.55);
+        }
+
+        body.dark-mode .sheet-result {
+            background: #173f4d;
+            border-color: #2a6c7f;
+        }
+
+        @media (max-width: 860px) {
+
+            .line-grid,
+            .line-grid.three {
+                grid-template-columns: 1fr;
+            }
+
+            .sheet-top {
+                padding: 18px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .sheet-form {
+                padding: 18px;
+            }
+
+            .sheet-brand strong {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte"><i class="fa-regular fa-bell"></i><span
+                    class="badge">3</span></button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashMedecin.html"><i class="fa-solid fa-house"></i><span>Accueil</span></a>
+                <a class="menu-item" href="rendez-vous-medecin.html"><i class="fa-regular fa-calendar"></i><span>Mes
+                        rendez-vous</span></a>
+                <a class="menu-item" href="patients-medecin.html"><i class="fa-solid fa-users"></i><span>Mes
+                        patients</span></a>
+                <a class="menu-item active" href="consultation-medecin.html"><i
+                        class="fa-solid fa-stethoscope"></i><span>Consultation</span></a>
+                <a class="menu-item" href="examens-medecin.html"><i
+                        class="fa-solid fa-flask"></i><span>Examens</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight sheet-wrap">
+            <section class="medical-sheet">
+                <div class="sheet-top">
+                    <div class="sheet-brand">
+                        <strong>MedArchive Medical Clinic</strong>
+                        <span>123 AnyWhere St, Cotonou</span>
+                    </div>
+                    <div class="sheet-date">12 Mars 2026</div>
+                </div>
+
+                <form class="sheet-form" onsubmit="saveConsultation(event)">
+                    <h1 class="sheet-title">Fiche de consultation medicale</h1>
+
+                    <section class="sheet-section">
+                        <h3>1. Informations du patient</h3>
+                        <div class="line-grid">
+                            <div class="line-field">
+                                <label for="patientNom">Nom et prenom</label>
+                                <input type="text" id="patientNom" value="Jean A.">
+                            </div>
+                            <div class="line-field">
+                                <label for="patientNpi">NPI</label>
+                                <input type="text" id="patientNpi" value="NPI-2026-000184">
+                            </div>
+                            <div class="line-field">
+                                <label for="patientSexe">Sexe</label>
+                                <select id="patientSexe">
+                                    <option>Masculin</option>
+                                    <option>Feminin</option>
+                                    <option>Autre</option>
+                                </select>
+                            </div>
+                            <div class="line-field">
+                                <label for="patientNaissance">Date de naissance / age</label>
+                                <input type="text" id="patientNaissance" value="18/06/1981 - 45 ans">
+                            </div>
+                            <div class="line-field">
+                                <label for="patientDossier">Numero de dossier medical</label>
+                                <input type="text" id="patientDossier" value="DM-45-2026-0092">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>2. Informations sur la consultation</h3>
+                        <div class="line-grid three">
+                            <div class="line-field">
+                                <label for="consultDate">Date de la consultation</label>
+                                <input type="date" id="consultDate" value="2026-03-12">
+                            </div>
+                            <div class="line-field">
+                                <label for="consultHeure">Heure</label>
+                                <input type="time" id="consultHeure" value="09:00">
+                            </div>
+                            <div class="line-field">
+                                <label for="consultMedecin">Medecin responsable</label>
+                                <input type="text" id="consultMedecin" value="Dr. Alice">
+                            </div>
+                            <div class="line-field">
+                                <label for="consultHopital">Hopital / etablissement</label>
+                                <input type="text" id="consultHopital" value="MedArchive Clinic">
+                            </div>
+                            <div class="line-field">
+                                <label for="consultType">Type de consultation</label>
+                                <select id="consultType">
+                                    <option>Nouvelle consultation</option>
+                                    <option selected>Suivi</option>
+                                    <option>Urgence</option>
+                                </select>
+                            </div>
+                            <div class="line-field">
+                                <label for="consultProchainRdv">Prochain RDV</label>
+                                <input type="datetime-local" id="consultProchainRdv" value="2026-03-19T09:30">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>3. Motif de consultation</h3>
+                        <div class="check-row">
+                            <label><input type="checkbox"> Fievre</label>
+                            <label><input type="checkbox"> Douleur abdominale</label>
+                            <label><input type="checkbox" checked> Suivi medical</label>
+                            <label><input type="checkbox"> Resultat d'examen</label>
+                        </div>
+                        <div class="line-field">
+                            <label for="consultMotif">Details du motif</label>
+                            <textarea id="consultMotif">Patient venu pour suivi apres episode febrile.</textarea>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>4. Symptomes et observations</h3>
+                        <div class="check-row">
+                            <label><input type="checkbox" checked> Fievre</label>
+                            <label><input type="checkbox" checked> Fatigue</label>
+                            <label><input type="checkbox"> Maux de tete</label>
+                        </div>
+                        <div class="line-grid three">
+                            <div class="line-field">
+                                <label for="obsTension">Tension arterielle</label>
+                                <input type="text" id="obsTension" value="12/8">
+                            </div>
+                            <div class="line-field">
+                                <label for="obsTemperature">Temperature</label>
+                                <input type="text" id="obsTemperature" value="38.2 C">
+                            </div>
+                            <div class="line-field">
+                                <label for="obsAutres">Autres observations</label>
+                                <input type="text" id="obsAutres" value="Etat general stable">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>5. Diagnostic</h3>
+                        <div class="line-field">
+                            <label for="consultDiagnostic">Conclusion medicale</label>
+                            <input type="text" id="consultDiagnostic" value="Paludisme simple, sans complication">
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <div class="section-title-row">
+                            <h3>6. Prescription (ordonnance)</h3>
+                            <button class="btn-add-row" type="button" onclick="addPrescriptionRow()"
+                                aria-label="Ajouter un medicament" title="Ajouter un medicament">+</button>
+                        </div>
+                        <div class="rx-table-wrap">
+                            <table class="rx-table" aria-label="Tableau ordonnance">
+                                <thead>
+                                    <tr>
+                                        <th>Nom du medicament</th>
+                                        <th>Dosage</th>
+                                        <th>Duree du traitement</th>
+                                        <th>Frequence</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prescriptionRows">
+                                    <tr>
+                                        <td><input type="text" value="Paracetamol"></td>
+                                        <td><input type="text" value="500 mg"></td>
+                                        <td><input type="text" value="3 jours"></td>
+                                        <td><input type="text" value="3 fois/jour"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" value="Artemether"></td>
+                                        <td><input type="text" value="80 mg"></td>
+                                        <td><input type="text" value="3 jours"></td>
+                                        <td><input type="text" value="2 fois/jour"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>7. Examens demandes (si necessaire)</h3>
+                        <div class="check-row">
+                            <label><input type="checkbox" checked> Analyse de sang</label>
+                            <label><input type="checkbox"> Radiographie</label>
+                            <label><input type="checkbox"> Scanner</label>
+                            <label><input type="checkbox"> Test laboratoire</label>
+                        </div>
+                    </section>
+
+                    <section class="sheet-section">
+                        <h3>8. Notes medicales</h3>
+                        <div class="line-field">
+                            <label for="consultNotes">Commentaires du medecin</label>
+                            <textarea id="consultNotes">Patient a revoir dans 7 jours pour controle clinique.</textarea>
+                        </div>
+                    </section>
+
+                    <div class="sheet-actions">
+                        <button class="btn-validate" type="submit"><i class="fa-solid fa-check"></i> Valider</button>
+                    </div>
+                    <p class="sheet-result" id="consultResult"><i class="fa-solid fa-circle-check"></i> Consultation
+                        enregistree avec succes.</p>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        function saveConsultation(event) {
+            event.preventDefault();
+            const result = document.getElementById("consultResult");
+            if (result) result.style.display = "block";
+        }
+
+        function addPrescriptionRow() {
+            const tbody = document.getElementById("prescriptionRows");
+            if (!tbody) return;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><input type="text" placeholder="Nom du medicament"></td>
+                <td><input type="text" placeholder="Dosage"></td>
+                <td><input type="text" placeholder="Duree"></td>
+                <td><input type="text" placeholder="Frequence"></td>
+            `;
+            tbody.appendChild(row);
+
+            const firstInput = row.querySelector("input");
+            if (firstInput) firstInput.focus();
+        }
+    </script>
+</body>
+
+</html>

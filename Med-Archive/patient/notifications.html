@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Notifications</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div><strong>John Doe</strong><span>IMU: 24P-001</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="dossier-medical.html"><i class="fa-solid fa-folder-open"></i><span>Mon
+                        dossier medical</span></a>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item active" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Notifications</h1>
+            </section>
+
+            <section class="notif-panel">
+                <div class="notif-tabs">
+                    <div class="notif-tabs-left">
+                        <button class="notif-tab active" type="button">Toutes (5)</button>
+                        <button class="notif-tab" type="button">Non lues (3)</button>
+                        <button class="notif-tab" type="button">Importantes</button>
+                    </div>
+                    <label class="table-search notif-search" aria-label="Recherche notifications">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher dans les notifications...">
+                    </label>
+                </div>
+
+                <ul class="notif-list">
+                    <li class="notif-item">
+                        <i class="fa-solid fa-vial notif-icon success"></i>
+                        <div class="notif-content">
+                            <strong>Nouveau Resultat d'Analyse Disponible</strong>
+                            <p>Votre resultat de prise de sang est disponible.</p>
+                        </div>
+                        <span class="notif-meta"><span class="notif-badge">Nouveau</span> Il y a 10 minutes</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                    <li class="notif-item">
+                        <i class="fa-solid fa-bell notif-icon warning"></i>
+                        <div class="notif-content">
+                            <strong>Rappel : Consultation Cardio Demain</strong>
+                            <p>Votre rendez-vous est prevu demain matin à 10h00.</p>
+                        </div>
+                        <span class="notif-meta"><span class="notif-badge">Nouveau</span> Il y a 4 heures</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                    <li class="notif-item">
+                        <i class="fa-solid fa-stethoscope notif-icon danger"></i>
+                        <div class="notif-content">
+                            <strong>Compte Rendu de Consultation Ajouté</strong>
+                            <p>Consultez le compte rendu de votre derniere consultation.</p>
+                        </div>
+                        <span class="notif-meta"><span class="notif-badge">Nouveau</span> Il y a 1 jour</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                    <li class="notif-item">
+                        <i class="fa-regular fa-file-lines notif-icon"></i>
+                        <div class="notif-content">
+                            <strong>Nouveau Document dans Votre Dossier</strong>
+                            <p>Ordonnance de suivi ajoutée à votre dossier.</p>
+                        </div>
+                        <span class="notif-meta">Il y a 2 jours</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                    <li class="notif-item">
+                        <i class="fa-regular fa-envelope notif-icon warning"></i>
+                        <div class="notif-content">
+                            <strong>Rappel : Prendre vos Médicaments</strong>
+                            <p>N'oubliez pas de prendre vos medicaments prescrits.</p>
+                        </div>
+                        <span class="notif-meta">Il y a 4 jours</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                    <li class="notif-item">
+                        <i class="fa-regular fa-file-arrow-down notif-icon"></i>
+                        <div class="notif-content">
+                            <strong>Document Téléchargé</strong>
+                            <p>Vous avez telechargé le fichier "resultats_2024.pdf".</p>
+                        </div>
+                        <span class="notif-meta">Il y a 6 jours</span>
+                        <button class="notif-more" type="button" aria-label="Plus d'options"><i
+                                class="fa-solid fa-ellipsis"></i></button>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+    </script>
+</body>
+
+</html>

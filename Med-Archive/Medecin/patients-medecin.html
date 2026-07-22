@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Mes patients</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .patients-main {
+            display: grid;
+            gap: 14px;
+        }
+
+        .patients-toolbar {
+            margin-top: 8px;
+            margin-bottom: 6px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            box-shadow: 0 10px 24px rgba(18, 39, 73, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .patients-search {
+            width: min(520px, 100%);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: #f1f5fa;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #8ea0ba;
+        }
+
+        .patients-search input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .patients-search input::placeholder {
+            color: #8ea0ba;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-switch {
+            display: inline-flex;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f1f5fa;
+        }
+
+        .view-btn {
+            width: 56px;
+            height: 46px;
+            border: none;
+            background: transparent;
+            color: #748ba6;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .view-btn.active {
+            background: #ffffff;
+            color: #169ea4;
+        }
+
+        .filter-btn {
+            height: 46px;
+            border: 1px solid #a7b8cc;
+            border-radius: 12px;
+            background: #fff;
+            color: #4f6682;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 0 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .patients-view {
+            display: none;
+        }
+
+        .patients-view.active {
+            display: block;
+        }
+
+        .patient-cards {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .patient-card {
+            border: 1px solid #cfe0ea;
+            border-radius: 12px;
+            background: #fff;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(26, 53, 82, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-card.featured {
+            border-color: #4ac4cf;
+        }
+
+        .patient-main {
+            padding: 12px 14px 12px;
+            text-align: center;
+            display: grid;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .patient-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .star-btn,
+        .menu-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5fa;
+            color: #a1b1c3;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .patient-avatar-wrap {
+            width: 82px;
+            margin: 0 auto;
+        }
+
+        .patient-avatar {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eef3f8;
+        }
+
+        .patient-avatar.initials {
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+            font-weight: 700;
+            color: #2e5f8a;
+            background: #d8eaf7;
+        }
+
+        .patient-name {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: #172c45;
+        }
+
+        .patient-role {
+            margin: 0;
+            color: #5f7895;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .patient-org {
+            margin: 0;
+            color: #89a0b9;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .patient-tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .patient-tag {
+            border-radius: 999px;
+            background: #f1f5fa;
+            color: #6f85a0;
+            font-size: 13px;
+            padding: 4px 10px;
+            font-weight: 600;
+        }
+
+        .patient-actions {
+            border-top: 1px solid var(--line);
+            padding: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .patient-action-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: #f1f5fa;
+            color: #607c98;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .patients-footer {
+            margin-top: 10px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 0 0 12px 12px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #5b7593;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .pager {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pager-btn {
+            min-width: 36px;
+            height: 36px;
+            border: 1px solid #cfdbe7;
+            border-radius: 10px;
+            background: #fff;
+            color: #4f6682;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        .pager-btn.active {
+            background: #14a7ad;
+            border-color: #14a7ad;
+            color: #fff;
+        }
+
+        .list-section {
+            margin-top: 8px;
+        }
+
+        .list-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            padding: 0;
+            box-shadow: 0 14px 28px rgba(18, 39, 73, 0.06);
+            overflow: hidden;
+        }
+
+        .list-table-wrap {
+            overflow-x: auto;
+        }
+
+        .list-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 840px;
+        }
+
+        .list-table th,
+        .list-table td {
+            text-align: left;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--line);
+            font-size: 15px;
+            color: #2a3f5f;
+            vertical-align: top;
+        }
+
+        .list-table th {
+            font-size: 16px;
+            color: #6b7f9a;
+            font-weight: 500;
+            background: #fbfcfe;
+        }
+
+        .list-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .list-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 20px 22px;
+            border-top: 1px solid var(--line);
+            background: #fbfcfe;
+        }
+
+        .list-pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list-page {
+            min-width: 42px;
+            height: 42px;
+            padding: 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--surface);
+            color: #6b7f9a;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .list-page.active {
+            background: #455ca8;
+            border-color: #455ca8;
+            color: #ffffff;
+        }
+
+        .floating-top {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            background: #14a7ad;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 12px 22px rgba(20, 167, 173, 0.3);
+        }
+
+        body.dark-mode .patients-toolbar,
+        body.dark-mode .patients-footer,
+        body.dark-mode .list-card {
+            background: #0a2839;
+            border-color: #1a4257;
+        }
+
+        body.dark-mode .patient-card {
+            background: #102b3d;
+            border-color: #1a4b65;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+        }
+
+        body.dark-mode .patient-main {
+            background: #123247;
+        }
+
+        body.dark-mode .patient-card.featured {
+            border-color: #2dd4c8;
+            box-shadow: 0 14px 28px rgba(45, 212, 200, 0.16);
+        }
+
+        body.dark-mode .patient-name {
+            color: #e6f2fd;
+        }
+
+        body.dark-mode .patient-role {
+            color: #b8cfe2;
+        }
+
+        body.dark-mode .patient-org {
+            color: #93b2cc;
+        }
+
+        body.dark-mode .patient-tag {
+            background: #16384d;
+            color: #cfe3f5;
+            border: 1px solid #245a78;
+        }
+
+        body.dark-mode .patient-avatar {
+            border-color: #2a5a75;
+        }
+
+        body.dark-mode .patient-actions {
+            border-top-color: #1a4b65;
+            background: #0f2c3f;
+        }
+
+        body.dark-mode .star-btn,
+        body.dark-mode .menu-dot {
+            background: #0f3750;
+            color: #b8d0e6;
+            border: 1px solid #23536f;
+        }
+
+        body.dark-mode .patient-action-btn {
+            background: #123b54;
+            color: #d6e9f8;
+            border: 1px solid #245d7c;
+        }
+
+        body.dark-mode .patient-action-btn:hover {
+            background: #194967;
+        }
+
+        body.dark-mode .patients-search,
+        body.dark-mode .view-switch,
+        body.dark-mode .view-btn.active,
+        body.dark-mode .star-btn,
+        body.dark-mode .menu-dot,
+        body.dark-mode .patient-action-btn,
+        body.dark-mode .filter-btn,
+        body.dark-mode .pager-btn,
+        body.dark-mode .list-page {
+            background: #123449;
+            border-color: #1a4f6b;
+            color: #c8ddf0;
+        }
+
+        body.dark-mode .patients-footer,
+        body.dark-mode .list-table th,
+        body.dark-mode .list-table td {
+            color: #e7eef9;
+        }
+
+        body.dark-mode .list-table th,
+        body.dark-mode .list-footer {
+            background: #0f3248;
+        }
+
+        body.dark-mode .list-table th,
+        body.dark-mode .list-table td,
+        body.dark-mode .patient-actions,
+        body.dark-mode .list-footer {
+            border-color: #1a4257;
+        }
+
+        body.dark-mode .view-btn.active,
+        body.dark-mode .pager-btn.active {
+            background: #2dd4c8;
+            border-color: #2dd4c8;
+            color: #001926;
+        }
+
+        @media (max-width: 1400px) {
+            .patient-cards {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .patient-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 820px) {
+            .patient-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .patients-footer,
+            .list-footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .toolbar-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .list-table th,
+            .list-table td {
+                font-size: 16px;
+            }
+
+            .list-page {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte"><i class="fa-regular fa-bell"></i><span
+                    class="badge">3</span></button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashMedecin.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="rendez-vous-medecin.html"><i class="fa-regular fa-calendar"></i><span>Mes
+                        rendez-vous</span></a>
+                <a class="menu-item active" href="patients-medecin.html"><i class="fa-solid fa-users"></i><span>Mes
+                        patients</span></a>
+                <a class="menu-item" href="consultation-medecin.html"><i
+                        class="fa-solid fa-stethoscope"></i><span>Consultation</span></a>
+                <a class="menu-item" href="examens-medecin.html"><i
+                        class="fa-solid fa-flask"></i><span>Examens</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight patients-main">
+            <section class="page-title-card">
+                <h1>Mes patients</h1>
+            </section>
+
+            <section class="patients-toolbar">
+                <label class="patients-search" aria-label="Recherche patient">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="patientSearch" placeholder="Rechercher un patient...">
+                </label>
+
+                <div class="toolbar-right">
+                    <div class="view-switch" aria-label="Changer la vue">
+                        <button class="view-btn active" id="gridViewBtn" type="button" aria-label="Vue cartes"><i
+                                class="fa-solid fa-table-cells-large"></i></button>
+                        <button class="view-btn" id="listViewBtn" type="button" aria-label="Vue liste"><i
+                                class="fa-solid fa-list"></i></button>
+                    </div>
+
+                    <button class="filter-btn" type="button"><i class="fa-solid fa-filter"></i> Filtrer <i
+                            class="fa-solid fa-caret-down"></i></button>
+                </div>
+            </section>
+
+            <section class="patients-view active" id="cardsView">
+                <div class="patient-cards" id="patientCards"></div>
+                <div class="patients-footer">
+                    <span id="cardsMeta">Aucun patient affiche</span>
+                    <div class="pager">
+                        <button class="pager-btn" type="button"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="pager-btn active" type="button">1</button>
+                        <button class="pager-btn" type="button">2</button>
+                        <button class="pager-btn" type="button">3</button>
+                        <button class="pager-btn" type="button">4</button>
+                        <button class="pager-btn" type="button"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="patients-view list-section" id="listView">
+                <article class="list-card">
+                    <div class="list-table-wrap">
+                        <table class="list-table" aria-label="Tableau des patients">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Age</th>
+                                    <th>Derniere consultation</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="list-footer">
+                        <span class="table-meta" id="listMeta">0 patients suivis</span>
+                        <div class="list-pagination">
+                            <span class="list-page">Precedent</span>
+                            <span class="list-page active">1</span>
+                            <span class="list-page">Suivant</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <button class="floating-top" id="toTop" aria-label="Retour en haut"><i class="fa-solid fa-arrow-up"></i></button>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const patientSearch = document.getElementById("patientSearch");
+        const cardsView = document.getElementById("cardsView");
+        const listView = document.getElementById("listView");
+        const gridViewBtn = document.getElementById("gridViewBtn");
+        const listViewBtn = document.getElementById("listViewBtn");
+        const patientCards = document.getElementById("patientCards");
+        const patientsTableBody = document.getElementById("patientsTableBody");
+        const cardsMeta = document.getElementById("cardsMeta");
+        const listMeta = document.getElementById("listMeta");
+        const toTop = document.getElementById("toTop");
+
+        const patients = [
+            { name: "Jean A.", role: "Patient suivi", org: "Service: Cardiologie", tags: ["Suivi", "Hypertension"], avatar: "https://i.pravatar.cc/120?img=5", age: 45, phone: "+2290100000001", lastConsult: "12/03/2026" },
+            { name: "Marie B.", role: "Patiente suivie", org: "Service: Medecine generale", tags: ["Controle", "Diabete"], avatar: "https://i.pravatar.cc/120?img=8", age: 37, phone: "+2290100000002", lastConsult: "02/03/2026", featured: true },
+            { name: "Paul C.", role: "Patient suivi", org: "Service: Pneumologie", tags: ["Asthme", "Traitement"], avatar: "https://i.pravatar.cc/120?img=11", age: 52, phone: "+2290100000003", lastConsult: "27/02/2026" },
+            { name: "Amina D.", role: "Patiente suivie", org: "Service: Endocrinologie", tags: ["Suivi", "Bilan"], avatar: "https://i.pravatar.cc/120?img=47", age: 31, phone: "+2290100000004", lastConsult: "10/03/2026" },
+            { name: "David K.", role: "Patient suivi", org: "Service: Neurologie", tags: ["Consultation"], avatar: "https://i.pravatar.cc/120?img=20", age: 50, phone: "+2290100000005", lastConsult: "01/03/2026" },
+            { name: "Lisa A.", role: "Patiente suivie", org: "Service: Gynecologie", tags: ["Prevention"], avatar: "https://i.pravatar.cc/120?img=16", age: 34, phone: "+2290100000006", lastConsult: "25/02/2026" },
+            { name: "Nina H.", role: "Patiente suivie", org: "Service: Dermatologie", tags: ["Suivi"], initials: "NH", age: 33, phone: "+2290100000007", lastConsult: "11/03/2026", featured: true },
+            { name: "Chris M.", role: "Patient suivi", org: "Service: Urologie", tags: ["Controle"], initials: "CM", age: 39, phone: "+2290100000008", lastConsult: "07/03/2026" },
+            { name: "Olivia S.", role: "Patiente suivie", org: "Service: ORL", tags: ["Traitement"], avatar: "https://i.pravatar.cc/120?img=68", age: 28, phone: "+2290100000009", lastConsult: "01/03/2026" },
+            { name: "Sarah W.", role: "Patiente suivie", org: "Service: Cardiologie", tags: ["Suivi"], avatar: "https://i.pravatar.cc/120?img=32", age: 42, phone: "+2290100000010", lastConsult: "22/02/2026" },
+            { name: "James V.", role: "Patient suivi", org: "Service: Rhumatologie", tags: ["Bilan"], avatar: "https://i.pravatar.cc/120?img=14", age: 29, phone: "+2290100000011", lastConsult: "20/02/2026" },
+            { name: "Fatou L.", role: "Patiente suivie", org: "Service: Pediatrie", tags: ["Controle"], avatar: "https://i.pravatar.cc/120?img=39", age: 41, phone: "+2290100000012", lastConsult: "18/02/2026" }
+        ];
+
+        const state = {
+            query: "",
+            view: "grid"
+        };
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        function filteredPatients() {
+            const q = (state.query || "").trim().toLowerCase();
+            if (!q) return patients;
+            return patients.filter((p) => {
+                return [p.name, p.role, p.org, (p.tags || []).join(" "), String(p.age), p.lastConsult]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(q);
+            });
+        }
+
+        function cardAvatarHtml(patient) {
+            if (patient.initials) {
+                return `<div class="patient-avatar initials">${patient.initials}</div>`;
+            }
+            return `<img class="patient-avatar" src="${patient.avatar}" alt="${patient.name}">`;
+        }
+
+        function renderCards(items) {
+            if (!patientCards) return;
+
+            patientCards.innerHTML = items.map((patient) => {
+                const featured = patient.featured ? "featured" : "";
+                const tags = (patient.tags || []).map((tag) => `<span class="patient-tag">${tag}</span>`).join("");
+                return `
+                    <article class="patient-card ${featured}">
+                        <div class="patient-main">
+                            <div class="patient-card-head">
+                                <button class="star-btn" type="button" aria-label="Favori"><i class="fa-regular fa-star"></i></button>
+                                
+                            </div>
+                            <div class="patient-avatar-wrap">
+                                ${cardAvatarHtml(patient)}
+                            </div>
+                            <h3 class="patient-name">${patient.name}</h3>
+                            <p class="patient-role">${patient.role}</p>
+                            <p class="patient-org">${patient.org}</p>
+                            <div class="patient-tags">${tags}</div>
+                        </div>
+                        <div class="patient-actions">
+                            <a class="patient-action-btn" href="dossier-medical.html" aria-label="Ouvrir dossier medical" title="Dossier medical"><i class="fa-solid fa-folder-open"></i></a>
+                            <a class="patient-action-btn" href="tel:${patient.phone || '+2290100000000'}" aria-label="Appeler" title="Appeler"><i class="fa-solid fa-phone"></i></a>
+                            <a class="patient-action-btn" href="../chat.html" aria-label="Envoyer un message" title="Message"><i class="fa-regular fa-envelope"></i></a>
+                        </div>
+                    </article>
+                `;
+            }).join("");
+
+            cardsMeta.textContent = `Affichage 1-${items.length} sur ${patients.length} patients`;
+        }
+
+        function renderTable(items) {
+            if (!patientsTableBody) return;
+
+            patientsTableBody.innerHTML = items.map((patient) => {
+                return `
+                    <tr>
+                        <td>${patient.name}</td>
+                        <td>${patient.age}</td>
+                        <td>${patient.lastConsult}</td>
+                        <td>
+                            <div class="list-actions">
+                                <a class="icon-action" href="dossier-medical.html" title="Dossier medical"><i class="fa-solid fa-folder-open"></i></a>
+                                <a class="icon-action" href="tel:${patient.phone || '+2290100000000'}" title="Appeler"><i class="fa-solid fa-phone"></i></a>
+                                <a class="icon-action" href="../chat.html" title="Message"><i class="fa-regular fa-envelope"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+
+            listMeta.textContent = `${items.length} patients suivis`;
+        }
+
+        function setView(view) {
+            state.view = view;
+            const isGrid = view === "grid";
+            cardsView.classList.toggle("active", isGrid);
+            listView.classList.toggle("active", !isGrid);
+            gridViewBtn.classList.toggle("active", isGrid);
+            listViewBtn.classList.toggle("active", !isGrid);
+        }
+
+        function render() {
+            const items = filteredPatients();
+            renderCards(items);
+            renderTable(items);
+        }
+
+        patientSearch.addEventListener("input", () => {
+            state.query = patientSearch.value || "";
+            render();
+        });
+
+        gridViewBtn.addEventListener("click", () => setView("grid"));
+        listViewBtn.addEventListener("click", () => setView("list"));
+
+        toTop.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        render();
+        setView("grid");
+    </script>
+</body>
+
+</html>

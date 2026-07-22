@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Historique des traitements</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;"><button class="icon-btn" id="sidebarToggle"
+                aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions"><button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit"
+                aria-pressed="false"><i class="fa-regular fa-moon"></i></button></div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon dossier medical</span><i
+                        class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item active" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Historique des traitements</h1>
+            </section>
+
+            <section class="table-toolbar">
+                <label class="table-search" aria-label="Recherche traitements">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Chercher un traitement...">
+                </label>
+                <button class="btn btn-solid"><i class="fa-solid fa-pills"></i> Ajouter un traitement</button>
+            </section>
+
+            <section class="bottom-cards">
+                <article class="small-card"><span>TRAITEMENTS ACTIFS</span><strong>3</strong></article>
+                <article class="small-card"><span>DUREE MOYENNE</span><strong>30 jours</strong></article>
+                <article class="small-card"><span>MEDECINS PRESCRIPTEURS</span><strong>2</strong></article>
+                <article class="small-card"><span>DERNIERE MISE A JOUR</span><strong>10 Mars</strong></article>
+            </section>
+
+            <section class="rdv-section">
+                <article class="rdv-card">
+                    <div class="dossier-head">
+                        <div>
+                            <span class="kicker">SUIVI THERAPEUTIQUE</span>
+                            <h2>Traitements recents et consignes associees</h2>
+                        </div>
+                        <span class="chip-positive"><i class="fa-solid fa-pills"></i> Suivi en cours</span>
+                    </div>
+
+                    <div class="rdv-table-wrap">
+                        <table class="rdv-table">
+                            <thead>
+                                <tr>
+                                    <th>Medicaments prescrits</th>
+                                    <th>Duree du traitement</th>
+                                    <th>Medecin prescripteur</th>
+                                    <th>Instructions</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Fer 80 mg, 1 gelule par jour</td>
+                                    <td>05 jan 2026 - 05 avr 2026</td>
+                                    <td>Dr. Alice Ahouansou</td>
+                                    <td>Apres le petit-dejeuner, avec de l'eau. Eviter the et cafe.</td>
+                                    <td><span class="rdv-status upcoming">En cours</span></td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Ordonnance"><i
+                                                class="fa-solid fa-file-medical"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Paracetamol 1 g, 1 comprime matin et soir</td>
+                                    <td>15 fev 2026 - 20 fev 2026</td>
+                                    <td>Dr. Martin Kossi</td>
+                                    <td>En cas de douleur, apres les repas, maximum 2 prises par jour.</td>
+                                    <td><span class="rdv-status done">Termine</span></td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Suivi"><i
+                                                class="fa-solid fa-notes-medical"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Vitamine D 1000 UI, 1 capsule par semaine</td>
+                                    <td>12 fev 2026 - 08 avr 2026</td>
+                                    <td>Dr. Samba Adje</td>
+                                    <td>Chaque dimanche matin. Signaler toute reaction inhabituelle.</td>
+                                    <td><span class="rdv-status upcoming">En cours</span></td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Details"><i
+                                                class="fa-solid fa-circle-info"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <span class="table-meta">3 traitements suivis</span>
+                        <div class="table-pagination">
+                            <span class="table-page">Precedent</span>
+                            <span class="table-page active">1</span>
+                            <span class="table-page">Suivant</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+    </script>
+</body>
+
+</html>

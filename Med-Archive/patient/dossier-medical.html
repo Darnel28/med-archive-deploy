@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Mon dossier medical</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .patient-dossier {
+            background: #e9eef8;
+            border-radius: 18px;
+            padding: 16px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .profile-card {
+            background: #fff;
+            border: 1px solid rgba(24, 68, 101, 0.12);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .profile-head {
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 84px 1fr auto;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .profile-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #dbe7f3;
+        }
+
+        .profile-main h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            color: #112d52;
+        }
+
+        .profile-tags {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            font-weight: 600;
+        }
+
+        .tag-neutral {
+            background: #efe8ff;
+            color: #6952a7;
+        }
+
+        .tag-vip {
+            background: #ffe8f7;
+            color: #b8428d;
+        }
+
+        .profile-main p {
+            margin: 10px 0 0;
+            color: #4f6b8a;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            align-self: start;
+        }
+
+        .profile-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(24, 68, 101, 0.2);
+            background: #fff;
+            color: #315b84;
+        }
+
+        .profile-meta {
+            border-top: 1px solid rgba(24, 68, 101, 0.12);
+            padding: 14px 18px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .meta-item {
+            display: grid;
+            gap: 4px;
+        }
+
+        .meta-item strong {
+            font-size: 1.1rem;
+            color: #132f53;
+        }
+
+        .meta-item span {
+            color: #617d97;
+            font-size: 0.9rem;
+        }
+
+        .meta-highlight {
+            justify-self: end;
+            text-align: right;
+            display: grid;
+            gap: 4px;
+        }
+
+        .meta-highlight strong {
+            font-size: 1.05rem;
+            color: #132f53;
+        }
+
+        .meta-highlight span {
+            color: #617d97;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .metric-card {
+            border-radius: 12px;
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 46px 1fr;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .metric-card i {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.75);
+            color: #2e557d;
+            font-size: 1.15rem;
+        }
+
+        .metric-card strong {
+            font-size: 1.9rem;
+            line-height: 1;
+            color: #122f53;
+        }
+
+        .metric-card span {
+            color: #5d7894;
+        }
+
+        .metric-a {
+            background: #f7dfc6;
+        }
+
+        .metric-b {
+            background: #f8e7b5;
+        }
+
+        .metric-c {
+            background: #cdeef4;
+        }
+
+        .metric-d {
+            background: #ead8eb;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 12px;
+        }
+
+        .stacked-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dossier-panel {
+            background: #fff;
+            border: 1px solid rgba(24, 68, 101, 0.12);
+            border-radius: 12px;
+            padding: 14px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .dossier-panel h3 {
+            margin: 0;
+            color: #122f53;
+            font-size: 1.18rem;
+        }
+
+        .panel-sub {
+            margin: -4px 0 0;
+            color: #5f7b95;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            border: 1px solid rgba(24, 68, 101, 0.12);
+            border-radius: 10px;
+            padding: 10px;
+            display: grid;
+            gap: 4px;
+            background: #fbfdff;
+        }
+
+        .info-item span {
+            font-size: 0.8rem;
+            color: #67829b;
+        }
+
+        .info-item strong {
+            color: #15395f;
+            font-size: 0.95rem;
+        }
+
+        .pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pill {
+            border-radius: 999px;
+            border: 1px solid rgba(24, 68, 101, 0.16);
+            padding: 6px 10px;
+            font-size: 0.86rem;
+            color: #375f84;
+            background: #f4f8fc;
+        }
+
+        .pill-danger {
+            color: #8c3b4a;
+            background: #ffeef2;
+            border-color: #f0c4cf;
+        }
+
+        .pill-warning {
+            color: #8a5a11;
+            background: #fff4dc;
+            border-color: #f1ddad;
+        }
+
+        .pill-success {
+            color: #1f6a45;
+            background: #e8f9ef;
+            border-color: #bde8ce;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .table-clean {
+            width: 100%;
+            min-width: 680px;
+            border-collapse: collapse;
+        }
+
+        .table-clean th,
+        .table-clean td {
+            text-align: left;
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(24, 68, 101, 0.12);
+            color: #20496f;
+            vertical-align: top;
+        }
+
+        .table-clean th {
+            color: #5f7b95;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        .action-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #2f5f91;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .doc-item {
+            border: 1px dashed rgba(24, 68, 101, 0.25);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fafcff;
+            display: grid;
+            gap: 8px;
+        }
+
+        .doc-item strong {
+            color: #1d466e;
+        }
+
+        .doc-item span {
+            color: #5f7b95;
+            font-size: 0.9rem;
+        }
+
+        .doc-item button {
+            justify-self: start;
+        }
+
+        .img-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .img-grid img {
+            width: 100%;
+            height: 105px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid rgba(24, 68, 101, 0.12);
+        }
+
+        .img-placeholder {
+            height: 105px;
+            border-radius: 10px;
+            border: 1px solid rgba(24, 68, 101, 0.12);
+            background: linear-gradient(145deg, #d9e8fb, #eef5ff);
+            color: #2e567e;
+            display: grid;
+            place-items: center;
+            gap: 2px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .img-placeholder i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 1120px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .profile-head {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-actions {
+                justify-content: flex-start;
+            }
+
+            .profile-meta {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .meta-highlight {
+                justify-self: start;
+                text-align: left;
+            }
+
+            .metrics-grid,
+            .info-grid,
+            .doc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        body.dark-mode .patient-dossier {
+            background: #0b2435;
+        }
+
+        body.dark-mode .profile-card,
+        body.dark-mode .dossier-panel {
+            background: #102b3d;
+            border-color: #1a4b65;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        body.dark-mode .profile-main h1,
+        body.dark-mode .meta-item strong,
+        body.dark-mode .meta-highlight strong,
+        body.dark-mode .metric-card strong,
+        body.dark-mode .dossier-panel h3,
+        body.dark-mode .info-item strong,
+        body.dark-mode .doc-item strong,
+        body.dark-mode .table-clean td,
+        body.dark-mode .action-link {
+            color: #e4f0fb;
+        }
+
+        body.dark-mode .profile-main p,
+        body.dark-mode .meta-item span,
+        body.dark-mode .meta-highlight span,
+        body.dark-mode .metric-card span,
+        body.dark-mode .panel-sub,
+        body.dark-mode .info-item span,
+        body.dark-mode .table-clean th,
+        body.dark-mode .doc-item span,
+        body.dark-mode .pill {
+            color: #9fc0d9;
+        }
+
+        body.dark-mode .profile-avatar {
+            border-color: #2a5a75;
+        }
+
+        body.dark-mode .profile-icon {
+            border-color: #2a5a75;
+            background: #14344a;
+            color: #b8d3e8;
+        }
+
+        body.dark-mode .profile-meta {
+            border-top-color: #1a4b65;
+        }
+
+        body.dark-mode .metric-a {
+            background: #4b3722;
+        }
+
+        body.dark-mode .metric-b {
+            background: #4d4524;
+        }
+
+        body.dark-mode .metric-c {
+            background: #214753;
+        }
+
+        body.dark-mode .metric-d {
+            background: #47344c;
+        }
+
+        body.dark-mode .metric-card i {
+            background: rgba(255, 255, 255, 0.12);
+            color: #d0e6f7;
+        }
+
+        body.dark-mode .info-item {
+            border-color: #21536d;
+            background: #123246;
+        }
+
+        body.dark-mode .pill {
+            border-color: #2b607b;
+            background: #16364c;
+        }
+
+        body.dark-mode .pill-danger {
+            color: #ffc7d6;
+            background: #5a2e3a;
+            border-color: #854557;
+        }
+
+        body.dark-mode .pill-warning {
+            color: #ffe4af;
+            background: #59461f;
+            border-color: #83652c;
+        }
+
+        body.dark-mode .pill-success {
+            color: #b9f3d1;
+            background: #244d39;
+            border-color: #3a7a5a;
+        }
+
+        body.dark-mode .table-clean th,
+        body.dark-mode .table-clean td {
+            border-bottom-color: #1e4f68;
+        }
+
+        body.dark-mode .doc-item {
+            border-color: #2a5d77;
+            background: #123246;
+        }
+
+        body.dark-mode .img-placeholder {
+            border-color: #2a5d77;
+            background: linear-gradient(145deg, #1d425a, #123247);
+            color: #cde2f3;
+        }
+
+        body.dark-mode .btn-outline {
+            border-color: #4f7ea2;
+            color: #d5e8f8;
+        }
+
+        body.dark-mode .btn-outline:hover {
+            background: #1b3f56;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications messages">
+                <i class="fa-regular fa-envelope"></i>
+                <span class="badge">2</span>
+            </button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="Profil">
+                <div>
+                    <strong>John Doe</strong>
+                    <span>IMU: 24P-001</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+                <button class="sidebar-user-toggle" id="sidebarUserToggle" aria-label="Ouvrir profil"
+                    aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-panel" id="sidebarUserPanel" aria-hidden="true">
+                <img src="https://i.pravatar.cc/200?img=12" alt="John Doe">
+                <strong>Dr. Alice</strong>
+                <span>IMU: 24P-001</span>
+            </div>
+
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item active" href="dossier-medical.html"><i class="fa-solid fa-folder-open"></i><span>Mon
+                        dossier medical</span></a>
+                <a class="menu-item" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Acces a mes
+                        donnees</span></a>
+            </div>
+
+            <h4>Gestion du compte</h4>
+            <div class="menu-block">
+                <a class="menu-item" href="notifications.html"><i
+                        class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                <a class="menu-item" href="profil.html"><i class="fa-regular fa-user"></i><span>Profil</span></a>
+            </div>
+            <div class="sidebar-profile">
+                <img src="https://i.pravatar.cc/80?img=12" alt="John Doe">
+                <div>
+                    <strong>John Doe</strong>
+                    <span>IMU: 24P-001</span>
+                </div>
+                <a class="settings-link" href="parametres.html" aria-label="Ouvrir les parametres">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+
+            <a class="sidebar-help" href="#">
+                <i class="fa-solid fa-headset"></i>
+                <span>Besoin d'aide ? Contacter le support</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="patient-dossier">
+                <article class="profile-card">
+                    <div class="profile-head">
+                        <img class="profile-avatar" src="https://i.pravatar.cc/140?img=12" alt="Photo patient">
+                        <div class="profile-main">
+                            <h1>Jean A.</h1>
+                            <div class="profile-tags">
+                                <span class="tag tag-neutral">Patient suivi</span>
+                                <span class="tag tag-vip">Dossier prioritaire</span>
+                            </div>
+                            <p>Zogbo, Benin Rue 123</p>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="profile-icon" type="button" title="Appeler"><i
+                                    class="fa-solid fa-phone"></i></button>
+                            <button class="profile-icon" type="button" title="Message"><i
+                                    class="fa-regular fa-comment"></i></button>
+                        </div>
+                    </div>
+                    <div class="profile-meta">
+                        <div class="meta-item"><strong>45 ans</strong><span>Age</span></div>
+                        <div class="meta-item"><strong>A+</strong><span>Groupe sanguin</span></div>
+                        <div class="meta-item"><strong>78 kg</strong><span>Poids</span></div>
+                        <div class="meta-highlight"><strong>Prochain RDV: 9:30 AM</strong><span>Aujourd'hui</span></div>
+                    </div>
+                </article>
+
+                <section class="metrics-grid" aria-label="Indicateurs rapides">
+                    <article class="metric-card metric-a"><i class="fa-regular fa-heart"></i>
+                        <div><strong>80</strong><span>bpm</span></div>
+                    </article>
+                    <article class="metric-card metric-b"><i class="fa-solid fa-gauge-high"></i>
+                        <div><strong>118/76</strong><span>mmHg Tension</span></div>
+                    </article>
+                    <article class="metric-card metric-c"><i class="fa-solid fa-lungs"></i>
+                        <div><strong>14</strong><span>Resp./min</span></div>
+                    </article>
+                    <article class="metric-card metric-d"><i class="fa-solid fa-cubes"></i>
+                        <div><strong>65</strong><span>mg/dl Glucose</span></div>
+                    </article>
+                </section>
+
+                <section class="content-grid">
+                    <div class="stacked-grid">
+                        <article class="dossier-panel">
+                            <h3>1. Informations generales</h3>
+                            <p class="panel-sub">Informations du patient.</p>
+                            <div class="info-grid">
+                                <div class="info-item"><span>Nom et prenom</span><strong>Jean A.</strong></div>
+                                <div class="info-item"><span>Sexe</span><strong>Masculin</strong></div>
+                                <div class="info-item"><span>Date de naissance</span><strong>18/06/1981</strong></div>
+                                <div class="info-item"><span>Age</span><strong>45 ans</strong></div>
+                                <div class="info-item"><span>Adresse</span><strong>Zogbo, Benin Rue 123
+                                    </strong></div>
+                                <div class="info-item"><span>Telephone</span><strong>+229 00 00 00 00</strong></div>
+                                <div class="info-item"><span>Email</span><strong>jean.a@email.com</strong></div>
+                                <div class="info-item"><span>Groupe sanguin</span><strong>A+</strong></div>
+                                <div class="info-item"><span>Urgence</span><strong>Marie A. +229 00 00 00 00</strong>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="dossier-panel">
+                            <h3>2. Allergies et antecedents</h3>
+                            <p class="panel-sub">Informations critiques pour la prise en charge medicale.</p>
+                            <strong>Allergies</strong>
+                            <div class="pill-list">
+                                <span class="pill pill-danger">Penicilline</span>
+                                <span class="pill pill-danger">Arachides</span>
+                                <span class="pill pill-danger">Poussiere</span>
+                            </div>
+                            <strong>Antecedents medicaux</strong>
+                            <div class="pill-list">
+                                <span class="pill">Diabete</span>
+                                <span class="pill">Hypertension</span>
+                                <span class="pill">Asthme</span>
+                                <span class="pill">Chirurgie passee</span>
+                                <span class="pill">Maladie chronique</span>
+                            </div>
+
+
+                            <strong>Vaccinations</strong>
+                            <div class="pill-list">
+                                <span class="pill pill-success">Tetanos</span>
+                                <span class="pill pill-success">Hepatite B</span>
+                            </div>
+                        </article>
+
+                        <article class="dossier-panel">
+                            <h3>3. Historique des consultations</h3>
+                            <div class="table-wrap">
+                                <table class="table-clean">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Medecin</th>
+                                            <th>Motif</th>
+                                            <th>Diagnostic</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>12/03/2026</td>
+                                            <td>Dr Alice</td>
+                                            <td>Fievre</td>
+                                            <td>Infection virale</td>
+                                            <td><a class="action-link" href="../Medecin/consultation-medecin.html"><i
+                                                        class="fa-regular fa-eye"></i> Voir details</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>03/03/2026</td>
+                                            <td>Dr Martin</td>
+                                            <td>Suivi</td>
+                                            <td>Evolution favorable</td>
+                                            <td><a class="action-link" href="../Medecin/consultation-medecin.html"><i
+                                                        class="fa-regular fa-eye"></i> Voir details</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="dossier-panel">
+                            <h3>4. Resultats d'analyses</h3>
+                            <div class="table-wrap">
+                                <table class="table-clean">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Analyse</th>
+                                            <th>Resultat</th>
+                                            <th>Document</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>10/03/2026</td>
+                                            <td>Analyse sanguine</td>
+                                            <td><span class="pill pill-warning">Normal</span></td>
+                                            <td><a class="action-link" href="#"><i class="fa-solid fa-download"></i>
+                                                    Telecharger</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>01/03/2026</td>
+                                            <td>CRP</td>
+                                            <td><span class="pill">Legere inflammation</span></td>
+                                            <td><a class="action-link" href="#"><i class="fa-solid fa-download"></i>
+                                                    Telecharger</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="dossier-panel">
+                            <h3>5. Ordonnances</h3>
+                            <div class="table-wrap">
+                                <table class="table-clean">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Medecin</th>
+                                            <th>Medicaments</th>
+                                            <th>Telecharger</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>12/03/2026</td>
+                                            <td>Dr Alice</td>
+                                            <td>Paracetamol</td>
+                                            <td><a class="action-link" href="#"><i class="fa-regular fa-file-pdf"></i>
+                                                    PDF</a></td>
+                                        </tr>
+                                        <tr>
+                                            <td>05/03/2026</td>
+                                            <td>Dr Martin</td>
+                                            <td>Vitamine C</td>
+                                            <td><a class="action-link" href="#"><i class="fa-regular fa-file-pdf"></i>
+                                                    PDF</a></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <article class="dossier-panel">
+                            <h3>7. Hospitalisations</h3>
+                            <div class="table-wrap">
+                                <table class="table-clean">
+                                    <thead>
+                                        <tr>
+                                            <th>Date entree</th>
+                                            <th>Date sortie</th>
+                                            <th>Service</th>
+                                            <th>Diagnostic</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>10/01/2025</td>
+                                            <td>15/01/2025</td>
+                                            <td>Cardiologie</td>
+                                            <td>Hypertension</td>
+                                        </tr>
+                                        <tr>
+                                            <td>03/10/2024</td>
+                                            <td>06/10/2024</td>
+                                            <td>Pneumologie</td>
+                                            <td>Infection respiratoire</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div class="stacked-grid">
+                        <article class="dossier-panel">
+                            <h3>6. Documents medicaux</h3>
+                            <p class="panel-sub">Formats supportes: PDF, JPEG, PNG, MP4</p>
+                            <div class="doc-grid">
+                                <article class="doc-item">
+                                    <strong>Radiographie thorax</strong>
+                                    <span>JPEG - 2.4 Mo</span>
+                                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i>
+                                        Ouvrir</button>
+                                </article>
+                                <article class="doc-item">
+                                    <strong>Scanner cerebral</strong>
+                                    <span>PNG - 5.8 Mo</span>
+                                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i>
+                                        Ouvrir</button>
+                                </article>
+                                <article class="doc-item">
+                                    <strong>Compte rendu</strong>
+                                    <span>PDF - 0.9 Mo</span>
+                                    <button class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i>
+                                        Ouvrir</button>
+                                </article>
+                            </div>
+                            <div class="img-grid">
+                                <div class="img-placeholder"><i
+                                        class="fa-regular fa-image"></i><span>Radiographie</span></div>
+                                <div class="img-placeholder"><i class="fa-solid fa-file-waveform"></i><span>IRM</span>
+                                </div>
+                                <div class="img-placeholder"><i class="fa-solid fa-file-medical"></i><span>Compte
+                                        rendu</span></div>
+                                <div class="img-placeholder"><i class="fa-solid fa-video"></i><span>Sequence MP4</span>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const topbar = document.querySelector(".topbar");
+        const mainContent = document.querySelector(".content");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.querySelector(".sidebar");
+        const layout = document.querySelector(".layout");
+        const sidebarUserToggle = document.getElementById("sidebarUserToggle");
+        const sidebarUserPanel = document.getElementById("sidebarUserPanel");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) {
+                icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+            }
+        };
+
+        const savedTheme = localStorage.getItem("medarchive-theme");
+        applyTheme(savedTheme === "dark");
+
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        if (mainContent) {
+            mainContent.addEventListener("scroll", () => {
+                if (mainContent.scrollTop > 20) {
+                    topbar.classList.add("scrolled");
+                } else {
+                    topbar.classList.remove("scrolled");
+                }
+            });
+        }
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+
+            const sidebarState = localStorage.getItem("medarchive-sidebar");
+            layout.classList.toggle("sidebar-collapsed", sidebarState === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            const isCollapsed = layout.classList.contains("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", isCollapsed ? "collapsed" : "expanded");
+        });
+
+        layout.addEventListener("click", (event) => {
+            if (!mobileSidebarQuery.matches) return;
+            if (layout.classList.contains("sidebar-collapsed")) return;
+
+            const clickedInsideSidebar = sidebar.contains(event.target);
+            const clickedToggle = sidebarToggle.contains(event.target);
+            if (!clickedInsideSidebar && !clickedToggle) {
+                layout.classList.add("sidebar-collapsed");
+            }
+        });
+
+        if (sidebarUserToggle && sidebarUserPanel) {
+            sidebarUserToggle.addEventListener("click", () => {
+                const isOpen = sidebarUserPanel.classList.toggle("open");
+                sidebarUserToggle.setAttribute("aria-expanded", String(isOpen));
+                sidebarUserPanel.setAttribute("aria-hidden", String(!isOpen));
+            });
+        }
+    </script>
+</body>
+
+</html>

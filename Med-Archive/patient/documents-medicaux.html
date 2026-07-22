@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Documents medicaux</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;"><button class="icon-btn" id="sidebarToggle"
+                aria-label="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions"><button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit"
+                aria-pressed="false"><i class="fa-regular fa-moon"></i></button></div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent active" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon dossier medical</span><i
+                        class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item active" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Documents medicaux</h1>
+            </section>
+            <section class="docsfm-storage">
+                <div class="docsfm-storage-info">
+                    <span><strong>47,52 Go</strong> utilisees sur 119 Go</span>
+                    <div class="docsfm-storage-track" aria-hidden="true">
+                        <span class="docsfm-storage-fill" style="width: 40%;"></span>
+                    </div>
+                </div>
+                <button class="btn btn-solid"><i class="fa-regular fa-file-lines"></i> Importer des documents</button>
+            </section>
+
+            <section class="docsfm-layout">
+                <div class="docsfm-main">
+                    <h2 class="docsfm-title">Dossiers</h2>
+                    <div class="docsfm-folder-grid">
+                        <article class="docsfm-folder-card">
+                            <div class="docsfm-folder-top"><input type="checkbox"
+                                    aria-label="Selectionner Scanner"><button class="docsfm-more"><i
+                                        class="fa-solid fa-ellipsis-vertical"></i></button></div>
+                            <i class="fa-solid fa-folder docsfm-folder-icon"></i>
+                            <h3>Scanner</h3>
+                            <div class="docsfm-folder-meta"><span><strong>412</strong>
+                                    fichiers</span><span><strong>5.48</strong> Go</span></div>
+                        </article>
+                        <article class="docsfm-folder-card">
+                            <div class="docsfm-folder-top"><input type="checkbox"
+                                    aria-label="Selectionner Radios"><button class="docsfm-more"><i
+                                        class="fa-solid fa-ellipsis-vertical"></i></button></div>
+                            <i class="fa-solid fa-folder docsfm-folder-icon"></i>
+                            <h3>Radios</h3>
+                            <div class="docsfm-folder-meta"><span><strong>380</strong>
+                                    fichiers</span><span><strong>4.75</strong> Go</span></div>
+                        </article>
+                        <article class="docsfm-folder-card">
+                            <div class="docsfm-folder-top"><input type="checkbox" aria-label="Selectionner IRM"><button
+                                    class="docsfm-more"><i class="fa-solid fa-ellipsis-vertical"></i></button></div>
+                            <i class="fa-solid fa-folder docsfm-folder-icon"></i>
+                            <h3>IRM</h3>
+                            <div class="docsfm-folder-meta"><span><strong>150</strong>
+                                    fichiers</span><span><strong>2.69</strong> Go</span></div>
+                        </article>
+                        <article class="docsfm-folder-card">
+                            <div class="docsfm-folder-top"><input type="checkbox"
+                                    aria-label="Selectionner Echographies"><button class="docsfm-more"><i
+                                        class="fa-solid fa-ellipsis-vertical"></i></button></div>
+                            <i class="fa-solid fa-folder docsfm-folder-icon"></i>
+                            <h3>Echographies</h3>
+                            <div class="docsfm-folder-meta"><span><strong>105</strong>
+                                    fichiers</span><span><strong>1.44</strong> Go</span></div>
+                        </article>
+                    </div>
+
+                    <h2 class="docsfm-title" style="margin-top: 24px;">Fichiers recents</h2>
+                    <article class="rdv-card docsfm-table-card">
+                        <div class="rdv-table-wrap">
+                            <table class="rdv-table docsfm-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Element</th>
+                                        <th>Taille</th>
+                                        <th>Date recente</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="docsfm-file-name"><i class="fa-regular fa-image"></i>
+                                            radios_poumon.jpg</td>
+                                        <td>01</td>
+                                        <td>2.4 MB</td>
+                                        <td>24 Mai, 2022</td>
+                                        <td class="rdv-actions table-actions-compact"><button class="icon-action"><i
+                                                    class="fa-solid fa-star"></i></button><button class="icon-action"><i
+                                                    class="fa-solid fa-ellipsis"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="docsfm-file-name"><i class="fa-regular fa-file-pdf"></i>
+                                            scanner_cerebral.pdf</td>
+                                        <td>01</td>
+                                        <td>3.6 MB</td>
+                                        <td>18 Mai, 2022</td>
+                                        <td class="rdv-actions table-actions-compact"><button class="icon-action"><i
+                                                    class="fa-regular fa-star"></i></button><button
+                                                class="icon-action"><i class="fa-solid fa-ellipsis"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="docsfm-file-name"><i class="fa-regular fa-file-pdf"></i>
+                                            echographie_abdom.pdf</td>
+                                        <td>01</td>
+                                        <td>2.1 MB</td>
+                                        <td>15 Mai, 2022</td>
+                                        <td class="rdv-actions table-actions-compact"><button class="icon-action"><i
+                                                    class="fa-regular fa-star"></i></button><button
+                                                class="icon-action"><i class="fa-solid fa-ellipsis"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="docsfm-file-name"><i class="fa-regular fa-file-lines"></i>
+                                            irm_genou.img</td>
+                                        <td>01</td>
+                                        <td>5.4 MB</td>
+                                        <td>06 Mai, 2022</td>
+                                        <td class="rdv-actions table-actions-compact"><button class="icon-action"><i
+                                                    class="fa-solid fa-star"></i></button><button class="icon-action"><i
+                                                    class="fa-solid fa-ellipsis"></i></button></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="docsfm-file-name"><i class="fa-regular fa-file-pdf"></i>
+                                            compte_rendu_hopital.pdf</td>
+                                        <td>01</td>
+                                        <td>1.1 MB</td>
+                                        <td>30 Avr, 2022</td>
+                                        <td class="rdv-actions table-actions-compact"><button class="icon-action"><i
+                                                    class="fa-regular fa-star"></i></button><button
+                                                class="icon-action"><i class="fa-solid fa-ellipsis"></i></button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="docsfm-side">
+                    <div class="docsfm-side-head">
+                        <h3>Vue d'ensemble</h3>
+                        <button class="icon-action" title="Fermer"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="docsfm-donut" aria-hidden="true"></div>
+                    <ul class="docsfm-legend">
+                        <li><span class="dot scanner"></span> Scanner <strong>5.48 Go</strong></li>
+                        <li><span class="dot radios"></span> Radios <strong>4.75 Go</strong></li>
+                        <li><span class="dot irm"></span> IRM <strong>2.69 Go</strong></li>
+                        <li><span class="dot echo"></span> Echographies <strong>1.44 Go</strong></li>
+                        <li><span class="dot autres"></span> Autres <strong>7.56 Go</strong></li>
+                    </ul>
+
+                    <div class="docsfm-mini-list">
+                        <article><i class="fa-regular fa-folder"></i>
+                            <div>
+                                <h4>Scanner</h4><span>412 fichiers</span>
+                            </div><strong>5.48 Go</strong>
+                        </article>
+                        <article><i class="fa-regular fa-folder"></i>
+                            <div>
+                                <h4>Radios</h4><span>380 fichiers</span>
+                            </div><strong>4.75 Go</strong>
+                        </article>
+                        <article><i class="fa-regular fa-folder"></i>
+                            <div>
+                                <h4>IRM</h4><span>150 fichiers</span>
+                            </div><strong>2.69 Go</strong>
+                        </article>
+                    </div>
+                </aside>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+    </script>
+</body>
+
+</html>

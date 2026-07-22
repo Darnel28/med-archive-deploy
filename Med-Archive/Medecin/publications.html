@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Publications Medecin</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .publications-main {
+            display: grid;
+            gap: 16px;
+            padding-top: 18px;
+        }
+
+        .pub-shell {
+            background: #f4f7fd;
+            border: 1px solid #d7e1ee;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 10px 24px rgba(18, 39, 73, 0.06);
+        }
+
+        .pub-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .pub-head h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #162a45;
+            line-height: 1.1;
+        }
+
+        .crumb {
+            margin-top: 6px;
+            color: #58708c;
+            font-size: 0.96rem;
+        }
+
+        .crumb a {
+            color: #3f62e4;
+            text-decoration: none;
+        }
+
+        .btn-post {
+            border: none;
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            background: linear-gradient(135deg, #5a54f7, #3d6af5);
+            font-weight: 700;
+            font-size: 0.98rem;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 10px 18px rgba(63, 98, 228, 0.28);
+        }
+
+        .hero-post {
+            border-radius: 14px;
+            overflow: hidden;
+            min-height: 430px;
+            display: flex;
+            align-items: flex-end;
+            padding: 36px;
+            background-image: linear-gradient(115deg, rgba(100, 75, 212, 0.78), rgba(72, 137, 204, 0.52)), url("../assets/img/cover.jpeg");
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+        }
+
+        .hero-content {
+            max-width: 920px;
+        }
+
+        .pub-tag {
+            display: inline-block;
+            margin-bottom: 14px;
+            background: #d74286;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 0.95rem;
+        }
+
+        .hero-content h2 {
+            margin: 0 0 12px;
+            font-size: clamp(1.7rem, 4vw, 3.95rem);
+            line-height: 1.12;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-content p {
+            margin: 0 0 18px;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(250, 252, 255, 0.95);
+        }
+
+        .hero-btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 700;
+            background: #e24395;
+            cursor: pointer;
+        }
+
+        .mini-cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .mini-post {
+            background: #fff;
+            border: 1px solid #dde6f2;
+            border-radius: 10px;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            min-height: 250px;
+        }
+
+        .mini-copy {
+            padding: 18px;
+            display: grid;
+            gap: 10px;
+            align-content: start;
+        }
+
+        .mini-copy h3 {
+            margin: 0;
+            color: #152943;
+            font-size: 2rem;
+            line-height: 1.15;
+        }
+
+        .mini-copy .meta {
+            color: #5c7490;
+            font-size: 0.95rem;
+        }
+
+        .mini-copy p {
+            margin: 0;
+            color: #506b89;
+            line-height: 1.45;
+            font-size: 0.95rem;
+        }
+
+        .mini-copy a {
+            color: #4b4dfa;
+            text-decoration: underline;
+            font-size: 0.94rem;
+            font-weight: 600;
+        }
+
+        .mini-visual {
+            background-size: cover;
+            background-position: center;
+        }
+
+        .topic-line {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .topic-line span {
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 0.9rem;
+        }
+
+        .chip-blue {
+            color: #1d5fae;
+            background: #d8e7fb;
+        }
+
+        .chip-gold {
+            color: #9e6d00;
+            background: #f3e0a1;
+        }
+
+        .chip-pink {
+            color: #a31568;
+            background: #f4d2e8;
+        }
+
+        .pub-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+
+        .main-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .feature-card {
+            border: 1px solid #dbe4f0;
+            border-radius: 10px;
+            background: #fff;
+            padding: 10px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .feature-card img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .feature-card h3 {
+            margin: 0;
+            font-size: clamp(1.4rem, 2.6vw, 2.75rem);
+            color: #152943;
+            line-height: 1.2;
+        }
+
+        .feature-card .meta {
+            color: #627a96;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .feature-card p {
+            margin: 0;
+            color: #506b89;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .read-btn {
+            margin-top: 8px;
+            border: none;
+            border-radius: 9px;
+            background: #4d50f4;
+            color: #fff;
+            padding: 9px 16px;
+            font-weight: 700;
+            width: fit-content;
+            cursor: pointer;
+        }
+
+        .sidebar-card {
+            background: #fff;
+            border: 1px solid #dbe4f0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-card h4 {
+            margin: 0 0 10px;
+            color: #1b2f4b;
+            font-size: 2rem;
+        }
+
+        .sidebar-card p,
+        .sidebar-card li,
+        .sidebar-card a {
+            color: #536f8d;
+            text-decoration: none;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+
+        .recent-line {
+            display: grid;
+            grid-template-columns: 74px 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .recent-line img {
+            width: 74px;
+            height: 74px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .recent-line strong {
+            color: #1a2f49;
+            display: block;
+            line-height: 1.25;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .archives,
+        .externals {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .archives a,
+        .externals a {
+            color: #4f54f2;
+            font-weight: 500;
+        }
+
+        .trend-wrap {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .trend-wrap h2 {
+            margin: 0;
+            color: #182b46;
+            font-size: clamp(1.4rem, 3.2vw, 2.9rem);
+            line-height: 1.15;
+        }
+
+        .trend-wrap p {
+            margin-top: 6px;
+            color: #5b7491;
+            font-size: 1rem;
+        }
+
+        .trend-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .trend-card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #d9e3ef;
+            background: #fff;
+            text-align: left;
+            min-height: 300px;
+            position: relative;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            color: #fff;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .trend-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(18, 34, 58, 0.08), rgba(18, 34, 58, 0.72));
+        }
+
+        .trend-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .trend-badge {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            border-radius: 999px;
+            padding: 5px 12px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .trend-badge-red {
+            background: #df2f4f;
+        }
+
+        .trend-badge-green {
+            background: #00a86b;
+        }
+
+        .trend-badge-orange {
+            background: #ff8b17;
+        }
+
+        .trend-badge-blue {
+            background: #286ed6;
+        }
+
+        .trend-card h3 {
+            margin: 0;
+            font-size: 1.55rem;
+            line-height: 1.2;
+        }
+
+        .trend-card p {
+            margin: 8px 0 10px;
+            color: #eef5ff;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+
+        .trend-card .read-btn {
+            margin-top: 0;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            backdrop-filter: blur(2px);
+        }
+
+        .floating-actions {
+            position: fixed;
+            right: 14px;
+            bottom: 12px;
+            display: grid;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        .floating-actions button {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 9px;
+            background: #4e4ff5;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(56, 70, 225, 0.3);
+        }
+
+        .switch {
+            font-size: 12px;
+            position: relative;
+            display: inline-block;
+            width: 3.2em;
+            height: 1.8em;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            --background: #12335a;
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--background);
+            transition: .5s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.15em;
+            width: 1.15em;
+            border-radius: 50%;
+            left: 11%;
+            bottom: 16%;
+            box-shadow: inset 8px -4px 0px 0px #fff000;
+            background: var(--background);
+            transition: .5s;
+        }
+
+        input:checked+.slider {
+            background-color: #2f7fbe;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(100%);
+            box-shadow: inset 15px -4px 0px 15px #fff000;
+        }
+
+        body.dark-mode .pub-shell,
+        body.dark-mode .mini-post,
+        body.dark-mode .feature-card,
+        body.dark-mode .sidebar-card {
+            background: #1f2d42;
+            border-color: rgba(121, 154, 192, 0.24);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.32);
+        }
+
+        body.dark-mode .pub-head h1,
+        body.dark-mode .mini-copy h3,
+        body.dark-mode .feature-card h3,
+        body.dark-mode .sidebar-card h4,
+        body.dark-mode .recent-line strong,
+        body.dark-mode .trend-wrap h2,
+        body.dark-mode .mini-copy .meta,
+        body.dark-mode .mini-copy p,
+        body.dark-mode .feature-card .meta,
+        body.dark-mode .feature-card p,
+        body.dark-mode .sidebar-card p,
+        body.dark-mode .sidebar-card li,
+        body.dark-mode .sidebar-card a,
+        body.dark-mode .trend-wrap p,
+        body.dark-mode .crumb,
+        body.dark-mode .crumb a {
+            color: #deecff;
+        }
+
+        body.dark-mode .chip-blue {
+            background: #274b75;
+            color: #cce3ff;
+        }
+
+        body.dark-mode .chip-gold {
+            background: #6a5a22;
+            color: #fff3c8;
+        }
+
+        body.dark-mode .chip-pink {
+            background: #6c3155;
+            color: #ffd6ef;
+        }
+
+        @media (max-width: 1240px) {
+
+            .mini-cards,
+            .trend-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mini-post {
+                grid-template-columns: 1fr;
+            }
+
+            .mini-visual {
+                min-height: 210px;
+            }
+
+            .pub-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 920px) {
+            .pub-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero-post {
+                min-height: 340px;
+                padding: 22px;
+            }
+
+            .hero-content h2 {
+                font-size: 2rem;
+            }
+
+            .feature-card img {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" aria-label="Langue"><i class="fa-solid fa-flag-usa"></i></button>
+            <label class="switch" aria-label="Mode nuit">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="slider"></span>
+            </label>
+            <button class="icon-btn has-badge" id="messageButton" aria-label="Notifications messages">
+                <i class="fa-regular fa-envelope"></i>
+                <span class="badge">2</span>
+            </button>
+            <button class="icon-btn has-badge" aria-label="Alertes resultats">
+                <i class="fa-regular fa-bell"></i>
+                <span class="badge">3</span>
+            </button>
+            <div class="profile">
+                <img src="https://i.pravatar.cc/80?img=32" alt="Profil medecin">
+                <div>
+                    <strong>Dr. Alice</strong>
+                    <span>ID: MED-24-007</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+                <button class="sidebar-user-toggle" id="sidebarUserToggle" aria-label="Ouvrir profil"
+                    aria-expanded="false">
+                    <i class="fa-regular fa-user"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user-panel" id="sidebarUserPanel" aria-hidden="true">
+                <img src="https://i.pravatar.cc/200?img=32" alt="Dr Alice">
+                <strong>Dr. Alice</strong>
+                <span>Service: Medecine generale</span>
+            </div>
+
+            <div class="menu-block">
+                <a class="menu-item" href="DashMedecin.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item" href="rendez-vous-medecin.html"><i class="fa-regular fa-calendar"></i><span>Mes
+                        rendez-vous</span></a>
+                <a class="menu-item" href="patients-medecin.html"><i class="fa-solid fa-users"></i><span>Mes
+                        patients</span></a>
+                <a class="menu-item" href="consultation-medecin.html"><i
+                        class="fa-solid fa-stethoscope"></i><span>Consultation</span></a>
+                <a class="menu-item" href="examens-medecin.html"><i
+                        class="fa-solid fa-flask"></i><span>Examens</span></a>
+
+                <h4>Gestion du compte</h4>
+                <div class="menu-block">
+                    <a class="menu-item active" href="publications.html"><i
+                            class="fa-regular fa-newspaper"></i><span>Publications</span></a>
+                    <a class="menu-item" href="../patient/notifications.html"><i
+                            class="fa-regular fa-bell"></i><span>Notifications</span></a>
+                    <a class="menu-item" href="../patient/profil.html"><i
+                            class="fa-regular fa-user"></i><span>Profil</span></a>
+                </div>
+            </div>
+
+            <div class="sidebar-profile">
+                <img src="https://i.pravatar.cc/80?img=32" alt="Dr Alice">
+                <div>
+                    <strong>Dr. Alice</strong>
+                    <span>ID: MED-24-007</span>
+                </div>
+                <a class="settings-link" href="../patient/parametres.html" aria-label="Ouvrir les parametres">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            </div>
+
+            <a class="sidebar-help" href="#">
+                <i class="fa-solid fa-headset"></i>
+                <span>Besoin d'aide ? Contacter le support</span>
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+        </aside>
+
+        <main class="content publications-main">
+            <section class="pub-shell">
+                <div class="pub-head">
+                    <div>
+                        <h1>Mes Publications</h1>
+
+                    </div>
+                    <button class="btn-post" type="button"><i class="fa-regular fa-square-plus"></i> Post</button>
+                </div>
+
+                <article class="hero-post">
+                    <div class="hero-content">
+                        <span class="pub-tag">Revolution clinique</span>
+                        <h2>Application de planification des rendez-vous hospitaliers pour cliniques, hopitaux et
+                            medecins</h2>
+                        <p>Connectez et integrez toutes vos sources de rendez-vous: site web, mobile, reception et
+                            teleconsultation.
+                            Centralisez les files d'attente patients, automatisez les rappels et fluidifiez l'accueil en
+                            service.</p>
+                        <button class="hero-btn" type="button">Continuer la lecture...</button>
+                    </div>
+                </article>
+            </section>
+
+            <section class="pub-shell mini-cards">
+                <article class="mini-post">
+                    <div class="mini-copy">
+                        <div class="topic-line"><span class="chip-blue">Monde</span><span class="chip-gold">En
+                                vedette</span></div>
+                        <h3>Le meilleur de la technologie</h3>
+                        <p class="meta">12 nov 2024</p>
+                        <p>L'intelligence artificielle assiste le triage, la lecture d'imagerie et le suivi patient pour
+                            gagner du temps medical utile.</p>
+                        <a href="#">Lire plus <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                    <div class="mini-visual" style="background-image:url('../assets/img/télécharger (11).jpg');"></div>
+                </article>
+
+                <article class="mini-post">
+                    <div class="mini-copy">
+                        <div class="topic-line"><span class="chip-pink">Innovation sante</span><span
+                                class="chip-gold">En vedette</span></div>
+                        <h3>Le meilleur de la technologie</h3>
+                        <p class="meta">12 nov 2024</p>
+                        <p>Analyse predicitve, surveillance continue et coordination de soins: trois usages qui changent
+                            deja la pratique clinique.</p>
+                        <a href="#">Lire plus <i class="fa-solid fa-arrow-right"></i></a>
+                    </div>
+                    <div class="mini-visual" style="background-image:url('../assets/img/télécharger (9).jpg');"></div>
+                </article>
+            </section>
+
+            <section class="pub-shell pub-grid">
+                <div class="main-list">
+                    <article class="feature-card">
+                        <img src="../assets/img/télécharger (2).jpeg" alt="Transport medical intelligent en ville">
+                        <div class="topic-line"><span class="chip-blue">Monde</span><span class="chip-gold">En
+                                vedette</span></div>
+                        <h3>Le grand debat commence quand la regle se termine a gravite zero</h3>
+                        <p class="meta">12 nov 2024</p>
+                        <p>Comment les systemes intelligents de transport sanitaire et de logistique hospitaliere
+                            peuvent reduire les delais de prise en charge des urgences en zone urbaine.</p>
+                        <button class="read-btn" type="button">Lire plus <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </article>
+
+                    <article class="feature-card">
+                        <img src="../assets/img/blogvacinnation.jpg" alt="Interface de prise de rendez-vous medical">
+                        <div class="topic-line"><span class="chip-blue">Monde</span><span class="chip-gold">En
+                                vedette</span></div>
+                        <h3>Suivi preventif: du rappel vaccinal a la maladie chronique</h3>
+                        <p class="meta">8 nov 2024</p>
+                        <p>Des workflows simples pour ne plus perdre les patients entre consultation, examens et
+                            vaccination.
+                            Une methode basee sur des rappels cibles et une priorisation clinique.</p>
+                        <button class="read-btn" type="button">Lire plus <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </article>
+                </div>
+
+                <aside>
+                    <div class="sidebar-card">
+                        <h4>A propos</h4>
+                        <p>Ce tableau de publications medecin centralise vos contenus de prevention, de protocoles et
+                            d'education therapeutique.
+                            L'objectif est de rendre la communication clinique claire, utile et actionnable pour vos
+                            patients.</p>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h4>Articles recents</h4>
+                        <div class="recent-line">
+                            <img src="../assets/img/post/post_1.png" alt="vignette article">
+                            <div>
+                                <strong>Design UI/UX medical pour fluidifier le parcours patient</strong>
+                                <p>15 decembre 2024</p>
+                            </div>
+                        </div>
+                        <div class="recent-line">
+                            <img src="../assets/img/post/post_2.png" alt="vignette article">
+                            <div>
+                                <strong>Telesuivi des traitements: ce qui fonctionne en pratique</strong>
+                                <p>27 aout 2024</p>
+                            </div>
+                        </div>
+                        <div class="recent-line">
+                            <img src="../assets/img/post/post_3.png" alt="vignette article">
+                            <div>
+                                <strong>Plus vous voyez vos indicateurs, plus vous anticipez</strong>
+                                <p>20 juillet 2024</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h4>Archives</h4>
+                        <ul class="archives">
+                            <li><a href="#">Mars 2025</a></li>
+                            <li><a href="#">Fevrier 2025</a></li>
+                            <li><a href="#">Janvier 2025</a></li>
+                            <li><a href="#">Decembre 2024</a></li>
+                            <li><a href="#">Novembre 2024</a></li>
+                            <li><a href="#">Octobre 2024</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h4>Ailleurs</h4>
+                        <ul class="externals">
+                            <li><a href="#">GitHub</a></li>
+                            <li><a href="#">Twitter</a></li>
+                            <li><a href="#">Facebook</a></li>
+                        </ul>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="pub-shell trend-wrap">
+                <h2>Publications medicales a fort impact</h2>
+                <p>Des sujets utiles pour la pratique clinique quotidienne et la prevention.</p>
+                <div class="trend-grid">
+                    <article class="trend-card" style="background-image:url('../assets/img/blog/single_blog_1.png');">
+                        <span class="trend-badge trend-badge-red">Urgences</span>
+                        <h3>Triage intelligent aux urgences: reduire l attente sans perdre la qualite</h3>
+                        <p>Protocoles de priorisation, alertes automatiques et orientation rapide selon la gravite.</p>
+                        <button class="read-btn" type="button">Lire plus <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </article>
+
+                    <article class="trend-card" style="background-image:url('../assets/img/blog/single_blog_2.png');">
+                        <span class="trend-badge trend-badge-green">Telemedecine</span>
+                        <h3>Teleconsultation post-hospitalisation: securiser les 30 premiers jours</h3>
+                        <p>Check-lists cliniques, rappels therapeutiques et signaux d alerte a distance.</p>
+                        <button class="read-btn" type="button">Lire plus <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </article>
+
+                    <article class="trend-card" style="background-image:url('../assets/img/blog/single_blog_3.png');">
+                        <span class="trend-badge trend-badge-orange">Prevention</span>
+                        <h3>Couverture vaccinale des adultes: strategie simple pour le cabinet</h3>
+                        <p>Segmenter les profils a risque, programmer les rappels et ameliorer l adherence.</p>
+                        <button class="read-btn" type="button">Lire plus <i
+                                class="fa-solid fa-arrow-right"></i></button>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="floating-actions">
+
+        <button type="button" aria-label="Monter"><i class="fa-solid fa-arrow-up"></i></button>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const topbar = document.querySelector(".topbar");
+        const mainContent = document.querySelector(".content");
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.querySelector(".sidebar");
+        const layout = document.querySelector(".layout");
+        const messageButton = document.getElementById("messageButton");
+        const sidebarUserToggle = document.getElementById("sidebarUserToggle");
+        const sidebarUserPanel = document.getElementById("sidebarUserPanel");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.checked = isDark;
+        };
+
+        const savedTheme = localStorage.getItem("medarchive-theme");
+        applyTheme(savedTheme === "dark");
+
+        darkModeToggle.addEventListener("change", () => {
+            const isDark = darkModeToggle.checked;
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        if (mainContent) {
+            mainContent.addEventListener("scroll", () => {
+                if (mainContent.scrollTop > 20) {
+                    topbar.classList.add("scrolled");
+                } else {
+                    topbar.classList.remove("scrolled");
+                }
+            });
+        }
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) {
+                layout.classList.add("sidebar-collapsed");
+                return;
+            }
+
+            const sidebarState = localStorage.getItem("medarchive-sidebar");
+            layout.classList.toggle("sidebar-collapsed", sidebarState === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            const isCollapsed = layout.classList.contains("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", isCollapsed ? "collapsed" : "expanded");
+        });
+
+        layout.addEventListener("click", (event) => {
+            if (!mobileSidebarQuery.matches || layout.classList.contains("sidebar-collapsed")) {
+                return;
+            }
+
+            const clickedInsideSidebar = sidebar.contains(event.target);
+            const clickedToggle = sidebarToggle.contains(event.target);
+
+            if (!clickedInsideSidebar && !clickedToggle) {
+                layout.classList.add("sidebar-collapsed");
+            }
+        });
+
+        if (sidebarUserToggle && sidebarUserPanel) {
+            sidebarUserToggle.addEventListener("click", () => {
+                const isOpen = sidebarUserPanel.classList.toggle("open");
+                sidebarUserToggle.setAttribute("aria-expanded", String(isOpen));
+                sidebarUserPanel.setAttribute("aria-hidden", String(!isOpen));
+            });
+        }
+
+        if (messageButton) {
+            messageButton.addEventListener("click", () => {
+                window.location.href = "../chat.html";
+            });
+        }
+    </script>
+</body>
+
+</html>

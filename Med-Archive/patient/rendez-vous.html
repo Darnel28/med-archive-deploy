@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedArchive - Rendez-vous medicaux</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="topbar">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="icon-btn" id="sidebarToggle" aria-label="Toggle sidebar"><i
+                    class="fa-solid fa-bars"></i></button>
+            <div class="brand">MedArchive</div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="darkModeToggle" aria-label="Mode nuit" aria-pressed="false"><i
+                    class="fa-regular fa-moon"></i></button>
+            <button class="icon-btn has-badge" aria-label="Notifications alerte"><i class="fa-regular fa-bell"></i><span
+                    class="badge">2</span></button>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-title-row">
+                <h3>Navigation</h3>
+            </div>
+            <div class="menu-block">
+                <a class="menu-item" href="DashPatient.html"><i class="fa-solid fa-house"></i><span>Dashboard</span></a>
+                <a class="menu-item menu-parent" href="#" role="button" aria-expanded="false"><i
+                        class="fa-solid fa-folder-open"></i><span>Mon dossier medical</span><i
+                        class="fa-solid fa-chevron-down submenu-arrow"></i></a>
+                <div class="submenu-block">
+                    <a class="submenu-item" href="consultations.html">Historique des consultations</a>
+                    <a class="submenu-item" href="resultats-analyses.html">Resultats d'analyses</a>
+                    <a class="submenu-item" href="ordonnances.html">Ordonnances</a>
+                    <a class="submenu-item" href="documents-medicaux.html">Documents medicaux</a>
+                </div>
+                <a class="menu-item active" href="rendez-vous.html"><i
+                        class="fa-regular fa-calendar"></i><span>Rendez-vous</span></a>
+                <a class="menu-item" href="traitements.html"><i class="fa-solid fa-pills"></i><span>Mes
+                        traitements</span></a>
+                <a class="menu-item" href="acces-donnees.html"><i class="fa-solid fa-key"></i><span>Accès à mes
+                        données</span></a>
+            </div>
+        </aside>
+
+        <main class="content page-tight">
+            <section class="page-title-card">
+                <h1>Rendez-vous medicaux</h1>
+            </section>
+            <section class="table-toolbar">
+                <label class="table-search" aria-label="Recherche rendez-vous">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Chercher un rendez-vous...">
+                </label>
+                <button class="btn btn-solid"><i class="fa-solid fa-calendar-plus"></i> Ajouter un rendez-vous</button>
+            </section>
+
+            <section class="rdv-section">
+                <article class="rdv-card">
+                    <div class="rdv-table-wrap">
+                        <table class="rdv-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Heure</th>
+                                    <th>Medecin</th>
+                                    <th>Service</th>
+                                    <th>Statut</th>
+                                    <th>Rappel</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>18 Mars 2026</td>
+                                    <td>14:30</td>
+                                    <td>Dr. Martin</td>
+                                    <td>Medecine generale</td>
+                                    <td><span class="rdv-status upcoming">A venir</span></td>
+                                    <td><i class="fa-regular fa-bell"></i> Active</td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Modifier"><i
+                                                class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="icon-action danger" title="Annuler"><i
+                                                class="fa-regular fa-circle-xmark"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>25 Mars 2026</td>
+                                    <td>09:15</td>
+                                    <td>Dr. Alice</td>
+                                    <td>Cardiologie</td>
+                                    <td><span class="rdv-status upcoming">A venir</span></td>
+                                    <td><i class="fa-regular fa-bell"></i> Active</td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Modifier"><i
+                                                class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="icon-action danger" title="Annuler"><i
+                                                class="fa-regular fa-circle-xmark"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>07 Avr 2026</td>
+                                    <td>11:00</td>
+                                    <td>Dr. Samba</td>
+                                    <td>Dermatologie</td>
+                                    <td><span class="rdv-status pending">En attente</span></td>
+                                    <td><i class="fa-regular fa-bell"></i> Active</td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Modifier"><i
+                                                class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="icon-action danger" title="Annuler"><i
+                                                class="fa-regular fa-circle-xmark"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>12 Fev 2026</td>
+                                    <td>16:00</td>
+                                    <td>Dr. Kone</td>
+                                    <td>Ophtalmologie</td>
+                                    <td><span class="rdv-status done">Effectue</span></td>
+                                    <td><i class="fa-regular fa-bell-slash"></i> Inactive</td>
+                                    <td class="rdv-actions">
+                                        <button class="icon-action" title="Voir"><i
+                                                class="fa-regular fa-eye"></i></button>
+                                        <button class="icon-action" title="Modifier"><i
+                                                class="fa-regular fa-pen-to-square"></i></button>
+                                        <button class="icon-action danger" title="Annuler"><i
+                                                class="fa-regular fa-circle-xmark"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <span class="table-meta">4 rendez-vous planifies</span>
+                        <div class="table-pagination">
+                            <span class="table-page">Precedent</span>
+                            <span class="table-page active">1</span>
+                            <span class="table-page">Suivant</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const darkModeToggle = document.getElementById("darkModeToggle");
+        const body = document.body;
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const layout = document.querySelector(".layout");
+        const mobileSidebarQuery = window.matchMedia("(max-width: 920px)");
+
+        const applyTheme = (isDark) => {
+            body.classList.toggle("dark-mode", isDark);
+            darkModeToggle.setAttribute("aria-pressed", String(isDark));
+            const icon = darkModeToggle.querySelector("i");
+            if (icon) icon.className = isDark ? "fa-regular fa-sun" : "fa-regular fa-moon";
+        };
+
+        applyTheme(localStorage.getItem("medarchive-theme") === "dark");
+        darkModeToggle.addEventListener("click", () => {
+            const isDark = !body.classList.contains("dark-mode");
+            applyTheme(isDark);
+            localStorage.setItem("medarchive-theme", isDark ? "dark" : "light");
+        });
+
+        const applyResponsiveSidebarState = () => {
+            if (mobileSidebarQuery.matches) { layout.classList.add("sidebar-collapsed"); return; }
+            layout.classList.toggle("sidebar-collapsed", localStorage.getItem("medarchive-sidebar") === "collapsed");
+        };
+
+        applyResponsiveSidebarState();
+        mobileSidebarQuery.addEventListener("change", applyResponsiveSidebarState);
+
+        sidebarToggle.addEventListener("click", () => {
+            layout.classList.toggle("sidebar-collapsed");
+            localStorage.setItem("medarchive-sidebar", layout.classList.contains("sidebar-collapsed") ? "collapsed" : "expanded");
+        });
+
+        const setupDossierSubmenu = () => {
+            const parent = document.querySelector(".menu-parent");
+            const submenu = document.querySelector(".submenu-block");
+            if (!parent || !submenu) return;
+
+            const hasActiveChild = submenu.querySelector(".submenu-item.active") !== null;
+            if (hasActiveChild) {
+                parent.classList.add("open");
+                submenu.classList.add("open");
+                parent.setAttribute("aria-expanded", "true");
+            }
+
+            parent.addEventListener("click", (event) => {
+                event.preventDefault();
+                parent.classList.toggle("open");
+                submenu.classList.toggle("open");
+                parent.setAttribute("aria-expanded", String(submenu.classList.contains("open")));
+            });
+        };
+
+        setupDossierSubmenu();
+    </script>
+</body>
+
+</html>
