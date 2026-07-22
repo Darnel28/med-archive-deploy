@@ -132,7 +132,7 @@ const DashHomeHopital = () => {
       label: 'Patients actifs',
       value: dashboard?.patients_actifs ?? dashboard?.patients?.total ?? 0,
       icon: 'fa-users',
-      trend: `${dashboard?.patients?.nouveaux_mois ?? 0} nouveau(x) ce mois`,
+      trend: ` nouveau(x) ce mois`,
     },
     {
       label: 'Nouveaux patients',
