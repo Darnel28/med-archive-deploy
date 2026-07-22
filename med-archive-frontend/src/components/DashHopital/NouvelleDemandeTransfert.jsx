@@ -15,11 +15,15 @@ function rowsFromPaginated(response) {
 }
 
 function patientFromHospitalRow(row) {
-    console.log(row);
-  const patient = row.patient ?? row;
-  console.log(patient.service);
-  console.log(patient.dossier);
-  const dossier = patient.dossier ?? {};
+
+    console.log("ROW RECU :", row);
+
+    const patient = row.patient ?? row;
+    const dossier = row.dossier ?? patient.dossier ?? row;
+
+    console.log("PATIENT :", patient);
+    console.log("DOSSIER :", dossier);
+
   return {
     id: patient.id,
     name: row.name || patient.user?.name || "-",
@@ -28,8 +32,16 @@ function patientFromHospitalRow(row) {
     birthDate: row.date_naissance || patient.user?.date_naissance || "",
     phone: row.telephone || patient.user?.telephone || "",
     sex: row.sexe || patient.user?.sexe || "",
-    serviceId: patient.service_id || patient.service?.id || dossier.service_proprietaire_id || dossier.service_proprietaire?.id || dossier.medecin_referent?.service_id || dossier.medecin_referent?.service?.id || "",
-    serviceName: patient.service?.nom || dossier.service_proprietaire?.nom || dossier.medecin_referent?.service?.nom || "",
+    serviceId:
+    patient.service?.id ||
+    dossier.service_proprietaire_id ||
+    dossier.service_proprietaire?.id ||
+    "",
+
+serviceName:
+    patient.service?.nom ||
+    dossier.service_proprietaire?.nom ||
+    "",
     medecinId: dossier.medecin_referent_id || dossier.medecin_referent?.id || "",
     medecinName: dossier.medecin_referent?.user?.name || dossier.medecin_traitant || "",
   };
