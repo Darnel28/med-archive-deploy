@@ -60,7 +60,7 @@ class Dossier extends Model
     }
 
     /**
-     * Relations - TOUT ce qui appartient au dossier
+     * Relations - tout ce qui appartient au dossier
      */
     public function patient(): BelongsTo
     {

@@ -166,7 +166,14 @@ class User extends Authenticatable
                      });
                });
            })
-          ->with('patient')
+          ->with([
+    'patient.user',
+    'patient.service',
+    'patient.dossier.serviceProprietaire',
+    'patient.dossier.medecinReferent.user',
+    'patient.dossier.medecinReferent.service',
+    'patient.dossier.transferts',
+])
           ->distinct();
     }
 
