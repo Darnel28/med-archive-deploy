@@ -185,6 +185,42 @@ class TransfertDossierTest extends TestCase
             ->assertJsonCount(0, 'data.data');
     }
 
+    public function test_service_transfer_list_excludes_inter_hospital_transfers(): void
+    {
+        $roleEtab = Role::firstOrCreate(['nom' => 'Responsable Etablissement'], ['description' => 'Etab']);
+        $roleService = Role::firstOrCreate(['nom' => 'Service'], ['description' => 'Service']);
+
+        $sourceEtab = User::factory()->create(['role_id' => $roleEtab->id, 'name' => 'CHU']);
+        $destinationEtab = User::factory()->create(['role_id' => $roleEtab->id, 'name' => 'Hopital destination']);
+        $sourceUser = User::factory()->create(['role_id' => $roleService->id, 'etablissement_id' => $sourceEtab->id]);
+        $destinationUser = User::factory()->create(['role_id' => $roleService->id, 'etablissement_id' => $destinationEtab->id]);
+        $serviceSource = Service::create(['user_id' => $sourceUser->id, 'etablissement_id' => $sourceEtab->id, 'nom' => 'Medecine generale', 'description' => 's', 'est_actif' => true]);
+        $serviceDestination = Service::create(['user_id' => $destinationUser->id, 'etablissement_id' => $destinationEtab->id, 'nom' => 'Accueil', 'description' => 'd', 'est_actif' => true]);
+        [, $dossier] = $this->makePatientWithDossier($serviceSource);
+
+        TransfertDossier::create([
+            'dossier_id' => $dossier->id,
+            'service_source_id' => $serviceSource->id,
+            'service_destination_id' => $serviceDestination->id,
+            'etablissement_source_id' => $sourceEtab->id,
+            'etablissement_destination_id' => $destinationEtab->id,
+            'statut' => 'demande',
+            'motif' => 'Transfert vers un autre hopital',
+            'demandeur_id' => $sourceEtab->id,
+            'date_demande' => now(),
+        ]);
+
+        $this->actingAs($sourceUser, 'sanctum')
+            ->getJson('/api/transferts-dossiers')
+            ->assertOk()
+            ->assertJsonCount(0, 'data.data');
+
+        $this->actingAs($sourceEtab, 'sanctum')
+            ->getJson('/api/transferts-dossiers?inter_etablissement=1')
+            ->assertOk()
+            ->assertJsonCount(1, 'data.data');
+    }
+
     public function test_service_patient_list_includes_transferred_dossier_owner()
     {
         $roleEtab = Role::firstOrCreate(['nom' => 'Responsable Etablissement'], ['description' => 'Etab']);

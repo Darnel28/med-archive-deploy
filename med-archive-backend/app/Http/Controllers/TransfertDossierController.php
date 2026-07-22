@@ -121,7 +121,7 @@ class TransfertDossierController extends Controller
             return $query->where(function ($q) use ($user) {
                 $q->where('service_source_id', $user->service->id)
                     ->orWhere('service_destination_id', $user->service->id);
-            });
+            })->whereColumn('etablissement_source_id', 'etablissement_destination_id');
         }
 
         return $query->whereRaw('1 = 0');
