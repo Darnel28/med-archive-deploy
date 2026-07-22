@@ -59,9 +59,9 @@ const categories = [
       // { q: 'Peut-on intégrer un ERP externe ?', a: 'Oui, selon le niveau d’intégration autorisé par votre installation et vos accès techniques.' },
       {
   q: 'Comment accéder à mon dossier médical ?',
-  a: 'Depuis votre tableau de bord, ouvrez la rubrique "Dossier médical" pour consulter vos consultations, ordonnances, examens et autres documents médicaux .'
+  a: 'Depuis votre tableau de board, ouvrez la rubrique "Dossier médical" pour consulter vos consultations, ordonnances, examens et autres documents médicaux .'
 },
-    {vs
+    {
   q: 'Mes informations personnelles sont-elles sécurisées ?',
   a: 'Oui. Toutes vos données médicales et personnelles sont protégées et accessibles uniquement aux professionnels de santé autorisés ainsi qu’à vous-même.'
 },
@@ -119,7 +119,7 @@ const BesoinAidePatient = () => {
 
       <section className="besoin-aide-shell">
         <div className="besoin-aide-container">
-          {/* COLONNE GAUCHE - CATÉGORIES ET CTA */}
+       
           <aside className="besoin-aide-sidebar">
             <div className="besoin-aide-categories">
               <h3>Parcourir par catégorie</h3>
