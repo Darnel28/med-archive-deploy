@@ -70,30 +70,35 @@ const buildPrescriptionPdf = (prescription) => {
   const ref = `ORD-${prescription.id}`;
 
   // --- En-tête ---
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(...primaryColor);
-  doc.text(etablissement, margin, 22);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.setTextColor(...redColor);
-  doc.text('ORDONNANCE MÉDICALE', pageWidth - margin, 22, { align: 'right' });
+// Nom de l'établissement
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(18);
+doc.setTextColor(...primaryColor);
+doc.text(etablissement, margin, 20);
 
-  // Séparateur
-  doc.setDrawColor(...borderColor);
-  doc.line(margin, 30, pageWidth - margin, 30);
+// Titre
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(20);
+doc.setTextColor(...redColor);
+doc.text('ORDONNANCE MÉDICALE', pageWidth / 2, 32, {
+  align: 'center'
+});
 
-  // Numéro et date sur la même ligne (à droite)
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.setTextColor(...darkGray);
-  doc.text(`N° ${ref}`, pageWidth - margin, 38, { align: 'right' });
-  doc.text(`Émise le : ${date}`, pageWidth - margin, 44, { align: 'right' });
-  doc.text(`Valable jusqu'au : ${dateValidite}`, pageWidth - margin, 50, { align: 'right' });
+// Ligne de séparation
+doc.setDrawColor(...borderColor);
+doc.line(margin, 40, pageWidth - margin, 40);
 
-  // --- Informations patient et médecin (encadré gris) ---
-  let y = 62;
+// Numéro et date
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(10);
+doc.setTextColor(...darkGray);
+doc.text(`N° ${ref}`, pageWidth - margin, 48, { align: 'right' });
+doc.text(`Émise le : ${date}`, pageWidth - margin, 54, { align: 'right' });
+doc.text(`Valable jusqu'au : ${dateValidite}`, pageWidth - margin, 60, { align: 'right' });
+
+// --- Informations patient et médecin (encadré gris) ---
+let y = 72;
   const rectHeight = 38;
   roundedRect(margin, y, maxWidth, rectHeight, 4);
   doc.setTextColor(...darkGray);

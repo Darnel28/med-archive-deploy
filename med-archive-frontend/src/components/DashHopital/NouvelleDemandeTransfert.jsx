@@ -15,7 +15,10 @@ function rowsFromPaginated(response) {
 }
 
 function patientFromHospitalRow(row) {
+    console.log(row);
   const patient = row.patient ?? row;
+  console.log(patient.service);
+  console.log(patient.dossier);
   const dossier = patient.dossier ?? {};
   return {
     id: patient.id,
