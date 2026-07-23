@@ -479,7 +479,7 @@ const RendezVousPatient = () => {
                     <td>{formatDate(rdv.date_consultation)}</td>
                     <td>{formatHour(rdv.date_consultation)}</td>
                     <td>{rdv.medecin?.user?.name || 'Medecin'}</td>
-                    <td>{rdv.service?.nom || rdv.medecin?.specialite?.nom || '-'}</td>
+                    <td>{rdv.service?.nom || rdv.medecin?.specialite?.nom || 'Laboratoire'}</td>
                     <td>{formatMoney( rdv.montant_consultation)}</td>
                     <td>
                       <span className={getStatutClass(rdv)}>
