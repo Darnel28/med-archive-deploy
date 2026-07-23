@@ -74,7 +74,7 @@ class FactureController extends Controller
             'type' => $validated['type'],
             'consultation_id' => $validated['consultation_id'] ?? null,
             'montant_total' => $validated['montant_total'],
-            'montant_paye' => 0,
+            'montant_paye' => 5000,
             'montant_restant' => $validated['montant_total'],
             'statut' => 'non_payee',
             'created_by' => $request->user()->id,

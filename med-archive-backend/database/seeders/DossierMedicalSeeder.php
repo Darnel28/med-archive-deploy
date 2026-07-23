@@ -221,14 +221,14 @@ class DossierMedicalSeeder extends Seeder
     private function createPatient(int $number, $rolePatient, string $ville): Patient
     {
         $firstNames = [
-            'Koffi', 'Awa', 'Moussa', 'Fatou', 'Sena', 'Yao', 'Aissatou', 'Kwame', 'Mariama',
+            'Egnon', 'Awa', 'Moussa', 'Fatou', 'Sena', 'Yao', 'Aissatou', 'Kwame', 'Mariama',
             'Abdoulaye', 'Akouavi', 'Ibrahim', 'Nafiou', 'Adjoa', 'Cheikh', 'Binta', 'Tchalla',
             'Aminata', 'Kodjo', 'Salimata', 'Basile', 'Fanta', 'Souleymane', 'Akossiwa', 'Mawuli',
             'Rokia', 'Issa'
         ];
 
         $lastNames = [
-            'Mensah', 'Dossou', 'Traore', 'Ouattara', 'Adeoti', 'Sow', 'Agbessi', 'Dieng', 'Kone',
+            'Koudo', 'Dossou', 'Traore', 'Ouattara', 'Adeoti', 'Sow', 'Agbessi', 'Dieng', 'Kone',
             'Bio', 'Sissoko', 'Houngbedji', 'Diop', 'Adjovi', 'Balde', 'Gueye', 'Toure', 'Zinsou',
             'Kouassi', 'Sanogo', 'Azon', 'Camara', 'Gnassingbe', 'Diallo', 'Lawson', 'Ndiaye', 'Sagna'
         ];

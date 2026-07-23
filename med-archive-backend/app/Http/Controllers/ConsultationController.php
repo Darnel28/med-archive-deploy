@@ -108,7 +108,6 @@ class ConsultationController extends Controller
             'observations' => 'nullable|string',
             'statut' => 'nullable|in:en_attente,en_cours,termine,absent',
 
-            // Constantes (optionnelles)
             'constantes' => 'nullable|array',
             'constantes.tension_arterielle' => 'nullable|string',
             'constantes.temperature' => 'nullable|numeric|between:35,42',
@@ -118,7 +117,6 @@ class ConsultationController extends Controller
             'constantes.glycemie' => 'nullable|numeric|between:2,30',
             'constantes.saturation_oxygene' => 'nullable|numeric|between:70,100',
 
-            // Ordonnance (optionnelle)
             'ordonnance' => 'nullable|array',
             'ordonnance.medicaments' => 'required_with:ordonnance|array',
             'ordonnance.posologie' => 'nullable|string',
@@ -236,7 +234,7 @@ class ConsultationController extends Controller
 
             foreach ($validated['analyses'] ?? [] as $analyseData) {
                 $laboratoire = Laboratoire::findOrFail($analyseData['laboratoire_id']);
-                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 10000;
+                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 5000;
 
                 $analyse = AnalyseLaboratoire::create([
                     'consultation_id' => $consultation->id,
@@ -425,7 +423,7 @@ class ConsultationController extends Controller
 
             foreach ($validated['analyses'] ?? [] as $analyseData) {
                 $laboratoire = Laboratoire::findOrFail($analyseData['laboratoire_id']);
-                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 10000;
+                $montantAnalyse = $analyseData['montant_analyse'] ?? $laboratoire->tarif_patient_simple ?? 5000;
 
                 $analyse = AnalyseLaboratoire::firstOrCreate(
                     [
