@@ -1,10 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { getPatientDossierComplet } from "../../api/patientApi";
+import { jsPDF } from "jspdf";
+import { getAuthUser } from "../../api/client";
+import { viewDocument } from "../../api/documentApi";
+import { getAnalyseResultatFichier, getPatientDossierComplet } from "../../api/patientApi";
 import { getMesPatientsService } from "../../api/serviceApi";
-import AvatarInitials from "../AvatarInitials.jsx"; // Import du composant
+import AvatarInitials from "../AvatarInitials.jsx";
 
-
+// ---------- Fonctions utilitaires ----------
 function rowsFromPaginated(response) {
   const payload = response?.data ?? response;
   return Array.isArray(payload?.data) ? payload.data : Array.isArray(payload) ? payload : [];
@@ -25,6 +28,205 @@ function displayValue(value, suffix = "") {
   return `${value}${suffix}`;
 }
 
+function normalizeMedicaments(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [value];
+    } catch {
+      return [value];
+    }
+  }
+  return [];
+}
+
+function formatOrdonnanceField(value) {
+  if (Array.isArray(value)) return value.filter(Boolean).join(", ") || "-";
+  return value || "-";
+}
+
+function blobFileName(baseName, fallback = "document-medical") {
+  const name = String(baseName || fallback).trim() || fallback;
+  return name.includes(".") ? name : `${name}.pdf`;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function openBlob(blob) {
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank", "noopener,noreferrer");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// Construction du PDF d'ordonnance (adaptée pour utiliser le nom du patient depuis l'objet ordonnance)
+function buildPrescriptionPdf(prescription) {
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 18;
+  const maxWidth = pageWidth - margin * 2;
+
+  const primaryColor = [0, 102, 204];
+  const redColor = [204, 0, 0];
+  const lightGray = [240, 242, 245];
+  const darkGray = [50, 50, 50];
+  const borderColor = [210, 218, 230];
+
+  const roundedRect = (x, y, w, h, r) => {
+    doc.setDrawColor(...borderColor);
+    doc.setFillColor(...lightGray);
+    doc.roundedRect(x, y, w, h, r, r, 'FD');
+  };
+
+  const medicaments = normalizeMedicaments(prescription.medicaments);
+  // Nom du patient depuis la consultation (ou fallback)
+  const patient = prescription?.consultation?.dossier?.patient?.user?.name ||
+                  prescription?.consultation?.dossier?.patient?.name ||
+                  "Patient";
+  const medecin = prescription.consultation?.medecin?.user?.name || 'Médecin';
+  const date = formatDate(prescription.created_at);
+  const dateValidite = Array.isArray(prescription.date_validite)
+    ? formatOrdonnanceField(prescription.date_validite)
+    : formatDate(prescription.date_validite || prescription.duree);
+  const posologie = formatOrdonnanceField(prescription.posologie || prescription.dosage);
+  const instructions = formatOrdonnanceField(prescription.instructions || prescription.frequence);
+  const ref = `ORD-${prescription.id}`;
+
+  // En‑tête
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...primaryColor);
+  doc.text('Med-Archive', margin, 22);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(...redColor);
+  doc.text('ORDONNANCE MÉDICALE', pageWidth - margin, 22, { align: 'right' });
+
+  doc.setDrawColor(...borderColor);
+  doc.line(margin, 30, pageWidth - margin, 30);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...darkGray);
+  doc.text(`N° ${ref}`, pageWidth - margin, 38, { align: 'right' });
+  doc.text(`Émise le : ${date}`, pageWidth - margin, 44, { align: 'right' });
+  doc.text(`Valable jusqu'au : ${dateValidite}`, pageWidth - margin, 50, { align: 'right' });
+
+  let y = 62;
+  const rectHeight = 38;
+  roundedRect(margin, y, maxWidth, rectHeight, 4);
+  doc.setTextColor(...darkGray);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Patient :', margin + 8, y + 8);
+  doc.text('Prescripteur :', margin + 8, y + 18);
+  doc.text('Spécialité / Service :', margin + 8, y + 28);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(patient, margin + 50, y + 8);
+  doc.text(medecin, margin + 50, y + 18);
+  doc.text(
+    prescription.consultation?.medecin?.specialite?.nom || '-',
+    margin + 50,
+    y + 28
+  );
+
+  y += rectHeight + 12;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(...primaryColor);
+  doc.text('Traitement prescrit', margin, y);
+  y += 8;
+
+  doc.setDrawColor(...borderColor);
+  doc.line(margin, y, pageWidth - margin, y);
+  y += 6;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...darkGray);
+
+  if (medicaments.length) {
+    medicaments.forEach((medicament, index) => {
+      let text = '';
+      if (typeof medicament === 'string') {
+        text = medicament;
+      } else {
+        text = `${medicament.nom || ''} ${medicament.posologie || ''} ${medicament.duree || ''}`.trim();
+      }
+      doc.text(`${index + 1}. ${text}`, margin, y);
+      y += 7;
+    });
+  } else {
+    doc.text('Aucun médicament spécifié.', margin, y);
+    y += 7;
+  }
+
+  y += 4;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...primaryColor);
+  doc.text('Posologie', margin, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...darkGray);
+  doc.text(posologie, margin, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...primaryColor);
+  doc.text('Instructions particulières', margin, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...darkGray);
+  const instrLines = doc.splitTextToSize(instructions, maxWidth);
+  doc.text(instrLines, margin, y);
+  y += instrLines.length * 5 + 6;
+
+  y += 6;
+  const sigX = margin + 20;
+  const sigW = maxWidth - 40;
+  doc.setDrawColor(...borderColor);
+  doc.setFillColor(250, 250, 252);
+  doc.roundedRect(sigX, y, sigW, 30, 4, 4, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...primaryColor);
+  doc.text('Signature électronique du médecin', pageWidth / 2, y + 10, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...darkGray);
+  doc.text(medecin, pageWidth / 2, y + 18, { align: 'center' });
+  doc.text('------------------------------------------------------------', pageWidth / 2, y + 24, { align: 'center' });
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(...borderColor);
+  doc.text('Document généré automatiquement par Med-Archive.', margin, pageHeight - 14);
+  doc.text(`Réf. ${ref}`, pageWidth - margin, pageHeight - 14, { align: 'right' });
+
+  doc.save(`${ref}.pdf`);
+}
+
+// ---------- Composant principal ----------
 export default function DossierPatientHopital() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [patients, setPatients] = useState([]);
@@ -33,6 +235,8 @@ export default function DossierPatientHopital() {
   const [activeTab, setActiveTab] = useState("consultations");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // État pour la consultation sélectionnée (modale)
+  const [selectedConsultation, setSelectedConsultation] = useState(null);
 
   // Charger la liste des patients du service
   useEffect(() => {
@@ -115,6 +319,31 @@ export default function DossierPatientHopital() {
     setSearchParams(id ? { patient_id: id } : {});
   }
 
+  // Gestionnaires pour les actions
+  async function handleDownloadAnalyse(analyse) {
+    if (!analyse?.id) return;
+
+    try {
+      setError("");
+      const response = await getAnalyseResultatFichier(analyse.id);
+      downloadBlob(response.data, blobFileName(analyse.fichier_resultat || analyse.type_analyse, `analyse-${analyse.id}.pdf`));
+    } catch (err) {
+      setError(err.response?.data?.message || "Impossible de télécharger le document d'analyse.");
+    }
+  }
+
+  async function handleOpenDocument(document) {
+    if (!document?.id) return;
+
+    try {
+      setError("");
+      const blob = await viewDocument(document.id);
+      openBlob(blob);
+    } catch (err) {
+      setError(err.response?.data?.message || "Impossible d'ouvrir ce document.");
+    }
+  }
+
   // Calcul de l'âge
   const age = patient?.user?.date_naissance
     ? new Date().getFullYear() - new Date(patient.user.date_naissance).getFullYear()
@@ -134,7 +363,6 @@ export default function DossierPatientHopital() {
         {/* Carte de profil */}
         <article className="profile-card">
           <div className="profile-head">
-            {/* Avatar dynamique */}
             {patient?.avatar ? (
               <img
                 className="profile-avatar"
@@ -183,7 +411,6 @@ export default function DossierPatientHopital() {
             </div>
             <div className="meta-highlight">
               <strong>N° dossier: {dossier?.numero_dossier || "-"}</strong>
-              {/* <span>N° dossier</span> */}
             </div>
           </div>
         </article>
@@ -292,7 +519,7 @@ export default function DossierPatientHopital() {
                   </thead>
                   <tbody>
                     {consultations.length === 0 ? (
-                      <tr><td colSpan="5">Aucune consultation .</td></tr>
+                      <tr><td colSpan="5">Aucune consultation.</td></tr>
                     ) : (
                       consultations.map((consultation) => (
                         <tr key={consultation.id}>
@@ -300,7 +527,15 @@ export default function DossierPatientHopital() {
                           <td>{consultation.medecin?.user?.name || "-"}</td>
                           <td>{consultation.motif || "-"}</td>
                           <td>{consultation.diagnostic || "-"}</td>
-                          <td><a className="action-link" href="#"><i className="fa-regular fa-eye"></i> Voir détails</a></td>
+                          <td>
+                            <button
+                              type="button"
+                              className="action-link action-button"
+                              onClick={() => setSelectedConsultation(consultation)}
+                            >
+                              <i className="fa-regular fa-eye"></i> Voir
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -331,7 +566,16 @@ export default function DossierPatientHopital() {
                           <td>{formatDate(analyse.date_prelevement || analyse.created_at)}</td>
                           <td>{analyse.type_analyse || "-"}</td>
                           <td><span className="pill pill-warning">{analyse.statut || "-"}</span></td>
-                          <td><a className="action-link" href="#"><i className="fa-solid fa-download"></i> Télécharger</a></td>
+                          <td>
+                            <button
+                              type="button"
+                              className="action-link action-button"
+                              onClick={() => handleDownloadAnalyse(analyse)}
+                              disabled={!analyse.fichier_resultat}
+                            >
+                              <i className="fa-solid fa-download"></i> Télécharger
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -362,7 +606,15 @@ export default function DossierPatientHopital() {
                           <td>{formatDate(ordonnance.created_at)}</td>
                           <td>{ordonnance.consultation?.medecin?.user?.name || "-"}</td>
                           <td>{Array.isArray(ordonnance.medicaments) ? ordonnance.medicaments.join(", ") : ordonnance.medicaments || "-"}</td>
-                          <td><a className="action-link" href="#"><i className="fa-regular fa-file-pdf"></i> PDF</a></td>
+                          <td>
+                            <button
+                              type="button"
+                              className="action-link action-button"
+                              onClick={() => buildPrescriptionPdf(ordonnance)}
+                            >
+                              <i className="fa-regular fa-file-pdf"></i> PDF
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -372,7 +624,7 @@ export default function DossierPatientHopital() {
             </article>
           </div>
 
-      
+          {/* Colonne droite : Documents médicaux */}
           <div className="stacked-grid">
             <article className="dossier-panel">
               <h3>6. Documents médicaux</h3>
@@ -385,13 +637,18 @@ export default function DossierPatientHopital() {
                     <article key={doc.id} className="doc-item">
                       <strong>{doc.titre || doc.nom || `Document #${doc.id}`}</strong>
                       <span>{doc.type_document?.nom || doc.type || "Document"} - {formatDate(doc.created_at)}</span>
-                      <button className="patient-compact-btn">Ouvrir</button>
+                      <button
+                        type="button"
+                        className="patient-compact-btn"
+                        onClick={() => handleOpenDocument(doc)}
+                      >
+                        Ouvrir
+                      </button>
                     </article>
                   ))
                 )}
               </div>
               <div className="img-grid">
-                {/* Placeholders d'aperçu (vous pouvez les lier aux documents réels si vous le souhaitez) */}
                 {documents.slice(0, 4).map((doc, idx) => (
                   <div key={idx} className="img-placeholder">
                     <i className="fa-regular fa-image"></i>
@@ -412,7 +669,38 @@ export default function DossierPatientHopital() {
         </section>
       </section>
 
-    
+      {/* MODALE DE CONSULTATION */}
+      {selectedConsultation && (
+        <div className="consultation-modal-backdrop" onClick={() => setSelectedConsultation(null)}>
+          <div className="consultation-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="consultation-modal-header">
+              <div>
+                <span className="modal-kicker">Consultation</span>
+                <h2>{formatDate(selectedConsultation.date_consultation || selectedConsultation.created_at)}</h2>
+              </div>
+              <button type="button" className="modal-close" title="Fermer" onClick={() => setSelectedConsultation(null)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="consultation-detail-grid">
+              <div><span>Médecin</span><strong>{selectedConsultation.medecin?.user?.name || "-"}</strong></div>
+              <div><span>Service</span><strong>{selectedConsultation.service?.nom || "-"}</strong></div>
+              <div><span>Motif</span><strong>{selectedConsultation.motif || "-"}</strong></div>
+              <div><span>Diagnostic</span><strong>{selectedConsultation.diagnostic || "-"}</strong></div>
+              <div className="detail-wide"><span>Observations</span><strong>{selectedConsultation.observations || selectedConsultation.notes || "-"}</strong></div>
+              <div className="detail-wide"><span>Traitement</span><strong>{[
+                Array.isArray(selectedConsultation.ordonnance?.medicaments)
+                  ? selectedConsultation.ordonnance.medicaments.join(", ")
+                  : selectedConsultation.ordonnance?.medicaments,
+                selectedConsultation.ordonnance?.posologie,
+                selectedConsultation.ordonnance?.instructions,
+              ].filter(Boolean).join(" — ") || "-"}</strong></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* STYLES (avec les ajouts pour la modale et les boutons) */}
       <style>{`
         /* ========== CONTENEUR PRINCIPAL AÉRÉ ========== */
         .patient-dossier {
@@ -447,10 +735,10 @@ export default function DossierPatientHopital() {
         .profile-main h1 {
           margin: 0;
           font-size: 1.9rem;
-          color: #000000 !important;   /* NOIR forcé en mode clair */
+          color: #000000 !important;
         }
         body.dark-mode .profile-main h1 {
-          color: #e4f0fb !important;   /* clair en mode sombre */
+          color: #e4f0fb !important;
         }
         .profile-tags {
           margin-top: 8px;
@@ -572,7 +860,6 @@ export default function DossierPatientHopital() {
           display: grid;
           gap: 16px;
         }
-        /* Titres principaux des sections (1.,2.,3.,5.,7.) en NOIR */
         .dossier-panel h3 {
           margin: 0;
           font-size: 1.35rem;
@@ -582,7 +869,6 @@ export default function DossierPatientHopital() {
         body.dark-mode .dossier-panel h3 {
           color: #e4f0fb !important;
         }
-        /* Sous-titres internes (Allergies, Antécédents, Vaccinations) retrouvent leur couleur normale */
         .subsection-title {
           font-size: 1rem;
           font-weight: 700;
@@ -682,6 +968,17 @@ export default function DossierPatientHopital() {
           text-decoration: none;
           font-weight: 600;
         }
+        .action-button {
+          border: 0;
+          background: transparent;
+          padding: 0;
+          cursor: pointer;
+          font: inherit;
+        }
+        .action-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.45;
+        }
 
         /* ========== DOCUMENTS MÉDICAUX ========== */
         .doc-grid {
@@ -704,7 +1001,6 @@ export default function DossierPatientHopital() {
           color: #5f7b95;
           font-size: 0.9rem;
         }
-        /* Bouton "Ouvrir" redessiné : compact, élégant */
         .patient-compact-btn {
           background: transparent;
           border: 1px solid var(--teal, #17b8b0);
@@ -755,6 +1051,80 @@ export default function DossierPatientHopital() {
         }
         .img-placeholder i {
           font-size: 1.3rem;
+        }
+
+        /* ========== MODALE CONSULTATION ========== */
+        .consultation-modal-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 100000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          background: rgba(15, 23, 42, 0.55);
+        }
+        .consultation-modal {
+          width: min(760px, 92vw);
+          max-height: 86vh;
+          overflow: auto;
+          background: #fff;
+          border-radius: 18px;
+          box-shadow: 0 30px 80px rgba(15, 23, 42, 0.22);
+        }
+        .consultation-modal-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 18px;
+          padding: 22px 24px;
+          border-bottom: 1px solid rgba(24, 68, 101, 0.12);
+        }
+        .consultation-modal-header h2 {
+          margin: 6px 0 0;
+          color: #132f53;
+          font-size: 1.35rem;
+        }
+        .modal-kicker {
+          color: #0f9f9b;
+          font-size: 0.78rem;
+          font-weight: 800;
+          text-transform: uppercase;
+        }
+        .modal-close {
+          width: 42px;
+          height: 42px;
+          border: 1px solid rgba(24, 68, 101, 0.14);
+          border-radius: 10px;
+          background: #f8fafc;
+          color: #315b84;
+          cursor: pointer;
+        }
+        .consultation-detail-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 14px;
+          padding: 24px;
+        }
+        .consultation-detail-grid div {
+          display: grid;
+          gap: 6px;
+          padding: 14px;
+          border: 1px solid rgba(24, 68, 101, 0.12);
+          border-radius: 12px;
+          background: #fbfdff;
+        }
+        .consultation-detail-grid .detail-wide {
+          grid-column: 1 / -1;
+        }
+        .consultation-detail-grid span {
+          color: #67829b;
+          font-size: 0.8rem;
+        }
+        .consultation-detail-grid strong {
+          color: #15395f;
+          font-size: 0.95rem;
+          white-space: pre-wrap;
         }
 
         /* ========== RESPONSIVE ========== */
@@ -827,6 +1197,31 @@ export default function DossierPatientHopital() {
           border-color: #2a5d77;
           background: linear-gradient(145deg, #1d425a, #123247);
           color: #cde2f3;
+        }
+        body.dark-mode .consultation-modal {
+          background: #102b3d;
+          border-color: #1a4b65;
+        }
+        body.dark-mode .consultation-modal-header {
+          border-bottom-color: #1a4b65;
+        }
+        body.dark-mode .consultation-modal-header h2 {
+          color: #e4f0fb;
+        }
+        body.dark-mode .consultation-detail-grid div {
+          border-color: #1a4b65;
+          background: #123246;
+        }
+        body.dark-mode .consultation-detail-grid span {
+          color: #9fc0d9;
+        }
+        body.dark-mode .consultation-detail-grid strong {
+          color: #e4f0fb;
+        }
+        body.dark-mode .modal-close {
+          border-color: #2a5a75;
+          background: #14344a;
+          color: #b8d3e8;
         }
       `}</style>
     </main>
