@@ -445,7 +445,7 @@ export default function DynamicPatientsDirectory({ title = 'Patients', source = 
               <div className="form-group"><label>NPI</label><input name="npi" type="text" value={patientForm.npi} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Nom complet</label><input name="name" type="text" value={patientForm.name} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Email</label><input name="email" type="email" value={patientForm.email} onChange={updatePatientForm} required /></div>
-              <div className="form-group"><label>Mot de passe initial</label><input name="password" type="text" value={patientForm.password} onChange={updatePatientForm} placeholder="Genere automatiquement si vide" /></div>
+              <div className="form-group"><label>Mot de passe initial</label><input name="password" type="password" value={patientForm.password} onChange={updatePatientForm} placeholder="Genere automatiquement si vide" /></div>
               <div className="form-group"><label>Telephone</label><input name="telephone" type="tel" value={patientForm.telephone} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Date de naissance</label><input name="date_naissance" type="date" value={patientForm.date_naissance} onChange={updatePatientForm} required /></div>
               <div className="form-group"><label>Sexe</label><select name="sexe" value={patientForm.sexe} onChange={updatePatientForm} required><option value="M">Masculin</option><option value="F">Feminin</option></select></div>
